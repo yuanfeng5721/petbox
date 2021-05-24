@@ -14,6 +14,6 @@ set linker_output_file_name=%3
 ..\..\..\tool\MD5\md5.exe "bin\%linker_output_file_name%_MP.bin"
 ::..\..\..\tool\srec_cat "bin\%linker_output_file_name%.bin" -binary -offset 0x80D000 -o "Objects\%linker_output_file_name%.hex" -intel
 del "bin\%linker_output_file_name%_MP.bin"
-md /y ..\..\..\out\%linker_output_file_name%
+md ..\..\..\out\%linker_output_file_name%
 xcopy /y ..\..\..\images\* ..\..\..\out\%linker_output_file_name%\
 xcopy /y bin\ ..\..\..\out\%linker_output_file_name%\
