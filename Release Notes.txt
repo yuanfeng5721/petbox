@@ -1,0 +1,79 @@
+V1.1.0 Date: 20190304
+1. Platform:
+   - NEW: add app_pre_main_cb
+   - NEW: increase default normal ota timeout
+   - NEW: add reset reason mechanism
+   - NEW: add using 32K wdg and aon wdg demo code
+   - NEW: add get active bank image version API
+   - NEW: support c library function
+   - NEW: add system_trace.lib and use SYSTEM_TRACE_ENABLE macro control debug function
+   - NEW: add SHARE_CACHE_RAM_SECTION section
+   - NEW: Add Flash SFDP read API, Flash OTP read/write/lock API;
+   - NEW: Add Flash quick read api (user mode) based on SPIC split read;
+   - CHG: use os tick as log timestamp instead of TIM7
+   - CHG: fix system hang if app call log_module_trace_set after disable log
+   
+
+2. IO Driver:
+   - NEW: Add PDM clock invertion  and  1.1v power management function in codec driver
+   - NEW: Add SPI bus divider register store and restore in DLPS driver
+   - NEW: Add GDMA+PWM+GPIO project
+   - CHG: Remove GDMA register preservation and recovery function in DLPS driver
+   - CHG: Reorganize the demo project and source code of all peripherals. 
+
+3. Upper Stack:
+   - CHG: gap_utils.lib and gap_bt5.lib£º
+        Add BT stack features configuration APIs;
+        Modify API le_gen_rand_addr;
+   - NEW: Add Pulse Oximeter Service;
+
+4. APP
+   1) OTA
+
+   2) Slient OTA
+   - NEW: add flash temp bank size check 
+   - NEW: support ota app data3-6
+   3) MP Support:
+   - NEW: Add MP functions to the APP-k_rf_freq project (APP Data UART Download, Write RF frequency/MAC to config, Swtich to HCI);
+
+
+V1.0.2 Date: 20180921
+1. Platform:
+   - NEW: Add appdata tool;
+   - NEW: Support app image encryption;
+   - CHG: Rename otp_cfg.h with otp.h;
+   - CHG: Rename flash download algorithm RRTL8763Bx_FLASH_8MB.FLM with RTL876x_SPI_FLASH.FLM;
+   - CHG: Update prepend_header and md5 tool;
+   - CHG: Move watch dog enable and SWD control setting from config file to app project;
+   - CHG: Support user defined app callback before calling WDG_SystemReset;
+   - CHG: Change app default download address because of adding secure boot image when not support bank switch;
+   - CHG: Devide mem_config.h into two files consist of mem_config.h and flash_map.h; 
+2. IO Driver:
+  1) ADC
+   - NEW: Add ADC lib£ºbee2_adc_lib.lib;
+   - CHG: Rename function ADC_HighBypassCmd to ADC_BypassCmd;
+  2) IR
+   - NEW: Added the RC6 infrared protocol;
+   - NEW: Add some infrared protocols to IOSample project;
+3. Upper Stack
+   - NEW: Add three new sample projects:
+		  ble_bt5_central
+		  ble_bt5_peripheral
+		  ble_peripheral_privacy;
+   - NEW: Add gap_bt5.lib used for extend advertising feature;
+   - NEW: Add some APIs to gap_utils.lib£º
+		  BT stack features configuration APIs£»
+		  API le_bond_get_sec_level to get security level£»
+4. APP
+   1) OTA
+   - CHG: Add ota header version report when support bank switch;
+   2) Slient OTA
+   - New:  Add ota header version report when support bank switch;
+   - CHG:  Rename dfu project to silent_ota project;
+   - CHG:  Call API is_ota_support_bank_switch() function to judge whether bank switch is supported;
+   - BUG:  Unlock flash block protect before wdg reset to fix ota copy fail bug when not support bank switch;
+   - BUG:  Replace flash_lock with os_lock to fix ota fail error 261;
+
+   
+V1.0.0 Date: 20180611
+1. Beta common sdk. 
