@@ -46,7 +46,7 @@ example:
 		j) APP data6                     0K (0x00000000)
 	5) FTL:                                           16K (0x00825000)
 	6) OTA Tmp:                                       92K (0x00829000)
-	7) APP Defined Section:                            0K (0x00000000)
+	7) APP Defined Section:                         1536K (0x00860000)
 */
 
 /*============================================================================*
@@ -69,8 +69,8 @@ example:
 #define FTL_SIZE                        0x00004000  //16K Bytes
 #define OTA_TMP_ADDR                    0x00829000
 #define OTA_TMP_SIZE                    0x00017000  //92K Bytes
-#define BKP_DATA1_ADDR                  0x00000000
-#define BKP_DATA1_SIZE                  0x00000000  //0K Bytes
+#define BKP_DATA1_ADDR                  0x00860000
+#define BKP_DATA1_SIZE                  0x00180000  //1536K Bytes
 #define BKP_DATA2_ADDR                  0x00000000
 #define BKP_DATA2_SIZE                  0x00000000  //0K Bytes
 

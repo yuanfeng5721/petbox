@@ -22,6 +22,9 @@ extern "C" {
 #define DATA_UART_TX_PIN    P3_0
 #define DATA_UART_RX_PIN    P3_1
 
+#define AT_UART_TX_PIN    	P4_0
+#define AT_UART_RX_PIN    	P4_1
+
 /* if use user define dlps enter/dlps exit callback function */
 #define USE_USER_DEFINE_DLPS_EXIT_CB      0
 #define USE_USER_DEFINE_DLPS_ENTER_CB     0
