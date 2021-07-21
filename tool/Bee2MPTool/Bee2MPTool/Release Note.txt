@@ -1,0 +1,579 @@
+Realtek Semiconductor Corp.Inc.
+
+RTL8762X MP Programing Tool.
+Release Notes
+
+Version 1.0.4.2
+March.4, 2021.
+
+Notice:
+    1. add flash avl in config.
+    2. add function of call flash map tool and pack tool
+Changes and Enhancements:
+   1. Add ictype select in menu
+   2. Add showing spipin set in menu 
+   3. Add factory code file for sbee2
+   4. Add read back mac in RD
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.4.1
+Sep.3, 2020.
+
+Notice:
+    1. change firmware RTL8762D_FW_A.BIN of S-bee2.
+Changes and Enhancements:
+    1. Add download tri-group in RD
+    2. Modify Sbee2 config item 40 xtal delay and ldo/swr
+    3. Modify data in battery box of userdata
+    4. Add all items in tx power of sbee2 config(needs switch)
+    5. Add ic-type check in flash check
+    6. Change readback folder to backup folder
+    7. Add ic_type check in mp download and mp setting
+    8. Modify max flash read size to 32
+    9. Modify SBee2 config tx power value -20~7.5dbm
+  10. Modify retry time and delay time when open ports
+  11. Modify ICSelectDlg UI
+  12. Add single port download(special)
+  13. Add to support keyboard for singe port download
+  14. Add download button  match to enter key
+  15. Modify progress bar of RD
+  16. Add Efuse set record in MP log
+  17. Add ictype select in menu
+  18. Add showing spipin set in menu 
+  19. Add factory code file for sbee2
+  20. Add read back mac in RD
+Bug Fixs:
+    1. fix browse button issue of userdata dlg
+    2. fix error code
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.4.0
+May.21, 2020.
+
+Notice:
+    1. add firmware to support S-bee2.
+    2. update prepend_header.exe
+Changes and Enhancements:
+    1. Add 40MHz XTAL for high temperature calibration in config set(hidden)
+    2. Add 0x40 for txpower in config set(internal switch)
+    3. Add 8762D selection
+    4. Add selection of PWM(internal switch)
+    5. Modify edit browse to load path more conveniently
+    6. Add mac in battery box of user data page
+    7. Add baidu tri file download
+    8. modify tri-group download setting to user data dlg
+    9. add normal and repeat mode download in MP 
+
+Bug Fixs:
+    1. fix bug of config file path
+    2. fix error code
+    3. fix bug of loadbin function in config file
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.3.4
+March.20, 2020.
+
+Notice:
+      NULL.
+
+Changes and Enhancements:
+    1.Increase the dividing line between download button and erase button in RD_download page 
+    2.Optimize Config Setting page to show RSA key
+    3.Add string file download in MP and RD
+    4.Add download 24 ports mode in MP
+    5.Add record string file in MPlog
+    6.Add Amazon eFuse configuration in RDsetting
+    7.Add packet+userdata image download in MP
+    8.Add unique mode in setting
+
+Bug Fixs:
+    1.fix bug when download SN 
+    2.fix address confict in userdata tab1 dlg
+    3.fix progress bar when download sn or string file in RD
+    4.increase delimiter for information in MPlog
+    5.fix bug when browse SN file and string file at the same time in RD
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.3.3
+January.02, 2020.
+
+Notice:
+     1.update firmware0
+
+Changes and Enhancements:
+    1.Add a switch case for max link to 11 
+    2.Add according to Bt MAC from UI to download tri file
+    3.Add a switch case for fr1 in config normal page
+    4.Add a switch case for single port log in MP download apply for ailian' demand
+    5.Add electric meter page in user data dialog
+    6.Optimize the display logic of select erase function in RD
+    7.Set tx power's defalut value is 7.5
+    8.Add receive status of writing efuse
+    9.Add log to show flashsize of readall
+
+Bug Fixs:
+    1.fix read function bug in RD 
+    2.fix a hidden bug when update SN in download
+    3.fix a code error of CSKBAssignmentLibrar
+    4.fix a code error when call the read interface of dll
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.3.2
+September.27, 2019.
+
+Notice:
+     NULL.
+
+Changes and Enhancements:
+    1.Divide the user data page into two tabs page.
+    2.Hidden interface selection SWD.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.3.1
+August.26, 2019.
+
+Notice:
+    1.update prepend_header.exe
+
+Changes and Enhancements:
+    1.Change ways of updating download times in superdog.
+    2.Add timer before showing not check Bt address message.
+    3.Add select erase function in RD
+    4.Add read FTL file of read all function in RD
+    5.Hidden 32KHz XTAL selection in config setting
+    6.Hidden interface selection SWD
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.3.0
+August.20, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add showing status of success or fail for MAC in MP
+    2.Add showing projet name ¡¢IC type and other logs in MPLog file.
+    3.Add prompt message when config file is not check Bt address checkbox. 
+    4.Set the tool configuration Bt address to the default check.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.9
+August.15, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add tips for config setting page in RD
+    2.Add showing log of MAC or SN whether update or note in MP .
+    3.Add prompt message when config setting page's bt address is unchecked and show download error. 
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.8
+August.6, 2019.
+
+Notice:
+    Replace firmware0,rtkmp.dll and MP Tool User Guide CN.PDF.
+
+Changes and Enhancements:
+    1.Add the function for supporting the reading of OTA temp in read all
+    2.Modify the rtkmp.dll to support for checking of spi pin cmd
+    3.Modify the maxmum of flash reading size from 8Mbytes to 16Mbytes
+
+Bug Fixs:
+    1.Fix a series of problems about read all function in RD
+    2.Fix the problem of "setting out of flash size" in setting extra flash 
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.7
+July.15, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add extra flash function by setting spi pin config in MP and RD
+    2.Add automatic SN function in RD
+
+Bug Fixs:
+    1.Fix the issue of com6 detected on UI showed incompletely 
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.6
+June.26, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Change Random BT address to  Automatic BT address in RD.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.5
+June.10, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add MP Finish Beep item in setting.
+
+Bug Fixs:
+    1.Fix rd download bugs while not downloading config file.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.4
+May.31, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add Random BT address in RD.
+    2.Add Read all flash in RD.
+    3.Add log in superdog mode.
+
+Bug Fixs:
+    1.Fix download 16 ports may cause button not clickable.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.2
+Mar.20, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add Random BT address in mp.
+    2.Add download 16 ports mode in mp.
+
+Bug Fixs:
+    1.Fix download 8 ports may cause crash.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Release Notes
+Version 1.0.2.1
+Jan.11, 2019.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add Update from file/UI for SN setting.
+    2.Add normal download in MP mode.
+    3.Add baudrate select in RD mode.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.2.0
+Dec.19, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Suspend SuperDog Mode in RD Download.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.9
+Dec.14, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add SuperDog Mode to protect Efuse download.
+    2.Add Detect/Open Mode for MP Download.
+    3.Add Erase choice in MP Setting.
+
+Bug Fixs:
+    1.Fix chip erase in RD Download.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.7
+Nov.28, 2018.
+
+Notice:
+    1.Baudrate set to 2M may cause Transmission Instable.
+
+Changes and Enhancements:
+    1.Add SN in userdata Dlg.
+    2.Add Name in userdata Dlg.
+    3.Add AppData3-6.
+    4.Add Baudrate Setting in MP Setting Dlg.
+    5.Add Tri-group Download Setting in MP Setting Dlg.
+
+Bug Fixs:
+    1.Fix size check problems while downloading to 0x800000.
+    2.Fix a problem that flash larger than 8M cannot erase correctly. 
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.6
+Nov.2, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Update DLL to upgrade multi-ports downloading rate performance.
+    2.Update firmware to upgrade firmware reboot rate.
+    3.Add flash size check during downloading.
+    4.Add txpowerex.switch for tx power config.
+    5.Change UI usage in log config set.
+
+Bug Fixs:
+    1.Fix write flash timeout porblems.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.5
+Oct.26, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Update version performance for different kinds of bins.
+    2.Update save setting function for user data settings.
+
+Bug Fixs:
+    1.Fix some UI problems.
+    2.Fix LDO/SWR item in config setting.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.4
+Oct.17, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add only write Efuse item in MP Setting Dlg.
+    2.Add Flash Check in RD Download Dlg.
+    3.Add Load Bin in Config Setting Dlg.
+
+Bug Fixs:
+    1.Fix Chip Erase function in MP Download.
+    2.Fix config items about log.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.3
+Sep.27, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    NULL.
+
+Bug Fixs:
+    1.Fix Efuse write time out.
+
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.1
+Sep.20, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add efuse write item in MPSetting Dlg.
+
+Bug Fixs:
+    1.Fix some UI's bugs.
+    2.Fix dpi object not release bugs.
+    3.Fix handle object not release bugs.
+
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.1.0
+Aug.31, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add RD setting for efuse cfg Dlg.
+    2.Add judge for rsa key items while there is no "key.switch" file in /dll folder, these items will not be shown.
+    3.Add password inputing in RD dlg.
+    4.FW Loader: Support XTX25F32B and GD25Q40C.
+    5.Adjust some cfg items on Config Set Dlg.
+    6.Add RF Test page on RD mode.
+
+Bug Fixs:
+    1.Fix some UI's bugs.
+    2.Fix com port occupation bug when switch dialog page.
+
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+Version 1.0.0.8
+Jun.11, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add some config items on Config setting page.
+    2.Add patch conversion function on RD mode.
+    3.Add memory layout loading from flash map.ini file.
+
+Bug Fixs:
+    1.Fix a bug that causes tool crashed when switchs to RD_Setting Dlg.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+Version 1.0.0.7
+May.16, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Add 32KHz XTAL Selection item on Config setting page.
+
+Bug Fixs:
+    1.Fix Config downloading failed bug on SWD interface.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+Version 1.0.0.6
+Apr.11, 2018.
+
+Notice:
+    NULL.
+
+Changes and Enhancements:
+    1.Refine UI to adjust to different DPI.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+Version 1.0.0.5
+Apr.10, 2018.
+
+Notice:
+    First Release.
+
+Changes and Enhancements:
+    NULL.
+
+Bug Fixs:
+    NULL.
+
+Known Issues:
+    NULL.
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
