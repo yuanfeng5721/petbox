@@ -2,3 +2,5 @@ out/app/*
 board/evb/*/Objects/
 board/evb/*/bin/
 board/evb/tracker/tracker.uvguix.*
+tool/Bee2MPTool/Bee2MPTool/Log/*
+tool/DebugAnalyzer/DataFile/*
