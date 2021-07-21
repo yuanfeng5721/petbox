@@ -1,0 +1,4 @@
+out/app/*
+board/evb/*/Objects/
+board/evb/*/bin/
+board/evb/tracker/tracker.uvguix.*
