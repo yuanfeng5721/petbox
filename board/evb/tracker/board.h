@@ -18,12 +18,49 @@
 extern "C" {
 #endif
 
+/* include file */
+#include "rtl876x_gpio.h"
+#include "rtl876x_pinmux.h"
+#include "rtl876x_rcc.h"
 
-#define DATA_UART_TX_PIN    P3_0
-#define DATA_UART_RX_PIN    P3_1
+/* GPIO function define begin */
+#define DATA_UART_TX_PIN     P3_0
+#define DATA_UART_RX_PIN     P3_1
 
-#define AT_UART_TX_PIN    	P4_0
-#define AT_UART_RX_PIN    	P4_1
+#define SYS_3V8_CTL_PIN      P3_3
+#define SYS_3V8_CTL_OUTPUT   GPIO_GetPin(SYS_3V8_CTL_PIN)
+
+#define MODEM_PWR_CTL_PIN    P2_1
+#define MODEM_PWR_CTL_OUTPUT GPIO_GetPin(MODEM_PWR_CTL_PIN)
+
+#define AT_UART_TX_PIN    	 P4_0
+#define AT_UART_RX_PIN    	 P4_1
+
+#define MODEM_PWR_KEY_PIN    P2_3
+#define MODEM_PWR_KEY_OUTPUT GPIO_GetPin(MODEM_PWR_KEY_PIN)
+#define MODEM_STATUS_PIN     P2_2
+#define MODEM_STATUS_INPUT   GPIO_GetPin(MODEM_STATUS_PIN)
+
+#define GNSS_PWR_CTL_PIN     P2_4
+#define GNSS_PWR_CTL_OUTPUT  GPIO_GetPin(GNSS_PWR_CTL_PIN)
+
+#define GNSS_LAN_CTL_PIN     P3_5
+#define GNSS_LAN_CTL_OUTPUT  GPIO_GetPin(GNSS_LAN_CTL_PIN)
+
+#define BLUE_LED_PIN         P0_0
+#define BLUE_LED_OUTPUT      GPIO_GetPin(BLUE_LED_PIN)
+
+#define GREEN_LED_PIN        P0_2
+#define GREEN_LED_OUTPUT     GPIO_GetPin(GREEN_LED_PIN)
+
+#define KEY_PAD_PIN          P0_1
+#define KEY_PAD_INPUT        GPIO_GetPin(KEY_PAD_PIN)
+
+/* GPIO function define end */
+
+/* custom define */
+#define PIN_LOW            0
+#define PIN_HIGH           1
 
 /* if use user define dlps enter/dlps exit callback function */
 #define USE_USER_DEFINE_DLPS_EXIT_CB      0

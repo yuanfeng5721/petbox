@@ -7,14 +7,16 @@
 
   <Targets>
     <Target>
-      <TargetName>bt5_central</TargetName>
+      <TargetName>tracker</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.4.5.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x00000000,0x80000) IRAM(0x20000000,0x20000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -50,7 +52,7 @@
           <OutputName>app</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
@@ -84,6 +86,8 @@
             <UserProg2Name>after_build_special.bat</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopA1X>0</nStopA1X>
+            <nStopA2X>0</nStopA2X>
           </AfterMake>
           <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
@@ -122,47 +126,6 @@
             <HexOffset>0</HexOffset>
             <Oh166RecLen>16</Oh166RecLen>
           </OPTHX>
-          <Simulator>
-            <UseSimulator>0</UseSimulator>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>1</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Simulator>
-          <Target>
-            <UseTarget>1</UseTarget>
-            <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
-            <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>1</RestoreBreakpoints>
-            <RestoreWatchpoints>1</RestoreWatchpoints>
-            <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
-            <RestoreFunctions>0</RestoreFunctions>
-            <RestoreToolbox>1</RestoreToolbox>
-            <RestoreTracepoints>1</RestoreTracepoints>
-            <RestoreSysVw>1</RestoreSysVw>
-          </Target>
-          <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>6</TargetSelection>
-          <SimDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
-          </SimDlls>
-          <TargetDlls>
-            <CpuDll></CpuDll>
-            <CpuDllArguments></CpuDllArguments>
-            <PeripheralDll></PeripheralDll>
-            <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile>..\rom\startup.ini</InitializationFile>
-            <Driver>Segger\JL2CM3.dll</Driver>
-          </TargetDlls>
         </DebugOption>
         <Utilities>
           <Flash1>
@@ -227,6 +190,7 @@
             <useUlib>0</useUlib>
             <EndSel>1</EndSel>
             <uLtcg>0</uLtcg>
+            <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
             <RwSelD>3</RwSelD>
             <CodeSel>0</CodeSel>
@@ -360,12 +324,20 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>1</uC99>
+            <uGnu>0</uGnu>
             <useXO>0</useXO>
+            <v6Lang>1</v6Lang>
+            <v6LangP>1</v6LangP>
+            <vShortEn>1</vShortEn>
+            <vShortWch>1</vShortWch>
+            <v6Lto>0</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--gnu --preinclude app_flags.h --bss_threshold=0</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\..\..\src\mcu\module\data_uart_cmd;..\..\..\src\sample\ble_bt5_central;..\ble_bt5_central</IncludePath>
+              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\..\..\src\mcu\module\data_uart_cmd;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -378,6 +350,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls>--cpreproc</MiscControls>
               <Define></Define>
@@ -470,6 +443,7 @@
                     <NoWarn>2</NoWarn>
                     <uSurpInc>2</uSurpInc>
                     <useXO>2</useXO>
+                    <uClangAs>2</uClangAs>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
@@ -501,34 +475,59 @@
               <FilePath>..\..\..\src\mcu\module\data_uart_cmd\user_cmd_parse.c</FilePath>
             </File>
             <File>
-              <FileName>app_task.c</FileName>
+              <FileName>overlay_mgr.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\sample\ble_bt5_central\app_task.c</FilePath>
-            </File>
-            <File>
-              <FileName>bt5_central_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\sample\ble_bt5_central\bt5_central_app.c</FilePath>
-            </File>
-            <File>
-              <FileName>link_mgr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\sample\ble_bt5_central\link_mgr.c</FilePath>
+              <FilePath>..\..\..\src\mcu\rtl876x\overlay_mgr.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\sample\ble_bt5_central\main.c</FilePath>
+              <FilePath>.\main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>hal</GroupName>
+          <Files>
+            <File>
+              <FileName>rtl876x_hal_bsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\rtl876x_hal_bsp.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>protocol</GroupName>
+          <Files>
+            <File>
+              <FileName>readme.txt</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\protocol\readme.txt</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>ble</GroupName>
+          <Files>
+            <File>
+              <FileName>app_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ble\app_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>bt5_central_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ble\bt5_central_app.c</FilePath>
+            </File>
+            <File>
+              <FileName>link_mgr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ble\link_mgr.c</FilePath>
             </File>
             <File>
               <FileName>user_cmd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\src\sample\ble_bt5_central\user_cmd.c</FilePath>
-            </File>
-            <File>
-              <FileName>overlay_mgr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\mcu\rtl876x\overlay_mgr.c</FilePath>
+              <FilePath>.\ble\user_cmd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -545,10 +544,121 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\peripheral\rtl876x_uart.c</FilePath>
             </File>
+            <File>
+              <FileName>rtl876x_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\peripheral\rtl876x_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtl876x_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\peripheral\rtl876x_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtl876x_io_dlps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\peripheral\rtl876x_io_dlps.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtl876x_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\peripheral\rtl876x_tim.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>iot</GroupName>
+          <Files>
+            <File>
+              <FileName>at_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\at_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>at_socket_inf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\at_socket_inf.c</FilePath>
+            </File>
+            <File>
+              <FileName>at_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\at_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>network_at_tcp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\network_at_tcp.c</FilePath>
+            </File>
+            <File>
+              <FileName>network_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\network_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>string_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\string_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\utils_list.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_ringbuff.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\utils_ringbuff.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\utils_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_AT_UART_freertos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\platform\os\HAL_AT_UART_freertos.c</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_OS_freertos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\platform\os\HAL_OS_freertos.c</FilePath>
+            </File>
+            <File>
+              <FileName>HAL_Timer_freertos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\platform\os\HAL_Timer_freertos.c</FilePath>
+            </File>
+            <File>
+              <FileName>qcloud_iot_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\src\qcloud_iot_log.c</FilePath>
+            </File>
+            <File>
+              <FileName>config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\src\iot\include\config.h</FilePath>
+            </File>
+            <File>
+              <FileName>at_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\at_uart\at_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>at_device_sim7070.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\iot\platform\at_device\sim7070\at_device_sim7070.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
     </Target>
   </Targets>
+
+  <RTE>
+    <apis/>
+    <components/>
+    <files/>
+  </RTE>
 
 </Project>
