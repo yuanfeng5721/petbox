@@ -18,22 +18,22 @@ extern "C" {
 /*============================================================================*
 *                        Flash Layout
 *============================================================================*/
-/*  Flash total size                                2048KB
+/*  Flash total size                                4096KB
 example:
 	1) Reaerved:                                       4K (0x00800000)
 	2) OEM Header:                                     4K (0x00801000)
-	3) OTA Bank0:                                    140K (0x00802000)
+	3) OTA Bank0:                                    200K (0x00802000)
 		a) OTA Header                    4K (0x00802000)
 		b) Secure boot loader            4K (0x0080D000)
 		c) Patch code                   40K (0x00803000)
-		d) APP code                     92K (0x0080E000)
-		e) APP data1                     0K (0x00825000)
-		f) APP data2                     0K (0x00000000)
-		g) APP data3                     0K (0x00000000)
-		h) APP data4                     0K (0x00000000)
-		i) APP data5                     0K (0x00000000)
-		j) APP data6                     0K (0x00000000)
-	4) OTA Bank1:                                      0K (0x00000000)
+		d) APP code                    152K (0x0080E000)
+		e) APP data1                     0K (0x00834000)
+		f) APP data2                     0K (0x00834000)
+		g) APP data3                     0K (0x00834000)
+		h) APP data4                     0K (0x00834000)
+		i) APP data5                     0K (0x00834000)
+		j) APP data6                     0K (0x00834000)
+	4) OTA Bank1:                                      0K (0x00834000)
 		a) OTA Header                    0K (0x00000000)
 		b) Secure boot loader            0K (0x00000000)
 		c) Patch code                    0K (0x00000000)
@@ -44,9 +44,9 @@ example:
 		h) APP data4                     0K (0x00000000)
 		i) APP data5                     0K (0x00000000)
 		j) APP data6                     0K (0x00000000)
-	5) FTL:                                           16K (0x00825000)
-	6) OTA Tmp:                                       92K (0x00829000)
-	7) APP Defined Section:                         1536K (0x00860000)
+	5) FTL:                                           16K (0x00834000)
+	6) OTA Tmp:                                      152K (0x00838000)
+	7) APP Defined Section:                            0K (0x0085E000)
 */
 
 /*============================================================================*
@@ -54,7 +54,7 @@ example:
 *============================================================================*/
 
 #define FLASH_ADDR                      0x00800000  //Fixed
-#define FLASH_SIZE                      0x00200000  //2048K Bytes
+#define FLASH_SIZE                      0x00400000  //4096K Bytes
 
 /* ========== High Level Flash Layout Configuration ========== */
 #define RESERVED_ADDR                   0x00800000
@@ -62,15 +62,15 @@ example:
 #define OEM_CFG_ADDR                    0x00801000
 #define OEM_CFG_SIZE                    0x00001000  //4K Bytes
 #define OTA_BANK0_ADDR                  0x00802000
-#define OTA_BANK0_SIZE                  0x00023000  //140K Bytes
-#define OTA_BANK1_ADDR                  0x00000000
+#define OTA_BANK0_SIZE                  0x00032000  //200K Bytes
+#define OTA_BANK1_ADDR                  0x00834000
 #define OTA_BANK1_SIZE                  0x00000000  //0K Bytes
-#define FTL_ADDR                        0x00825000
+#define FTL_ADDR                        0x00834000
 #define FTL_SIZE                        0x00004000  //16K Bytes
-#define OTA_TMP_ADDR                    0x00829000
-#define OTA_TMP_SIZE                    0x00017000  //92K Bytes
-#define BKP_DATA1_ADDR                  0x00860000
-#define BKP_DATA1_SIZE                  0x00180000  //1536K Bytes
+#define OTA_TMP_ADDR                    0x00838000
+#define OTA_TMP_SIZE                    0x00026000  //152K Bytes
+#define BKP_DATA1_ADDR                  0x0085E000
+#define BKP_DATA1_SIZE                  0x00000000  //0K Bytes
 #define BKP_DATA2_ADDR                  0x00000000
 #define BKP_DATA2_SIZE                  0x00000000  //0K Bytes
 
@@ -82,18 +82,18 @@ example:
 #define BANK0_ROM_PATCH_ADDR            0x00803000
 #define BANK0_ROM_PATCH_SIZE            0x0000A000  //40K Bytes
 #define BANK0_APP_ADDR                  0x0080E000
-#define BANK0_APP_SIZE                  0x00017000  //92K Bytes
-#define BANK0_APP_DATA1_ADDR            0x00825000
+#define BANK0_APP_SIZE                  0x00026000  //152K Bytes
+#define BANK0_APP_DATA1_ADDR            0x00834000
 #define BANK0_APP_DATA1_SIZE            0x00000000  //0K Bytes
-#define BANK0_APP_DATA2_ADDR            0x00000000
+#define BANK0_APP_DATA2_ADDR            0x00834000
 #define BANK0_APP_DATA2_SIZE            0x00000000  //0K Bytes
-#define BANK0_APP_DATA3_ADDR            0x00000000
+#define BANK0_APP_DATA3_ADDR            0x00834000
 #define BANK0_APP_DATA3_SIZE            0x00000000  //0K Bytes
-#define BANK0_APP_DATA4_ADDR            0x00000000
+#define BANK0_APP_DATA4_ADDR            0x00834000
 #define BANK0_APP_DATA4_SIZE            0x00000000  //0K Bytes
-#define BANK0_APP_DATA5_ADDR            0x00000000
+#define BANK0_APP_DATA5_ADDR            0x00834000
 #define BANK0_APP_DATA5_SIZE            0x00000000  //0K Bytes
-#define BANK0_APP_DATA6_ADDR            0x00000000
+#define BANK0_APP_DATA6_ADDR            0x00834000
 #define BANK0_APP_DATA6_SIZE            0x00000000  //0K Bytes
 
 /* ========== OTA Bank1 Flash Layout Configuration ========== */
