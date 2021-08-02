@@ -31,7 +31,7 @@ extern "C" {
 #define APP_BANK                                  0
 
 /** @brief ram code configuration: 1 is ram code, 0 is flash code */
-#define FEATURE_RAM_CODE                          1
+#define FEATURE_RAM_CODE                          0
 
 /** @brief encrypt app or not */
 #define FEATURE_ENCRYPTION                        0
@@ -54,7 +54,7 @@ example:
 #define HEAP_DATA_ON_SIZE              (65 * 1024 - APP_GLOBAL_SIZE)
 
 /** @brief shared cache ram size (adjustable, config SHARE_CACHE_RAM_SIZE: 0/8KB/16KB) */
-#define SHARE_CACHE_RAM_SIZE           (16 * 1024)
+#define SHARE_CACHE_RAM_SIZE           (8 * 1024)
 
 
 #ifdef __cplusplus
