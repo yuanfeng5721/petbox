@@ -338,7 +338,7 @@ int at_obj_exec_cmd(at_response_t resp, const char *cmd_expr, ...)
         if (HAL_SemaphoreWait(client->resp_sem, resp->timeout) < 0) {
             cmd = at_get_last_cmd(&cmd_size);
             Log_e("execute command (%.*s) failed!", cmd_size, cmd);
-            result = QCLOUD_ERR_FAILURE;
+            result = QCLOUD_ERR_TIMEOUT;
             goto __exit;
         }
 

@@ -14,13 +14,35 @@
 
 
 void (* at_uart_rcv_data)(uint8_t *buf, uint8_t size) = NULL;
+bool uart_send_data(const uint8_t *data, uint16_t size)
+{
+	uint8_t i = 0;
+	uint8_t count = size/UART_TX_FIFO_SIZE;
+	
+	for(i=0; i<count; i++)
+	{
+		UART_SendData(UART1, data+i*UART_TX_FIFO_SIZE, UART_TX_FIFO_SIZE);
+		/* wait tx fifo empty */
+		while (UART_GetFlagState(UART1, UART_FLAG_THR_TSR_EMPTY) != SET);
+	}
+	if(size%UART_TX_FIFO_SIZE)
+	{
+		UART_SendData(UART1, data+i*UART_TX_FIFO_SIZE, size%UART_TX_FIFO_SIZE);
+		/* wait tx fifo empty */
+		while (UART_GetFlagState(UART1, UART_FLAG_THR_TSR_EMPTY) != SET);
+	}
+	
+	return true;
+}
+
 bool at_uart_send_data(const uint8_t *data, uint16_t size)
 {
-    UART_SendData(UART1, data, size);
-    /* wait tx fifo empty */
-    while (UART_GetFlagState(UART1, UART_FLAG_THR_TSR_EMPTY) != SET);
+//    UART_SendData(UART1, data, size);
+//    /* wait tx fifo empty */
+//    while (UART_GetFlagState(UART1, UART_FLAG_THR_TSR_EMPTY) != SET);
 
-    return true;
+//    return true;
+	return uart_send_data(data, size);
 }
 
 /****************************************************************************/
