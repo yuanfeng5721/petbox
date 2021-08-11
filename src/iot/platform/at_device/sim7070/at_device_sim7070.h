@@ -22,4 +22,4 @@
 int at_device_sim7070_init(void);
 
 #endif /* __AT_DEVICE_SIM7070_H__ */
- 
+

@@ -149,6 +149,22 @@ int network_at_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen,
     return (len_sent > 0 && net_err == 0) ? QCLOUD_RET_SUCCESS : QCLOUD_ERR_TCP_WRITE_FAIL;
 }
 
+int network_at_tcp_parse_domain(Network *pNetwork)
+{
+    int ret;
+	POINTER_SANITY_CHECK(pNetwork, QCLOUD_ERR_INVAL);
+
+    ret = at_socket_parse_domain(pNetwork->domain, pNetwork->host, 16);
+
+    if (ret < 0) {
+        Log_e("fail to parse domain: %s", STRING_PTR_PRINT_SANITY_CHECK(pNetwork->domain));
+        return -1;
+    } else {
+        Log_d("success parse domain: %s -> %s", pNetwork->domain, pNetwork->host);
+        return 0;
+    }
+}
+
 void network_at_tcp_disconnect(Network *pNetwork)
 {
     int rc;
