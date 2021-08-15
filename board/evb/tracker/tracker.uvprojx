@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.7.0</PackID>
+          <PackID>ARM.CMSIS.5.3.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x00000000,0x80000) IRAM(0x20000000,0x20000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -504,6 +504,31 @@
               <FileType>5</FileType>
               <FilePath>.\protocol\readme.txt</FilePath>
             </File>
+            <File>
+              <FileName>btlink_protocol_hdlr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_protocol_hdlr.c</FilePath>
+            </File>
+            <File>
+              <FileName>btlink_protocol_util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_protocol_util.c</FilePath>
+            </File>
+            <File>
+              <FileName>btlink_protocol_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_protocol_cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>btlink_assem_asc_msg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_assem_asc_msg.c</FilePath>
+            </File>
+            <File>
+              <FileName>btlink_assem_hex_msg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_assem_hex_msg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -534,6 +559,11 @@
         <Group>
           <GroupName>peripheral</GroupName>
           <Files>
+            <File>
+              <FileName>btlink_protocol_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_protocol_cmd.c</FilePath>
+            </File>
             <File>
               <FileName>rtl876x_rcc.c</FileName>
               <FileType>1</FileType>
