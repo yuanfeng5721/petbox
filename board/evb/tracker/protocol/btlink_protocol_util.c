@@ -602,4 +602,3 @@ bool btlink_util_ip_all_zero(uint8_t* ip)
 {
     return (bool)(0==strncmp("0.0.0.0", (char *)ip, 7));
 }
-
