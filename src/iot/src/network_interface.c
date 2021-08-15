@@ -50,6 +50,7 @@ int network_init(Network *pNetwork)
             pNetwork->connect      = network_at_tcp_connect;
             pNetwork->read         = network_at_tcp_read;
             pNetwork->write        = network_at_tcp_write;
+			pNetwork->prase_domain = network_at_tcp_parse_domain;
             pNetwork->disconnect   = network_at_tcp_disconnect;
             pNetwork->is_connected = is_network_at_connected;
             pNetwork->handle       = AT_NO_CONNECTED_FD;

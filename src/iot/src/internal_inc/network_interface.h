@@ -55,6 +55,8 @@ struct Network {
 
     int (*write)(Network *, unsigned char *, size_t, uint32_t, size_t *);
 
+	int (*prase_domain)(Network *);
+	
     void (*disconnect)(Network *);
 
     int (*is_connected)(Network *);
@@ -67,8 +69,8 @@ struct Network {
 #ifndef AUTH_WITH_NOTLS
     SSLConnectParams ssl_connect_params;
 #endif
-
-    const char * host;  // server address
+	char * domain;
+    char * host;  // server address
     int          port;  // server port
     NETWORK_TYPE type;
 };
@@ -92,7 +94,7 @@ int  network_at_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen
 void network_at_tcp_disconnect(Network *pNetwork);
 int  network_at_tcp_connect(Network *pNetwork);
 int  network_at_tcp_init(Network *pNetwork);
-
+int  network_at_tcp_parse_domain(Network *pNetwork);
 #else
 int network_tcp_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len);
 int network_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *written_len);
