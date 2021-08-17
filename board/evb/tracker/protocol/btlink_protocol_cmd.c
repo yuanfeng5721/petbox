@@ -36,17 +36,21 @@ extern const char *btlink_dn_frame_header_str[];
 /*************************************************************************
 * Global Variable
 *************************************************************************/
-char btlink_canack_sn[ 1 + BTLINK_FLD_LEN_SERIAL_NUM] = "";
+char btlink_canack_sn[ 1 + BTLINK_LEN_SERIAL_NUM] = "";
 /*******************************************************/
 //Temporary  variables definition
 /*******************************************************/
 static void btlink_cmd_exec_dbg(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
-		#if 0 //eric
     btlink_arg_dbg_struct *arg_dbg;
 
     arg_dbg = &(dn_frame->arg.dbg);
-		#endif
+	
+		// <Mode>
+		if (g_btlink_config.cfg_dbg.dbg_mode != arg_dbg->dbg_mode)
+		{
+			g_btlink_config.cfg_dbg.dbg_mode = arg_dbg->dbg_mode;
+		}
 }
 
 static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
@@ -83,7 +87,7 @@ static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
         else if (arg_ips->pri_mode == BTLINK_IPS_PRI_DN)
         {
             /*TODO: DNS*/
-            memcpy((char *)g_btlink_config.cfg_ips.pri_host, (char *)arg_ips->pri_host, BTLINK_FLD_LEN_HOST);
+            memcpy((char *)g_btlink_config.cfg_ips.pri_host, (char *)arg_ips->pri_host, BTLINK_LEN_IPS_HOST);
         }
         need_save = true;
     }
@@ -101,10 +105,10 @@ static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
         }
         else if (arg_ips->pri_mode == BTLINK_IPS_PRI_DN)
         {
-            if (strncmp((char *)g_btlink_config.cfg_ips.pri_host, (char *)arg_ips->pri_host, BTLINK_FLD_LEN_HOST)!=0)
+            if (strncmp((char *)g_btlink_config.cfg_ips.pri_host, (char *)arg_ips->pri_host, BTLINK_LEN_IPS_HOST)!=0)
             {
                 /*TODO: DNS*/
-                memcpy((char *)g_btlink_config.cfg_ips.pri_host, (char *)arg_ips->pri_host, BTLINK_FLD_LEN_HOST);
+                memcpy((char *)g_btlink_config.cfg_ips.pri_host, (char *)arg_ips->pri_host, BTLINK_LEN_IPS_HOST);
                 need_save = true;
             }
         }
@@ -132,7 +136,7 @@ static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
         else if (arg_ips->sec_mode == BTLINK_IPS_PRI_DN)
         {
             /*TODO: DNS*/
-            memcpy((char *)g_btlink_config.cfg_ips.sec_host, (char *)arg_ips->sec_host, BTLINK_FLD_LEN_HOST);
+            memcpy((char *)g_btlink_config.cfg_ips.sec_host, (char *)arg_ips->sec_host, BTLINK_LEN_IPS_HOST);
         }
         need_save = true;
     }
@@ -150,10 +154,10 @@ static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
         }
         else if (arg_ips->sec_mode == BTLINK_IPS_PRI_DN)
         {
-            if (strncmp((char *)g_btlink_config.cfg_ips.sec_host, (char *)arg_ips->sec_host, BTLINK_FLD_LEN_HOST)!=0)
+            if (strncmp((char *)g_btlink_config.cfg_ips.sec_host, (char *)arg_ips->sec_host, BTLINK_LEN_IPS_HOST)!=0)
             {
                 /*TODO: DNS*/
-                memcpy((char *)g_btlink_config.cfg_ips.sec_host, (char *)arg_ips->sec_host, BTLINK_FLD_LEN_HOST);
+                memcpy((char *)g_btlink_config.cfg_ips.sec_host, (char *)arg_ips->sec_host, BTLINK_LEN_IPS_HOST);
                 need_save = true;
             }
         }

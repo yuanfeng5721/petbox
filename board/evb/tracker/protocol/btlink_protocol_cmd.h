@@ -27,8 +27,8 @@
  *
  *******************************************************************************/
 
-#ifndef _GPSTRACKER_NVRAM_TYPE_H_
-#define _GPSTRACKER_NVRAM_TYPE_H_
+#ifndef _BTLINK_PROTOCOL_CMD_H_
+#define _BTLINK_PROTOCOL_CMD_H_
 
 #include "trace.h"
 #include "btlink_protocol_hdlr.h"
@@ -37,15 +37,19 @@
 * Typedef for NVRAM Data
 *****************************************************************************/
 typedef struct {
+    uint32_t   dbg_mode;
+} btlink_config_dbg_struct;
+
+typedef struct {
     uint8_t   report_mode;
     uint8_t   buffer_mode;
 		/* Main Server IP & DNS */
     uint8_t   pri_mode;
-    uint8_t 	pri_host[1+BTLINK_FLD_LEN_HOST];
+    uint8_t 	pri_host[1+BTLINK_LEN_IPS_HOST];
     sockaddr_struct pri;
 		/* Backup Server IP & DNS */
 		uint8_t   sec_mode;
-    uint8_t 	sec_host[1+BTLINK_FLD_LEN_HOST];
+    uint8_t 	sec_host[1+BTLINK_LEN_IPS_HOST];
     sockaddr_struct sec;
 } btlink_config_ips_struct;
 
@@ -86,6 +90,7 @@ typedef struct {
 * Refer to ALL response
 *****************************************************************************/
 typedef struct {
+	  btlink_config_dbg_struct             cfg_dbg;
     btlink_config_ips_struct             cfg_ips;
     btlink_config_apn_struct             cfg_apn;
 		btlink_config_scs_struct             cfg_scs;
@@ -109,4 +114,4 @@ extern void btlink_cmd_process(btlink_parsed_dnlnk_frame_struct *dn_frame);
 //²¹³äËµÃ÷£º
 ******************************************************************************************/
 extern void btlink_print_reboot_log(void);
-#endif //_GPSTRACKER_NVRAM_TYPE_H_
+#endif //_BTLINK_PROTOCOL_CMD_H_

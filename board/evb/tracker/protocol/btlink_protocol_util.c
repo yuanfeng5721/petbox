@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "btlink_trace.h"
 #include "btlink_protocol_enums.h"
 #include "btlink_protocol_def.h"
 #include "btlink_protocol_util.h"

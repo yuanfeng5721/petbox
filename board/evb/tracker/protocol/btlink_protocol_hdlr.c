@@ -20,11 +20,12 @@
 * Include Files
 ******************************************************************************/
 #include "ctype.h"
-//#include "stm32f2xx.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
+#include "btlink_trace.h"
 #include "btlink_protocol_hdlr.h"
 #include "btlink_protocol_cmd.h"
 #include "btlink_protocol_util.h"
@@ -184,7 +185,7 @@ bool verify_serial_number(uint8_t * sn)
     uint8_t i;
     bool ret = true;
 
-    for (i = 0; i < BTLINK_FLD_LEN_SERIAL_NUM; i++)
+    for (i = 0; i < BTLINK_LEN_SERIAL_NUM; i++)
     {
 		#if 0
         if (!isxdigit(sn[i]))
@@ -207,20 +208,20 @@ static bool btlink_get_dnlnk_frame_type(btlink_raw_dnlnk_frame_struct *raw_frame
 {
     int i;
     bool ret = false;
-    uint8_t header[BTLINK_FLD_LEN_HEADER + 1];
+    uint8_t header[BTLINK_LEN_HEADER + 1];
 
     // for example "AT+GTXXX=..."
-    memset(header, 0, (BTLINK_FLD_LEN_HEADER + 1)*sizeof(uint8_t));
-    strncpy((char *)header, (char *)&raw_frame->data[raw_frame->position], BTLINK_FLD_LEN_HEADER);
-    raw_frame->position += (uint8_t)BTLINK_FLD_LEN_HEADER;
+    memset(header, 0, (BTLINK_LEN_HEADER + 1)*sizeof(uint8_t));
+    strncpy((char *)header, (char *)&raw_frame->data[raw_frame->position], BTLINK_LEN_HEADER);
+    raw_frame->position += (uint8_t)BTLINK_LEN_HEADER;
     //determine the frame type
     for ( i = 0; i < BTLINK_FH_ID_NUM; i++)
     {
         if ( btlink_dn_frame_header_str[i][0] != '\0'
 			 #if 0
-             && btlink_utils_app_strnicmp((char *)btlink_dn_frame_header_str[i], (char *)header, BTLINK_FLD_LEN_HEADER) == 0 )
+             && btlink_utils_app_strnicmp((char *)btlink_dn_frame_header_str[i], (char *)header, BTLINK_LEN_HEADER) == 0 )
 			 #else
-			 && (strncmp((char *)btlink_dn_frame_header_str[i], (char *)header, BTLINK_FLD_LEN_HEADER) == 0))
+			 && (strncmp((char *)btlink_dn_frame_header_str[i], (char *)header, BTLINK_LEN_HEADER) == 0))
 			 #endif
         {
             frame->type = (btlink_frame_header_index)i;
@@ -241,11 +242,11 @@ static bool btlink_get_frame_arg_reserved(btlink_raw_dnlnk_frame_struct *raw_fra
 {
     uint8_t i;
     bool ret = true;
-    //uint8_t buffer[BTLINK_FLD_LEN_CONTENT+1]; //防止局部数组过大，造成堆栈溢出
+    //uint8_t buffer[BTLINK_LEN_CONTENT+1]; //防止局部数组过大，造成堆栈溢出
 
     for (i = 0; i < total; i++)
     {
-        ret = btlink_get_frame_arg_field(raw_frame, NULL, BTLINK_FLD_LEN_RESERVED,
+        ret = btlink_get_frame_arg_field(raw_frame, NULL, BTLINK_LEN_RESERVED,
                                        p_buffer, sizeof(p_buffer));
         if (ret == false) break;
     }
@@ -254,22 +255,25 @@ static bool btlink_get_frame_arg_reserved(btlink_raw_dnlnk_frame_struct *raw_fra
 
 }
 
+
+
+		
 static bool btlink_get_dnlnk_frame_arg_dbg(btlink_raw_dnlnk_frame_struct *raw_frame,
         btlink_parsed_dnlnk_frame_struct *frame)
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 
     //<Debug Mask>
     p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_FLAG,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_DBG_MODE,
                                    buffer, sizeof(buffer));
     if (ret)
     {
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_FLAG))
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_DBG_MODE))
         {
-            frame->arg.dbg.mode = btlink_utils_atoi_buffer((char *)buffer);
+            frame->arg.dbg.dbg_mode = btlink_utils_atoi_buffer((char *)buffer);
         }
         else
         {
@@ -287,14 +291,14 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 		btlink_arg_ips_struct *ips = &frame->arg.ips;
 		uint8_t i;    
 		bool is_legal_ip;
 	
     //<Report Mode>
     p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_REPORT_MODE, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_IPS_REPORT_MODE, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -303,7 +307,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
             ips->report_mode = g_btlink_config.cfg_ips.report_mode;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_REPORT_MODE)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_IPS_REPORT_MODE)) 
         {
 						uint8_t report_mode = 0;
             report_mode = btlink_utils_atoi_buffer((char*)buffer);
@@ -325,7 +329,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<Buffer Mode>
     p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_BUFFER_MODE, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_IPS_BUFFER_MODE, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -334,7 +338,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
             ips->buffer_mode = g_btlink_config.cfg_ips.buffer_mode;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_BUFFER_MODE)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_IPS_BUFFER_MODE)) 
         {
 						uint8_t buffer_mode = 0;
             buffer_mode = btlink_utils_atoi_buffer((char*)buffer);
@@ -360,7 +364,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
 		
 		//<main Service IP & DNS>
     p_arg_field = NULL; 
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_HOST, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_IPS_HOST, 
                                    buffer, sizeof(buffer));    
     if (ret) 
     {
@@ -379,7 +383,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
             if (g_btlink_config.cfg_ips.pri_mode == BTLINK_IPS_PRI_DN) 
             {
                 strncpy((char *)ips->pri_host, 
-                        (char *)g_btlink_config.cfg_ips.pri_host, BTLINK_FLD_LEN_HOST);
+                        (char *)g_btlink_config.cfg_ips.pri_host, BTLINK_LEN_IPS_HOST);
             }
         }
         else 
@@ -422,7 +426,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<main port>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_PORT, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_IPS_PORT, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -431,7 +435,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.ips.pri.port = g_btlink_config.cfg_ips.pri.port;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_PORT)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_IPS_PORT)) 
         {
 						uint16_t port = 0;
             port = btlink_utils_atoi_buffer((char*)buffer);
@@ -453,7 +457,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<Backup Service IP & DNS>
     p_arg_field = NULL; 
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_HOST, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_IPS_HOST, 
                                    buffer, sizeof(buffer));    
     if (ret) 
     {
@@ -472,7 +476,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
             if (g_btlink_config.cfg_ips.sec_mode == BTLINK_IPS_PRI_DN) 
             {
                 strncpy((char *)ips->sec_host, 
-                        (char *)g_btlink_config.cfg_ips.sec_host, BTLINK_FLD_LEN_HOST);
+                        (char *)g_btlink_config.cfg_ips.sec_host, BTLINK_LEN_IPS_HOST);
             }
         }
         else 
@@ -515,7 +519,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<backup port>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_PORT, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_IPS_PORT, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -524,7 +528,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.ips.sec.port = g_btlink_config.cfg_ips.sec.port;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_PORT)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_IPS_PORT)) 
         {
 						uint16_t port = 0;
             port = btlink_utils_atoi_buffer((char*)buffer);
@@ -557,11 +561,11 @@ static bool btlink_get_dnlnk_frame_arg_apn(btlink_raw_dnlnk_frame_struct *raw_fr
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 
     //<APN Quantity>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_APN_NUMS, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_NUMS, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -570,7 +574,7 @@ static bool btlink_get_dnlnk_frame_arg_apn(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.apn.apn_quantity = g_btlink_config.cfg_apn.apn_quantity;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_APN_NUMS)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_APN_NUMS)) 
         {
 						uint16_t apn_nums = 0;
             apn_nums = btlink_utils_atoi_buffer((char*)buffer);
@@ -592,25 +596,25 @@ static bool btlink_get_dnlnk_frame_arg_apn(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		/* MCC&MNC */
     p_arg_field = frame->arg.apn.mcc_mnc;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_MCC_MNC,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_MCC_MNC,
                                    buffer, sizeof(buffer));
     if (ret == false) goto error;
 
 		/* APN NAME */
     p_arg_field = frame->arg.apn.apn_name;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_APN_NAME,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_NAME,
                                    buffer, sizeof(buffer));
     if (ret == false) goto error;
 
 		/* APN USER NAME */
     p_arg_field = frame->arg.apn.apn_user_name;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_APN_USER_NAME,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_USER_NAME,
                                    buffer, sizeof(buffer));
     if (ret == false) goto error;
 
 		/* APN Password */
     p_arg_field = frame->arg.apn.apn_password;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_APN_PASSWORD,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_PASSWORD,
                                    buffer, sizeof(buffer));
     if (ret == false) goto error;
 
@@ -627,11 +631,11 @@ static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_fr
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 
     //<data zone Mask>
     p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_DATA_ZONE_MASK,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SCS_DATA_ZONE_MASK,
                                    buffer, sizeof(buffer));
     if (ret)
     {
@@ -640,7 +644,7 @@ static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.scs.data_zone_mask = g_btlink_config.cfg_scs.data_zone_mask;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_DATA_ZONE_MASK))
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_SCS_DATA_ZONE_MASK))
         {
             frame->arg.scs.data_zone_mask = btlink_hex_string_2_int((char *)buffer);
         }
@@ -664,11 +668,11 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 
     //<Mode Selection>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_MODE_SELECT, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_MODE_SELECT, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -677,7 +681,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.mode_selection = g_btlink_config.cfg_lss.mode_selection;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_MODE_SELECT)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_MODE_SELECT)) 
         {
 						uint8_t mode_selection = 0;
             mode_selection = btlink_utils_atoi_buffer((char*)buffer);
@@ -699,7 +703,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<Continues Send Interval>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_CONT_SEND_INTERVAL, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_CONT_SEND_INTERVAL, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -708,7 +712,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.continue_send_interval = g_btlink_config.cfg_lss.continue_send_interval;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_CONT_SEND_INTERVAL)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_CONT_SEND_INTERVAL)) 
         {
 						uint16_t continus_send_interval = 0;
             continus_send_interval = btlink_utils_atoi_buffer((char*)buffer);
@@ -730,7 +734,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 		
     //<Start Mode>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_START_MODE, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_START_MODE, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -739,7 +743,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.start_mode = g_btlink_config.cfg_lss.start_mode;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_START_MODE)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_START_MODE)) 
         {
 						uint8_t start_mode = 0;
             start_mode = btlink_utils_atoi_buffer((char*)buffer);
@@ -761,13 +765,13 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 		
 		// <Specified Time of Day>
     p_arg_field = frame->arg.lss.spec_time_of_day;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_SPEC_TIME_DAY,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_SPEC_TIME_DAY,
                                    buffer, sizeof(buffer));
     if (ret == false) goto error;
 
 		//<Wakeup Interval>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_WAKEUP_INTERVAL, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_WAKEUP_INTERVAL, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -776,7 +780,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.wakeup_interval = g_btlink_config.cfg_lss.wakeup_interval;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_WAKEUP_INTERVAL)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_WAKEUP_INTERVAL)) 
         {
 						uint8_t wakeup_interval = 0;
             wakeup_interval = btlink_utils_atoi_buffer((char*)buffer);
@@ -803,7 +807,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<PSM Network Hold Time>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_PSM_NET_HOLD_TIME, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_PSM_NET_HOLD_TIME, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -812,7 +816,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.psm_net_hold_time = g_btlink_config.cfg_lss.psm_net_hold_time;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_PSM_NET_HOLD_TIME)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_PSM_NET_HOLD_TIME)) 
         {
 						uint32_t psm_net_hold_time = 0;
             psm_net_hold_time = btlink_utils_atoi_buffer((char*)buffer);
@@ -834,7 +838,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<Report Frequency>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_REPORT_FREG, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_REPORT_FREG, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -843,7 +847,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.report_freq = g_btlink_config.cfg_lss.report_freq;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_REPORT_FREG)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_REPORT_FREG)) 
         {
 						uint8_t report_freq = 0;
             report_freq = btlink_utils_atoi_buffer((char*)buffer);
@@ -866,7 +870,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 		
 		//<GNSS Enable>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_GNSS_ENABLE, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_GNSS_ENABLE, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -875,7 +879,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.gnss_enable = g_btlink_config.cfg_lss.gnss_enable;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_GNSS_ENABLE)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_GNSS_ENABLE)) 
         {
 						uint8_t gnss_enable = 0;
             gnss_enable = btlink_utils_atoi_buffer((char*)buffer);
@@ -897,7 +901,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<GNSS Fix Delay>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_GNSS_FIX_DELAY, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_GNSS_FIX_DELAY, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -906,7 +910,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.gnss_fix_delay = g_btlink_config.cfg_lss.gnss_fix_delay;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_GNSS_FIX_DELAY)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_GNSS_FIX_DELAY)) 
         {
 						uint8_t gnss_fix_delay = 0;
             gnss_fix_delay = btlink_utils_atoi_buffer((char*)buffer);
@@ -929,7 +933,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<AGPS Mode>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_AGPS_MODE, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_AGPS_MODE, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -938,7 +942,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.agps_mode = g_btlink_config.cfg_lss.agps_mode;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_AGPS_MODE)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_AGPS_MODE)) 
         {
 						uint8_t agps_mode = 0;
             agps_mode = btlink_utils_atoi_buffer((char*)buffer);
@@ -960,7 +964,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<Battery Low Percent>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_BAT_LOW_PERCENT, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_BAT_LOW_PERCENT, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -969,7 +973,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.bat_low_percent = g_btlink_config.cfg_lss.bat_low_percent;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_BAT_LOW_PERCENT)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_BAT_LOW_PERCENT)) 
         {
 						uint8_t bat_low_percent = 0;
             bat_low_percent = btlink_utils_atoi_buffer((char*)buffer);
@@ -995,7 +999,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 
 		//<Sensor Enable>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_SENSOR_ENABLE, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_SENSOR_ENABLE, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -1004,7 +1008,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.sensor_enable = g_btlink_config.cfg_lss.sensor_enable;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_SENSOR_ENABLE)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_SENSOR_ENABLE)) 
         {
 						uint8_t sensor_enable = 0;
             sensor_enable = btlink_utils_atoi_buffer((char*)buffer);
@@ -1026,7 +1030,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
 		
 		//<Non Movement Duration>
 		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_NON_MOVE_DUR, 
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_LSS_NON_MOVE_DUR, 
                                    buffer, sizeof(buffer));
     if (ret) 
     {
@@ -1035,7 +1039,7 @@ static bool btlink_get_dnlnk_frame_arg_lss(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.lss.non_move_duration = g_btlink_config.cfg_lss.non_move_duration;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_NON_MOVE_DUR)) 
+        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_LSS_NON_MOVE_DUR)) 
         {
 						uint8_t non_move_dur = 0;
             non_move_dur = btlink_utils_atoi_buffer((char*)buffer);
@@ -1069,15 +1073,15 @@ static bool btlink_get_dnlnk_frame_arg_rth(btlink_raw_dnlnk_frame_struct *raw_fr
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 
     //<Sub Command>
     p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_SUB_COMMAND,
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_RTH_SUB_COMMAND,
                                    buffer, sizeof(buffer));
     if (ret)
     {
-			  if (btlink_utils_isdigit_buffer(buffer, BTLINK_FLD_LEN_SUB_COMMAND)) 
+			  if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_RTH_SUB_COMMAND)) 
         {
 						uint8_t sub_command = 0;
             sub_command = btlink_utils_atoi_buffer((char*)buffer);
@@ -1165,11 +1169,11 @@ static bool btlink_get_dnlnk_frame_sn(btlink_raw_dnlnk_frame_struct *raw_frame,
 {
     bool ret = true;
     uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_FLD_LEN_SERIAL_NUM + 1];
+    uint8_t buffer[BTLINK_LEN_SERIAL_NUM + 1];
 
     //<Serial number>
     p_arg_field = frame->serial_number;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_FLD_LEN_SERIAL_NUM, buffer, sizeof(buffer));
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SERIAL_NUM, buffer, sizeof(buffer));
     return (ret && verify_serial_number(p_arg_field));
 }
 
@@ -1270,7 +1274,7 @@ bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
         }
 
         //get parameter string
-        memset((char *)frame->para_string, 0, (BTLINK_FLD_LEN_PARAMETER + 1));
+        memset((char *)frame->para_string, 0, (BTLINK_LEN_PARAMETER + 1));
         strncpy((char *)frame->para_string, (char *)(&raw_frame->data[para_pos]), (raw_frame->position - para_pos));
     }
 

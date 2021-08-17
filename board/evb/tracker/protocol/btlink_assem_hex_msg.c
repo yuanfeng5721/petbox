@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "btlink_trace.h"
 #include "btlink_assem_hex_msg_enums.h"
 #include "btlink_assem_hex_msg_struct.h"
 #include "btlink_assem_asc_msg_struct.h"
@@ -788,6 +789,9 @@ void btlink_assemm_hex_prt_msg_hdlr(uint8_t* buff, uint16_t event_type, btlink_g
 		uint8_t* pbuff = NULL;
 	
 	  pbuff = buff;
+	
+		BTLINK_DEBUG_TRACE(DBG_QPROT, "%d", BTLINK_DEVICE_TYPE);
+		//DBG_DIRECT("Device Type:%d", BTLINK_DEVICE_TYPE);
 	
 		/* IMEI */
 		pbuff += btlink_hex_pack_imei(pbuff);

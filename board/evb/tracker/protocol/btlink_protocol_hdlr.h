@@ -27,8 +27,8 @@
  *
  *******************************************************************************/
 
-#ifndef _GPSTRACKER_PROTOCOL_HDLR_H_
-#define _GPSTRACKER_PROTOCOL_HDLR_H_
+#ifndef _BTLINK_PROTOCOL_HDLR_H_
+#define _BTLINK_PROTOCOL_HDLR_H_
 
 #include "trace.h"
 #include "btlink_protocol_def.h"
@@ -52,12 +52,12 @@ typedef struct {
 } btlink_raw_dnlnk_frame_struct;               //Raw donwlink frame via SMS
 
 typedef struct {
-    uint8_t mode;
+    uint32_t dbg_mode;
 } btlink_arg_dbg_struct;
 
 typedef struct {
     uint32_t  send_interval;
-    uint8_t   new_password[1+BTLINK_FLD_LEN_PASSWORD];
+    uint8_t   new_password[1+BTLINK_LEN_PASSWORD];
     uint8_t   dat_cmd_mode;
 		uint8_t   fc_report_mode;
 		uint16_t  fc_report_valid_time;
@@ -80,11 +80,11 @@ typedef struct {
     uint8_t   buffer_mode;
 		/* Main Server IP & DNS */
     uint8_t   pri_mode;
-    uint8_t 	pri_host[BTLINK_FLD_LEN_HOST];
+    uint8_t 	pri_host[BTLINK_LEN_IPS_HOST];
     sockaddr_struct pri;
 		/* Backup Server IP & DNS */
 		uint8_t   sec_mode;
-    uint8_t 	sec_host[BTLINK_FLD_LEN_HOST];
+    uint8_t 	sec_host[BTLINK_LEN_IPS_HOST];
     sockaddr_struct sec;
 } btlink_arg_ips_struct;
 
@@ -136,7 +136,7 @@ typedef struct {
     btlink_frame_header_index  type;
     uint8_t                       length;
     uint8_t                       data[BTLINK_MAX_ACK_FRAME_SIZE+1];
-    uint8_t                       oa_number[BTLINK_FLD_LEN_SMS_GATE+1];
+    uint8_t                       oa_number[BTLINK_LEN_SMS_GATE+1];
 } btlink_ack_frame_struct;
 
 //Parsed downlink frame
@@ -147,8 +147,8 @@ typedef struct {
     bool                     ack;
     uint8_t                       oa_number [ 1+MAX_CC_ADDR_LEN ];
     //U8				     send_time [ 1 + GPRT_FLD_LEN_SEND_TIME ];
-    uint8_t				         serial_number[ 1 + BTLINK_FLD_LEN_SERIAL_NUM];
-    uint8_t                        para_string[ 1+ BTLINK_FLD_LEN_PARAMETER ];
+    uint8_t				         serial_number[ 1 + BTLINK_LEN_SERIAL_NUM];
+    uint8_t                        para_string[ 1+ BTLINK_LEN_PARAMETER ];
 
     //Status
     bool                     valid;
@@ -174,4 +174,4 @@ extern btlink_parsed_at_cmd_struct   parsed_at_cmd;
 extern int btlink_cmd_parse(char *cmd, int16_t cmd_len);
 extern bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame);
 extern bool btlink_is_protocol_format(uint8_t* msg_content, uint16_t msg_length);
-#endif //_GPSTRACKER_PROTOCOL_HDLR_H_
+#endif //_BTLINK_PROTOCOL_HDLR_H_

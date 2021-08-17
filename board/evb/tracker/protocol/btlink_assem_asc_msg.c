@@ -245,7 +245,7 @@ uint16_t btlink_prot_frame_tail_ascii(uint8_t* buff, uint16_t buf_len)
 ******************************************************************************/ 
 void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, uint8_t* cmd_str)
 {
-		uint8_t imei[1+BTLINK_FLD_LEN_IMEI] = "123456789012345";
+		uint8_t imei[1+BTLINK_LEN_IMEI] = "123456789012345";
 		uint16_t len = 0;
 		uint8_t device_type = 0;
 		uint8_t mar_ver = 0;
