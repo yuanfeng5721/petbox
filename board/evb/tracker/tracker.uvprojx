@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.3.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x00000000,0x80000) IRAM(0x20000000,0x20000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -337,7 +337,7 @@
               <MiscControls>--gnu --preinclude app_flags.h --bss_threshold=0</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\..\..\src\mcu\module\data_uart_cmd;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal</IncludePath>
+              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal;..\..\..\src\mcu\module\cmd_uart;..\tracker\app</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -465,16 +465,6 @@
           <GroupName>app</GroupName>
           <Files>
             <File>
-              <FileName>data_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\mcu\module\data_uart_cmd\data_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>user_cmd_parse.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\src\mcu\module\data_uart_cmd\user_cmd_parse.c</FilePath>
-            </File>
-            <File>
               <FileName>overlay_mgr.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\rtl876x\overlay_mgr.c</FilePath>
@@ -483,6 +473,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\app\cmd_task.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -493,6 +488,21 @@
               <FileName>rtl876x_hal_bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\hal\rtl876x_hal_bsp.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd_parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\cmd_uart\cmd_parse.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\cmd_uart\cmd_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd_uart_dlps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\cmd_uart\cmd_uart_dlps.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -535,24 +545,9 @@
           <GroupName>ble</GroupName>
           <Files>
             <File>
-              <FileName>app_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ble\app_task.c</FilePath>
-            </File>
-            <File>
-              <FileName>bt5_central_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ble\bt5_central_app.c</FilePath>
-            </File>
-            <File>
               <FileName>link_mgr.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\ble\link_mgr.c</FilePath>
-            </File>
-            <File>
-              <FileName>user_cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ble\user_cmd.c</FilePath>
             </File>
           </Files>
         </Group>

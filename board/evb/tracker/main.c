@@ -25,7 +25,7 @@
 #include "gap_msg.h"
 #include "gap_config.h"
 #include "gap_ext_scan.h"
-#include "app_task.h"
+#include "cmd_task.h"
 #include "bt5_central_app.h"
 #include "link_mgr.h"
 #include "otp_config.h"
@@ -34,7 +34,8 @@
 #include "rtl876x_hal_bsp.h"
 #include "network_interface.h"
 
-#define TEST_DRIVER 1
+
+uint8_t network_status = 0;
 /** @defgroup  BT5_CENTRAL_DEMO_MAIN BT5 Central Main
     * @brief Main file to initialize hardware and BT stack and start task scheduling
     * @{
@@ -61,6 +62,7 @@ APP_FLASH_TEXT_SECTION void bt_stack_config_init(void)
             related parameters
   * @return void
   */
+#if 0
 void app_le_gap_init(void)
 {
     /* Device name and device appearance */
@@ -120,7 +122,7 @@ void app_le_gap_init(void)
     /* Register gap message callback */
     le_register_app_cb(app_gap_callback);
 }
-
+#endif
 /**
  * @brief    Contains the initialization of pinmux settings and pad settings
  * @note     All the pinmux settings and pad settings shall be initiated in this function,
@@ -146,12 +148,26 @@ void driver_init(void)
 #if TEST_NETWORK
 	int rc;
 	Network network_stack;
+	char ip_addr[16]={0};
 	
-	network_stack.host = "115.29.109.104";
+	network_stack.domain = "www.baidu.com";
+	network_stack.host = ip_addr;
 	network_stack.port = 6522;
 	network_stack.type = NETWORK_TCP;
 	
 	rc = network_init(&network_stack);
+	//if(!network_stack.prase_domain(&network_stack))
+	//	network_stack.connect(&network_stack);
+	if(rc<0)
+	{
+		network_status = 0;
+	}
+	else
+	{
+		network_status = 1;
+		if(!network_stack.prase_domain(&network_stack))
+			network_stack.connect(&network_stack);
+	}
 #endif
 	
 #if TEST_TICK
@@ -186,9 +202,15 @@ void app_test_task(void *p_param)
     while (true)
     {
 		os_delay(1000);
-        green_led_ctl(1);
+		if(network_status)
+			blue_led_ctl(1);
+		else
+			green_led_ctl(1);
 		os_delay(100);
-		green_led_ctl(0);
+		if(network_status)
+			blue_led_ctl(0);
+		else
+			green_led_ctl(0);
     }
 }
 /**
@@ -197,7 +219,7 @@ void app_test_task(void *p_param)
  */
 void test_task_init()
 {
-    os_task_create(&app_test_task_handle, "app_test", app_test_task, 0, 256 * 4, 1);
+    os_task_create(&app_test_task_handle, "app_test", app_test_task, 0, 256 * 5, 1);
 }
 
 /**
@@ -207,10 +229,11 @@ void test_task_init()
  */
 void task_init(void)
 {
+#define TEST_DRIVER 0
+	cmd_task_init();
 #if TEST_DRIVER
 	test_task_init();
 #else
-    app_task_init();
 #endif
 }
 
@@ -222,9 +245,9 @@ int main(void)
 {
     board_init();
 #if(TEST_DRIVER == 0)
-    le_gap_init(APP_MAX_LINKS);
-    gap_lib_init();
-    app_le_gap_init();
+//    le_gap_init(APP_MAX_LINKS);
+//    gap_lib_init();
+//    app_le_gap_init();
 #endif
     pwr_mgr_init();
     task_init();

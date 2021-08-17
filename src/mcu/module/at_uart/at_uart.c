@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <data_uart.h>
 #include <os_msg.h>
 #include <trace.h>
 #include <app_msg.h>
