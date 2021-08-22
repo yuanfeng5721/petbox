@@ -67,6 +67,21 @@ typedef enum
     BTLINK_PARSE_STEP_UNKNOWN
 } btlink_parse_step;
 
+typedef enum
+{
+    BTLINK_CMD_DEBUG,
+    BTLINK_CMD_IPS,
+		BTLINK_CMD_APN,
+		BTLINK_CMD_SCS,
+		BTLINK_CMD_LSS,
+		BTLINK_CMD_RTH,
+	
+    /*Please put the real command with entry in g_QuecAtCommandTable before this one*/
+    BTLINK_CMD_NUMS, 
+    /*the types here have no entry in g_QuecAtCommandTable, just use the mechanism*/
+    BTLINK_CMD_TYPE_END
+}btlin_cmd_type_e;
+
 //Index of response uplink frame header string
 typedef enum
 {

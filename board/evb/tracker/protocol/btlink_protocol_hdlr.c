@@ -25,11 +25,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "cmd_uart.h"
 #include "btlink_trace.h"
 #include "btlink_protocol_hdlr.h"
 #include "btlink_protocol_cmd.h"
 #include "btlink_protocol_util.h"
-
+#include "btlink_cmd_rmmi.h"
 /*****************************************************************************
 * Define
 *****************************************************************************/
@@ -210,7 +211,7 @@ static bool btlink_get_dnlnk_frame_type(btlink_raw_dnlnk_frame_struct *raw_frame
     bool ret = false;
     uint8_t header[BTLINK_LEN_HEADER + 1];
 
-    // for example "AT+GTXXX=..."
+    // for example "AT@XXX=..."
     memset(header, 0, (BTLINK_LEN_HEADER + 1)*sizeof(uint8_t));
     strncpy((char *)header, (char *)&raw_frame->data[raw_frame->position], BTLINK_LEN_HEADER);
     raw_frame->position += (uint8_t)BTLINK_LEN_HEADER;
@@ -230,6 +231,8 @@ static bool btlink_get_dnlnk_frame_type(btlink_raw_dnlnk_frame_struct *raw_frame
         }
     }
 
+		cmd_uart_print("frame->type:%d\r\n", frame->type);
+		
     return ret;
 }
 
@@ -253,37 +256,6 @@ static bool btlink_get_frame_arg_reserved(btlink_raw_dnlnk_frame_struct *raw_fra
 
     return ret;
 
-}
-
-
-
-		
-static bool btlink_get_dnlnk_frame_arg_dbg(btlink_raw_dnlnk_frame_struct *raw_frame,
-        btlink_parsed_dnlnk_frame_struct *frame)
-{
-    bool ret = true;
-    uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
-
-    //<Debug Mask>
-    p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_DBG_MODE,
-                                   buffer, sizeof(buffer));
-    if (ret)
-    {
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_DBG_MODE))
-        {
-            frame->arg.dbg.dbg_mode = btlink_utils_atoi_buffer((char *)buffer);
-        }
-        else
-        {
-            ret = false;
-        }
-    }
-    if (ret == false) goto error;
-
-error:
-    return ret;
 }
 
 static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_frame,
@@ -1116,10 +1088,6 @@ static bool btlink_get_dnlnk_frame_arg (btlink_raw_dnlnk_frame_struct *raw_frame
 
     switch (frame->type)
     {
-        case BTLINK_FH_ID_DBG:
-            ret = btlink_get_dnlnk_frame_arg_dbg(raw_frame, frame);
-            break;
-
 				case BTLINK_FH_ID_IPS:
 						ret = btlink_get_dnlnk_frame_arg_ips(raw_frame, frame);
 						break;
@@ -1231,6 +1199,8 @@ bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
     bool ret = false;
     uint8_t para_pos = 0;
 
+		cmd_uart_print("raw_frame->data:%s\r\n", raw_frame->data);
+	
     if ( raw_frame->length > 0 &&
          ( strncmp((const char *)raw_frame->data, BTLINK_DNLNK_HEADER,  BTLINK_HEADER_CHKLEN) == 0 ||
            strncmp((const char *)raw_frame->data, BTLINK_DNLNK_HEADER_LC,  BTLINK_HEADER_CHKLEN) == 0)
@@ -1284,36 +1254,6 @@ error:
     return  ret;
 }
 
-#if 0 //eric
-static void btlink_assemble_general_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame, uint8_t content)
-{
-#if 0 //zx
-    if (rx.doing_power_off)
-        return;
-
-    while (eque_tail != eque_head)
-    {
-        ebuf_write_proc();
-    }
-    memset((void *)&g_resp_report_items, 0, sizeof(resp_report_union));
-    g_resp_report_items.ack.name = ST_ACK;
-    applib_dt_get_rtc_time(&g_resp_report_items.ack.rtc_time);
-    g_resp_report_items.ack.type = dn_frame->type;
-    g_resp_report_items.ack.report_count = btlink_get_report_count();
-    g_resp_report_items.ack.serial_number = strtol((char const *)dn_frame->serial_number, NULL, 16);
-    g_resp_report_items.ack.id = content;
-#ifdef __GFS_PRT_SMS_ACK__
-    if (g_btlink_config.cfg_sri.sms_ack_enable && strlen((char *)dn_frame->oa_number))
-    {
-        g_resp_report_items.ack.bearer = BTLINK_BM_BIT_SMS;
-        strcpy((char *)g_resp_report_items.ack.number, (char *)dn_frame->oa_number);
-    }
-#endif//__GFS_PRT_SMS_ACK__    
-    else
-        g_resp_report_items.ack.bearer = BTLINK_BM_BIT_AUTO;
-#endif
-}
-#endif
 
 bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
@@ -1364,29 +1304,31 @@ bool btlink_check_and_exec_protocol(uint8_t *msg_content, uint16_t msg_length, u
 
 int btlink_cmd_parse(char *cmd, int16_t cmd_len)
 {
-	bool retcode = false;
+	int retcode = -1;
+	CommandLine_t command_line = {0};
 	
-	parsed_at_cmd.position = 0;
+	//cmd_uart_print("cmd:%s, cmd_len:%d\r\n", cmd, cmd_len);
+	//BTLINK_DEBUG_TRACE(DBG_QPROT, "%s", cmd);
+
+	if (cmd_len >= COMMAND_LINE_SIZE)
+	{
+		cmd_len = COMMAND_LINE_SIZE;
+	}
 	
-	if (cmd_len > BTLINK_MAX_DNLNK_FRAME_SIZE)
+	if (true == rmmi_is_btlink_cmd((uint8_t *)cmd))
 	{
-		cmd_len = BTLINK_MAX_DNLNK_FRAME_SIZE;
+			strncpy(command_line.character, cmd, cmd_len);
+			command_line.character[COMMAND_LINE_SIZE] = '\0';
+			command_line.length = strlen(command_line.character);
+			command_line.position = 0;
+			
+			if (true == rmmi_btlink_cmd_hdlr(&command_line))
+			{
+					retcode = 0;
+			}
 	}
-	parsed_at_cmd.length = cmd_len;
-	strncpy(parsed_at_cmd.character, cmd, cmd_len);
-
-	retcode = btlink_check_and_exec_protocol((uint8_t *)parsed_at_cmd.character, parsed_at_cmd.length, NULL);
-
-	if (retcode == true)
-	{
-		//tty_tran_txt("OK\r\n");
-		return CMD_ACCEPT;
-	}
-	else
-	{
-		//tty_tran_txt("ERROR\r\n");
-		return CMD_ERROR;
-	}
+	
+	return retcode;
 }
 
 bool btlink_is_protocol_format(uint8_t * msg_content, uint16_t msg_length)

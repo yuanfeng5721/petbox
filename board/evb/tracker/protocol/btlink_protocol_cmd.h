@@ -37,10 +37,6 @@
 * Typedef for NVRAM Data
 *****************************************************************************/
 typedef struct {
-    uint32_t   dbg_mode;
-} btlink_config_dbg_struct;
-
-typedef struct {
     uint8_t   report_mode;
     uint8_t   buffer_mode;
 		/* Main Server IP & DNS */
@@ -90,7 +86,6 @@ typedef struct {
 * Refer to ALL response
 *****************************************************************************/
 typedef struct {
-	  btlink_config_dbg_struct             cfg_dbg;
     btlink_config_ips_struct             cfg_ips;
     btlink_config_apn_struct             cfg_apn;
 		btlink_config_scs_struct             cfg_scs;

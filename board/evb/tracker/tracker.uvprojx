@@ -544,6 +544,11 @@
               <FileType>1</FileType>
               <FilePath>.\protocol\btlink_trace.c</FilePath>
             </File>
+            <File>
+              <FileName>btlink_cmd_rmmi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_cmd_rmmi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

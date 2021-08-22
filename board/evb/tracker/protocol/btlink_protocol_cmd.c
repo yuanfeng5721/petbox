@@ -24,6 +24,7 @@
 #include "string.h"
 #include "stdio.h"
 
+#include "cmd_uart.h"
 #include "btlink_protocol_cmd.h"
 #include "btlink_protocol_hdlr.h"
 #include "btlink_protocol_util.h"
@@ -40,19 +41,6 @@ char btlink_canack_sn[ 1 + BTLINK_LEN_SERIAL_NUM] = "";
 /*******************************************************/
 //Temporary  variables definition
 /*******************************************************/
-static void btlink_cmd_exec_dbg(btlink_parsed_dnlnk_frame_struct *dn_frame)
-{
-    btlink_arg_dbg_struct *arg_dbg;
-
-    arg_dbg = &(dn_frame->arg.dbg);
-	
-		// <Mode>
-		if (g_btlink_config.cfg_dbg.dbg_mode != arg_dbg->dbg_mode)
-		{
-			g_btlink_config.cfg_dbg.dbg_mode = arg_dbg->dbg_mode;
-		}
-}
-
 static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
     btlink_arg_ips_struct *arg_ips = &(dn_frame->arg.ips);
@@ -356,10 +344,6 @@ static void btlink_cmd_exec(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
     switch (dn_frame->type)
     {
-        case BTLINK_FH_ID_DBG:
-            btlink_cmd_exec_dbg(dn_frame);
-            break;
-
 				case BTLINK_FH_ID_IPS:
 						btlink_cmd_exec_ips(dn_frame);
 						break;

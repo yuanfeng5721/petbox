@@ -45,7 +45,7 @@
 /*****************************************************************************
 * Define
 *****************************************************************************/
-#define QUEC_TRACE_BUFF_SIZE    160
+#define BTLINK_TRACE_BUFF_SIZE    160
 
 typedef enum
 {
@@ -60,11 +60,13 @@ typedef enum
 /******************************************************************************
 * Global functions
 ******************************************************************************/
+extern uint32_t g_dbg_mode;
 extern void btlink_trace(uint8_t dbg_idx, char *file_ptr,
                             uint32_t line, const char *fmt,...);
 
 #define BTLINK_DEBUG_TRACE(dBG_iDX, ...)   \
-    if ((dBG_iDX < DBG_TYPE_NUM) && (g_btlink_config.cfg_dbg.dbg_mode & (1 << dBG_iDX))) \
+    if ((dBG_iDX < DBG_TYPE_NUM) && (g_dbg_mode & (1 << dBG_iDX))) \
         btlink_trace(dBG_iDX, __FILE__, __LINE__, __VA_ARGS__);
 
+extern void btlink_set_log_mode(uint32_t mode);
 #endif /* _BTLINK_TRACE_H_ */

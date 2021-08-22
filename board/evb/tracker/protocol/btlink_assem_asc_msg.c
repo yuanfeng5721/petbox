@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "btlink_trace.h"
 #include "btlink_assem_asc_msg_struct.h"
 #include "btlink_assem_asc_msg_enums.h"
 #include "btlink_protocol_def.h"
@@ -149,7 +150,7 @@ uint32_t btlink_util_get_report_count(void)
 {
     uint32_t report_count = g_send_cnt;
 
-    //QUEC_DEBUG_TRACE(DBG_QPROT, "btlink_util_get_report_count: %d", report_count);
+    BTLINK_DEBUG_TRACE(DBG_QPROT, "btlink_util_get_report_count: %d", report_count);
     g_send_cnt++;
     if (g_send_cnt > 0xffff) 
     {

@@ -300,6 +300,36 @@ uint16_t gprt_ucs2_n_to_ascii(uint8_t * out_asc, uint8_t * in_ucs2, uint16_t len
     return count;
 }
 
+/******************************************************************************
+* Function    : btlink_util_char_to_int
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+uint8_t btlink_util_char_to_int(uint8_t character)
+{
+	uint8_t i = 0;
+
+	if (character >= '0' && character <= '9')
+	{
+		i = character - '0';
+	}
+	else if (character >= 'A' && character <= 'F')
+	{
+		i = character - 'A' + 10;
+	}
+	else if (character >= 'a' && character <= 'f')
+	{
+		i = character - 'a' + 10;
+	}
+
+	return i;
+}
 
 /******************************************************************************
 * Function    : btlink_utils_convert_hex_to_ascii

@@ -35,13 +35,15 @@
 #include "btlink_protocol_enums.h"
 
 /***************************************************************************** 
-* Downlink Frame Typedef 
+* Downlink Frame enums 
 *****************************************************************************/
 #define CMD_IGNORE      0
 #define CMD_ERROR       1
 #define CMD_ACCEPT      2
 
-
+/***************************************************************************** 
+* Typedef 
+*****************************************************************************/
 //Caution:  If the max downlink frame size > 256, change 3 definitions:
 //GPRT_MAX_DNLNK_FRAM_SIZE
 //last_position & lenght should be uint16_t or larger
@@ -121,7 +123,6 @@ typedef struct {
 } btlink_arg_rth_struct;
 
 typedef union {
-    btlink_arg_dbg_struct    dbg;                       //[AT@DBG]
 		btlink_arg_ips_struct    ips;                       //[AT@IPS]
 		btlink_arg_apn_struct    apn;                       //[AT@APN]
 		btlink_arg_scs_struct    scs;                       //[AT@SCS]
