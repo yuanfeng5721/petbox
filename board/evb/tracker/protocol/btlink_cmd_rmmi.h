@@ -32,6 +32,7 @@
 * Define
 *****************************************************************************/
 #define SEMICOLON_CHAR       (';')
+#define QUOTES_CHAR          ('\"')
 #define COMMA_CHAR           (',')
 #define QUERY_CHAR           ('?')
 #define EQUALS_CHAR          ('=')
@@ -39,6 +40,7 @@
 #define NEGATIVE_CHAR        ('-')
 #define BTLINK_GTCMD_HEADER       "AT@"
 #define BTLINK_GTCMD_HEADER_LEN   3
+#define BTLINK_ATRSP_HEADER       "+QRY"   /*AT command response header string*/
 
 #define MIN_VALUE(a, b) ((a) < (b)) ? (a) : (b)
 #define MAX_VALUE(a, b) ((a) > (b)) ? (a) : (b)

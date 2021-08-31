@@ -29,6 +29,8 @@
 #include "btlink_trace.h"
 #include "btlink_cmd_rmmi.h"
 #include "btlink_protocol_util.h"
+#include "btlink_assem_asc_msg.h"
+
 /*****************************************************************************
 * Define
 *****************************************************************************/
@@ -40,6 +42,9 @@
 /*****************************************************************************
 * Extern Variable
 *****************************************************************************/
+extern const char *btlink_dn_frame_header_str[];
+extern btlink_frame_header_index multi_alc_header_index[];
+extern uint16_t (*assemble_packet_func[BTLINK_MAX_ATCMD_NUM])(uint8_t *buff, uint16_t buf_len);
 
 /*****************************************************************************
 * Extern Function
@@ -67,6 +72,9 @@ const BtlinkAtCmdControl g_btlink_at_cmd_table[BTLINK_CMD_NUMS+1] =
  *****************************************************************************/
 static uint8_t at_dnlnk_content[BTLINK_MAX_DNLNK_FRAME_SIZE+2];
 static uint16_t dnlnk_len = 0;
+static uint8_t at_query_content[BTLINK_QUERY_SIZE];
+static uint16_t query_content_len = 0;
+static uint8_t g_print_prot_buf[BTLINK_MAX_ATRSP_FRAME_SIZE+1];
 
 /*****************************************************************************
 * Local function
@@ -138,6 +146,48 @@ int32_t getDecimalValue (CommandLine_t *commandBuffer_p)
   return (value);
 }
 
+/*--------------------------------------------------------------------------
+ *
+ * Function:    getHexaValue
+ *
+ * Parameters:  (In) c - a character, that scould be converted to the Hexa value
+ *              (Out) value - the Hexa value
+ *
+ * Returns:     Boolean indicating the success or failure
+ *
+ * Description:
+ *
+ *-------------------------------------------------------------------------*/
+bool getHexaValue (char c, int8_t *value)
+{
+  bool result = true;
+
+  if ((c >= '0') && (c <= '9'))
+  {
+    *value = c - '0';
+  }
+  else
+  {
+    if ((c >= 'a') && (c <= 'f'))
+    {
+      *value = c - 'a' + 10;
+    }
+    else
+    {
+      if ((c >= 'A') && (c <= 'F'))
+      {
+        *value = c - 'A' + 10;
+      }
+      else
+      {
+        result = false;
+      }
+    }
+  }
+
+  return (result);
+}
+
  /******************************************************************************
 * Function    : btlink_getExtendedOperation
 * 
@@ -189,6 +239,105 @@ ExtendedOperation_t btlink_getExtendedOperation (CommandLine_t *commandBuffer_p)
 	else
 	{
 		result = EXTENDED_ACTION;
+	}
+
+	return (result);
+}
+
+/******************************************************************************
+* Function    : btlink_getExtendedString
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+bool btlink_getExtendedString (CommandLine_t *commandBuffer_p,
+                               char *outString,
+                               int16_t maxStringLength,
+                               int16_t *outStringLength)
+{
+	bool result = true;
+	int16_t   length = 0;
+	int8_t    first = 0;
+	int8_t    second = 0;
+
+	*outString = (char)0;
+	*outStringLength = 0;
+
+	if ( commandBuffer_p->position < commandBuffer_p->length - 1 )
+	{
+		if (commandBuffer_p->character[commandBuffer_p->position] == COMMA_CHAR)
+		{
+			commandBuffer_p->position++;
+		}
+		else
+		{
+			if (commandBuffer_p->character[commandBuffer_p->position] != SEMICOLON_CHAR)
+			{
+				if (commandBuffer_p->character[commandBuffer_p->position] != QUOTES_CHAR)
+				{
+					result = false;
+				}
+				else
+				{
+					commandBuffer_p->position++;
+					while ((commandBuffer_p->position < commandBuffer_p->length - 1) 
+								&& (commandBuffer_p->character[commandBuffer_p->position] != QUOTES_CHAR) 
+								&& (length <= maxStringLength) 
+								&& (result == true))
+					{
+						if (commandBuffer_p->character[commandBuffer_p->position] == '\\')
+						{
+							commandBuffer_p->position++;
+							/* here must come two hexa digits */
+							if (commandBuffer_p->position + 2 < commandBuffer_p->length - 1)
+							{
+								if ((getHexaValue (commandBuffer_p->character[commandBuffer_p->position++], &first)) 
+										&& (getHexaValue (commandBuffer_p->character[commandBuffer_p->position++], &second)))
+								{
+									*outString++ = (char)(16 * first + second);
+									length++;
+								}
+								else
+								{
+									result = false;
+								}
+							}
+							else
+							{
+								result = false;
+							}
+						}
+						else
+						{
+							*outString++ = (char)(commandBuffer_p->character[commandBuffer_p->position++]);
+							length++;
+						}
+					}
+
+					*outStringLength = length;
+					*outString = (char)0;
+
+					if (((commandBuffer_p->character[commandBuffer_p->position] == QUOTES_CHAR) 
+							&& (length <= maxStringLength)) == false)
+					{
+						result = false;
+					}
+					else
+					{
+						commandBuffer_p->position++;
+						if (commandBuffer_p->character[commandBuffer_p->position] == COMMA_CHAR)
+						{
+							commandBuffer_p->position++;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	return (result);
@@ -421,7 +570,7 @@ bool rmmi_btlink_cmd_hdlr(CommandLine_t *command_line)
 {
     bool        ret = true;
     T_CMD_PARSE_RESULT    ret_code = RESULT_ERR;
-    char buffer[COMMAND_LINE_SIZE+1]={0};
+    //char buffer[COMMAND_LINE_SIZE+1]={0};
 
 		//cmd_uart_print("source_string_ptr, length: %d, content: %s, position: %d\r\n", 
                 //command_line->length, command_line->character, command_line->position);
@@ -438,6 +587,111 @@ bool rmmi_btlink_cmd_hdlr(CommandLine_t *command_line)
     }
 
     return ret;
+}
+
+uint8_t btlink_find_protocol_type(char* header)
+{
+	uint8_t i;
+	uint8_t type = BTLINK_FH_ID_NUM;
+
+	for( i = 0; i < BTLINK_FH_ID_NUM; i++) 
+	{
+		if(btlink_util_is_same_str_ignore_lc(btlink_dn_frame_header_str[i], (char*)header))
+		{
+			type = i;
+			BTLINK_DEBUG_TRACE(DBG_QPROT, "frame type %s", btlink_dn_frame_header_str[i]);
+			break;
+		}
+	}
+
+	return type;
+}
+
+/******************************************************************************
+* Function    : quec_print_protocol_param
+* 
+* Author      : dgreen.lin
+* 
+* Parameters  : 
+* 
+* Return      : void
+* 
+* Description : 
+******************************************************************************/
+void quec_print_protocol_param(uint8_t type)
+{
+	uint16_t len = 0;
+	uint16_t buf_len = 0;
+
+	memset(g_print_prot_buf, 0, BTLINK_MAX_ATRSP_FRAME_SIZE+1);
+
+	buf_len = BTLINK_MAX_ATRSP_FRAME_SIZE;
+	len = btlink_prot_print_cfg_head_ascii(g_print_prot_buf, buf_len, type);
+
+	switch (type)
+	{
+		/*normal AT command configurations*/
+		default:
+		{
+			uint16_t i = 0;
+
+			for (i=0; i<BTLINK_MAX_ATCMD_NUM; i++)
+			{
+				if (multi_alc_header_index[i] == type)
+				{
+					if (NULL != assemble_packet_func[i])
+					{
+						len += assemble_packet_func[i](&g_print_prot_buf[len], buf_len-len);
+					}
+					break;
+				}
+			}
+
+			break;
+		}
+	}
+
+	len += btlink_prot_print_cfg_tail_ascii(&g_print_prot_buf[len], buf_len-len);
+
+	cmd_uart_print("%s\r\n", g_print_prot_buf);
+}
+
+/******************************************************************************
+* Function    : btlink_do_protocol_query
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+static T_CMD_PARSE_RESULT btlink_do_protocol_query(char *at_buf)
+{
+	uint8_t type = BTLINK_FH_ID_NUM;
+	char header[4];
+	T_CMD_PARSE_RESULT     result = RESULT_ERR;
+
+	strncpy((char*)at_query_content, at_buf, BTLINK_QUERY_SIZE);
+	query_content_len = strlen((const char*)at_query_content) - 1; /*remove CR*/
+	at_query_content[query_content_len] = '\0';
+
+	memset(header, 0, 4);
+	memcpy(header, &at_query_content[3], 3);
+
+	BTLINK_DEBUG_TRACE(DBG_QPROT, "header:%s", header);
+	BTLINK_DEBUG_TRACE(DBG_QPROT, "at_query_content:%s", at_query_content);
+	
+	type = btlink_find_protocol_type(header);
+
+	if (type != BTLINK_FH_ID_NUM)
+	{
+		result = RESULT_SUCESS;
+		quec_print_protocol_param(type);
+	}
+
+	return result;
 }
 
 /******************************************************************************
@@ -457,7 +711,7 @@ T_CMD_PARSE_RESULT vgDEBUG(CommandLine_t *commandBuffer_p)
 	ExtendedOperation_t operation = btlink_getExtendedOperation (commandBuffer_p);
 	int32_t              value=0;
 	char   buffer[MAX_UART_LEN];
-	static bool qfct_flag = false;
+	//static bool qfct_flag = false;
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -535,29 +789,26 @@ T_CMD_PARSE_RESULT rmmi_protocol_cmd_entry(CommandLine_t *commandBuffer_p)
 
         case EXTENDED_QUERY:   /* AT@XXX?  */
         {
-						#if 0
-            char password[GPRT_FLD_LEN_PASSWORD+1] = {0};
+            char password[BTLINK_LEN_PASSWORD+1] = {0};
             int16_t length;
-            if (quec_getExtendedString (commandBuffer_p, password, GPRT_FLD_LEN_PASSWORD, &length) == KAL_TRUE) 
+            if (btlink_getExtendedString (commandBuffer_p, password, BTLINK_LEN_PASSWORD, &length) == true) 
             {
-                kal_char buffer[MAX_UART_LEN] = {0};
+                char buffer[MAX_UART_LEN] = {0};
                 
-                if (0 < length && quec_util_password_match((kal_uint8*)password))
+                if (0 < length && btlink_util_password_match((uint8_t *)password))
                 {
-									result = quec_do_protocol_query((kal_char*)commandBuffer_p->character);
+									result = btlink_do_protocol_query((char*)commandBuffer_p->character);
                 }
                 else 
                 {
-                    sprintf(buffer, "Password error");
-                    rmmi_write_to_uart((kal_uint8*)buffer, strlen(buffer), KAL_TRUE);
-                    result = RESULT_CODE_ERROR;
+										cmd_uart_print("Password error %d\r\n");
+                    result = RESULT_ERR;
                 }
             }
             else 
             {
-                result = RESULT_CODE_ERROR;
+                result = RESULT_ERR;
             }
-						#endif
             break;
         }
 

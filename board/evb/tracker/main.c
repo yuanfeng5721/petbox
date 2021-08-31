@@ -33,7 +33,7 @@
 
 #include "rtl876x_hal_bsp.h"
 #include "network_interface.h"
-
+#include "btlink_protocol_util.h"
 
 uint8_t network_status = 0;
 /** @defgroup  BT5_CENTRAL_DEMO_MAIN BT5 Central Main
@@ -250,6 +250,7 @@ int main(void)
 //    app_le_gap_init();
 #endif
     pwr_mgr_init();
+    btlink_util_protocol_init();
     task_init();
     os_sched_start();
 

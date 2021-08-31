@@ -27,6 +27,9 @@
 *****************************************************************************/
 #define BTLINK_DEVICE_TYPE    0x10
 #define BTLINK_VERSION_INFO   "BTL100R00A01V01M32"
-#define BTLINK_MAR_VER        1
-#define BTLINK_MIN_VER        1
+#define BTLINK_SW_MAR_VER        1
+#define BTLINK_SW_MIN_VER        1
+#define BTLINK_PRO_MAR_VER       1
+#define BTLINK_PRO_MIN_VER       1
+
 #endif /* __BTLINK_PROTOCOL_VERNO_H__ */

@@ -223,6 +223,15 @@ static void btlink_cmd_exec_scs(btlink_parsed_dnlnk_frame_struct *dn_frame)
     btlink_arg_scs_struct *arg_scs = &(dn_frame->arg.scs);
     bool need_save = false;
 	
+		// <New Password>
+		if (strlen((char *)arg_scs->dev_password) != 0
+        && strncmp((char *)g_btlink_config.cfg_scs.dev_password, (char *)arg_scs->dev_password, BTLINK_LEN_SCS_PASSWORD) != 0)
+    {
+        memset(g_btlink_config.cfg_scs.dev_password, 0, BTLINK_LEN_SCS_PASSWORD);
+        strncpy((char *)g_btlink_config.cfg_scs.dev_password, (char *)arg_scs->dev_password, BTLINK_LEN_SCS_PASSWORD);
+        need_save = true;
+    }
+		
 		// <Data Zone Mask>
 		if (g_btlink_config.cfg_scs.data_zone_mask != arg_scs->data_zone_mask)
 		{

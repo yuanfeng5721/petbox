@@ -26,10 +26,12 @@
 #include <stdint.h>
 
 #include "btlink_trace.h"
+#include "btlink_assem_asc_msg.h"
 #include "btlink_assem_asc_msg_struct.h"
 #include "btlink_assem_asc_msg_enums.h"
 #include "btlink_protocol_def.h"
 #include "btlink_protocol_verno.h"
+#include "btlink_cmd_rmmi.h"
 
 /*****************************************************************************
 * Define
@@ -42,12 +44,16 @@
 /*****************************************************************************
 * Extern Variable
 *****************************************************************************/
-extern const char *btlink_dn_frame_header_str;
+extern const char *btlink_dn_frame_header_str[];
 
 /*****************************************************************************
 * Extern Function
 *****************************************************************************/
-
+extern uint16_t btlink_prot_assemble_cfg_ips_ascii(uint8_t* buff, uint16_t buf_len);
+extern uint16_t btlink_prot_assemble_cfg_apn_ascii(uint8_t* buff, uint16_t buf_len);
+extern uint16_t btlink_prot_assemble_cfg_scs_ascii(uint8_t* buff, uint16_t buf_len);
+extern uint16_t btlink_prot_assemble_cfg_lss_ascii(uint8_t* buff, uint16_t buf_len);
+	
 /*****************************************************************************
  * global variable
  *****************************************************************************/
@@ -56,7 +62,23 @@ static uint32_t g_send_cnt = 0;
 /*****************************************************************************
  * Local variable
  *****************************************************************************/
+btlink_frame_header_index multi_alc_header_index[BTLINK_MAX_ATCMD_NUM] = 
+{
+	BTLINK_FH_ID_IPS, BTLINK_FH_ID_APN,
+	BTLINK_FH_ID_SCS, BTLINK_FH_ID_LSS,
+	BTLINK_FH_ID_NUM, BTLINK_FH_ID_NUM,
+	BTLINK_FH_ID_NUM, BTLINK_FH_ID_NUM
+};
 
+uint16_t (*assemble_packet_func[BTLINK_MAX_ATCMD_NUM])(uint8_t *buff, uint16_t buf_len) = 
+{
+	btlink_prot_assemble_cfg_ips_ascii, btlink_prot_assemble_cfg_apn_ascii,
+	btlink_prot_assemble_cfg_scs_ascii, btlink_prot_assemble_cfg_lss_ascii,
+	NULL, NULL,
+	NULL, NULL
+};
+
+char g_btlink_pro_verno[9] = {0};
 /*****************************************************************************
  * Local function
  *****************************************************************************/
@@ -106,6 +128,239 @@ uint16_t btlink_prot_pack_string_ascii(uint8_t* buff, uint16_t buf_len, uint8_t*
 		strncpy((char*)buff, (char*)str, len); 
 	}
 	return len; 
+}
+
+/******************************************************************************
+* Function    : btlink_get_pro_verno
+* 
+* Author      : Eric.xu
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : Return device ID and protocol version number string
+******************************************************************************/
+char* btlink_get_pro_verno(void)
+{
+    return g_btlink_pro_verno;
+}
+
+/******************************************************************************
+* Function    : btlink_set_pro_verno
+* 
+* Author      : Eric.xu
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description :
+******************************************************************************/
+void btlink_set_pro_verno(void)
+{
+	uint8_t buff[16];
+	uint8_t len = 0;
+	
+	sprintf(g_btlink_pro_verno, "%02x%02x%02x", BTLINK_DEVICE_TYPE, BTLINK_PRO_MAR_VER, BTLINK_PRO_MIN_VER);
+}
+
+/******************************************************************************
+* Function    : btlink_get_pro_verno
+* 
+* Author      : Eric.xu
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : Return device ID and protocol version number string
+******************************************************************************/
+char* btlink_get_imei(void)
+{
+    return (char *)(g_btlink_config.imei);
+}
+
+/******************************************************************************
+* Function    : btlink_set_imei
+* 
+* Author      : Eric.xu
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description :
+******************************************************************************/
+void btlink_set_imei(void)
+{
+	memcpy(g_btlink_config.imei, "123456789012345", BTLINK_LEN_IMEI);
+}
+
+/******************************************************************************
+* Function    : btlink_prot_print_cfg_head_ascii
+* 
+* Author      : Eric.xu
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description :
+******************************************************************************/
+uint16_t btlink_prot_print_cfg_head_ascii(uint8_t *buff, uint16_t buf_len, uint8_t type)
+{
+	uint16_t len = 0;
+
+	len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, 
+										(uint8_t *)BTLINK_ATRSP_HEADER, strlen(BTLINK_ATRSP_HEADER), false);
+
+	len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t *)btlink_dn_frame_header_str[type], 
+										strlen(btlink_dn_frame_header_str[type]),false);
+
+	len += btlink_prot_pack_char_ascii(&buff[len], buf_len-len, BTLINK_CHR_ATSEP_HDR, 1);
+
+	len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t*)btlink_get_pro_verno(), 
+										strlen(btlink_get_pro_verno()),false);
+
+	len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, g_btlink_config.imei, 
+										strlen((char*)g_btlink_config.imei), true);
+
+	return len;
+}
+
+/******************************************************************************
+* Function    : btlink_prot_print_cfg_tail_ascii
+* 
+* Author      : Eric.xu
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description :
+******************************************************************************/
+uint16_t btlink_prot_print_cfg_tail_ascii(uint8_t* buff, uint16_t buf_len)
+{
+    uint16_t len = 0;
+	
+		#if 0
+    uint8_t ack_time[BTLINK_FLD_LEN_SEND_TIME+1];
+    quec_util_get_rtc_time(ack_time);
+    len += quec_prot_pack_string_ascii(&buff[len], buf_len-len, ack_time, 
+                                strlen((kal_char*)ack_time), KAL_TRUE);
+		#endif
+	
+    len += btlink_prot_pack_char_ascii(&buff[len], buf_len-len, BTLINK_CHR_TAIL, 1);
+
+    return len;
+}
+
+uint16_t btlink_prot_assemble_cfg_ips_ascii(uint8_t* buff, uint16_t buf_len)
+{
+	snprintf((char *)buff, buf_len,
+		"%c%d%c%d%c%c"
+		"%c%s%c%d"
+		"%c%s%c%d"
+		"%c%c%c%c%c%c",
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.report_mode,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.buffer_mode,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.pri_host,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.pri.port,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.sec_host,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.sec.port,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR);
+
+	return strlen((char*)buff);
+}
+
+uint16_t btlink_prot_assemble_cfg_apn_ascii(uint8_t* buff, uint16_t buf_len)
+{
+	uint8_t len = 0;
+	uint8_t idx = 0;
+	
+	snprintf((char *)buff, buf_len,
+		"%c%d",
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_quantity);
+
+	for (idx=0; idx<g_btlink_config.cfg_apn.apn_quantity; idx++)
+	{
+		len = strlen((char *)buff);
+		snprintf((char *)&buff[len], buf_len,
+			"%c%s%c%s%c%s%c%s",
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.mcc_mnc,
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_name,
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_user_name,
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_password);
+	}
+	
+	len = strlen((char *)buff);
+	snprintf((char *)&buff[len], buf_len,
+		"%c%c%c%c",
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR);
+	return strlen((char*)buff);
+}
+
+uint16_t btlink_prot_assemble_cfg_scs_ascii(uint8_t* buff, uint16_t buf_len)
+{
+	snprintf((char *)buff, buf_len,
+		"%c%s%c%08X"
+		"%c%c%c%c", 
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_scs.dev_password,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_scs.data_zone_mask,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR);
+
+	return strlen((char*)buff);
+}
+
+uint16_t btlink_prot_assemble_cfg_lss_ascii(uint8_t* buff, uint16_t buf_len)
+{
+	snprintf((char *)buff, buf_len,
+		"%c%d%c%d"
+		"%c%d%c%s"
+		"%c%d%c%d"
+		"%c%d%c%d"
+		"%c%d%c%d"
+		"%c%d"
+		"%c%c%c%c"
+		"%c%d%c%d"
+		"%c%c%c%c",
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.mode_selection,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.continue_send_interval,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.start_mode,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.spec_time_of_day,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.wakeup_interval,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.psm_net_hold_time,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.report_freq,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.gnss_enable,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.gnss_fix_delay,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.agps_mode,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.bat_low_percent,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.sensor_enable,
+		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_lss.non_move_duration,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR,
+		BTLINK_CHR_SEPARATOR);
+
+	return strlen((char*)buff);
 }
 
 /******************************************************************************
@@ -248,9 +503,9 @@ void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, uint8_t* cmd_
 {
 		uint8_t imei[1+BTLINK_LEN_IMEI] = "123456789012345";
 		uint16_t len = 0;
-		uint8_t device_type = 0;
-		uint8_t mar_ver = 0;
-		uint8_t min_ver = 0;
+		//uint8_t device_type = 0;
+		//uint8_t mar_ver = 0;
+		//uint8_t min_ver = 0;
 	
 		/* Head */
 		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t *)ASC_ACK_HEAD, strlen(ASC_ACK_HEAD), false);
@@ -267,7 +522,7 @@ void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, uint8_t* cmd_
     len += strlen((char*)&buff[len]);
 	
 		/* Protocol Version */
-		snprintf((char*)&buff[len], buf_len-len, "%c%d%d", BTLINK_CHR_SEPARATOR, BTLINK_MAR_VER, BTLINK_MIN_VER);
+		snprintf((char*)&buff[len], buf_len-len, "%c%d%d", BTLINK_CHR_SEPARATOR, BTLINK_SW_MAR_VER, BTLINK_SW_MIN_VER);
     len += strlen((char*)&buff[len]);
 	
 		/* Sub Command */

@@ -589,10 +589,10 @@ static uint8_t btlink_hex_pack_verno(uint8_t* buff)
 	pbuff = buff;
 	
 	/* Mar Version */
-	pbuff += btlink_hex_pack_u8(buff, BTLINK_MAR_VER);
+	pbuff += btlink_hex_pack_u8(buff, BTLINK_SW_MAR_VER);
 	
 	/* Min Version */
-	pbuff += btlink_hex_pack_u8(buff, BTLINK_MIN_VER);
+	pbuff += btlink_hex_pack_u8(buff, BTLINK_SW_MIN_VER);
 
 	return (buff - pbuff);
 }

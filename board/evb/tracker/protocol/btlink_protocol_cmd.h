@@ -58,6 +58,7 @@ typedef struct {
 } btlink_config_apn_struct;
 
 typedef struct {
+		char dev_password[BTLINK_LEN_SCS_PASSWORD];
     uint32_t   data_zone_mask;
 } btlink_config_scs_struct;
 
@@ -91,6 +92,8 @@ typedef struct {
 		btlink_config_scs_struct             cfg_scs;
 		btlink_config_lss_struct             cfg_lss;
 		btlink_config_rth_struct             cfg_rth;
+	
+		uint8_t imei[1+BTLINK_LEN_IMEI];
 } btlink_config_struct;
 
 /***************************************************************************** 

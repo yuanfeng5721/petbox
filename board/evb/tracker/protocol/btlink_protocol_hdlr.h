@@ -99,7 +99,8 @@ typedef struct {
 } btlink_arg_apn_struct;
 
 typedef struct {
-    uint32_t   data_zone_mask;
+		uint8_t   dev_password[MAX_APN_PASSWORD_LEN];
+    uint32_t  data_zone_mask;
 } btlink_arg_scs_struct;
 
 typedef struct {
@@ -144,16 +145,17 @@ typedef struct {
 typedef struct {
     //Data
     btlink_frame_header_index  type;
-    btlink_dnlnk_arg_union     arg;
+    uint8_t  password[1+BTLINK_LEN_SCS_PASSWORD];
+    btlink_dnlnk_arg_union   arg;
     bool                     ack;
-    uint8_t                       oa_number [ 1+MAX_CC_ADDR_LEN ];
-    //U8				     send_time [ 1 + GPRT_FLD_LEN_SEND_TIME ];
-    uint8_t				         serial_number[ 1 + BTLINK_LEN_SERIAL_NUM];
-    uint8_t                        para_string[ 1+ BTLINK_LEN_PARAMETER ];
+    uint8_t                  oa_number [ 1+MAX_CC_ADDR_LEN ];
+    //U8				     				 send_time [ 1 + GPRT_FLD_LEN_SEND_TIME ];
+    uint8_t				           serial_number[ 1 + BTLINK_LEN_SERIAL_NUM];
+    uint8_t                  para_string[ 1+ BTLINK_LEN_PARAMETER ];
 
     //Status
     bool                     valid;
-    btlink_parse_step          step;       //current parse step
+    btlink_parse_step        step;       //current parse step
 } btlink_parsed_dnlnk_frame_struct;
 
 typedef struct {

@@ -101,7 +101,12 @@
 #define MAX_APN_LEN       42
 
 /* SCS */
+#define SUPER_PASSWORD                 "btlink"
+#define BTLINK_LEN_SCS_PASSWORD        20
 #define BTLINK_LEN_SCS_DATA_ZONE_MASK  8
+
+#define BTLINK_MAX_PASSWORD_LEN        (BTLINK_LEN_SCS_PASSWORD)
+#define BTLINK_MIN_PASSWORD_LEN        4
 
 /* LSS */
 #define BTLINK_LEN_LSS_MODE_SELECT         1

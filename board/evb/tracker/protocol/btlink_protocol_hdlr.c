@@ -58,7 +58,6 @@ btlink_config_struct g_btlink_config;
  *****************************************************************************/
 const char *btlink_dn_frame_header_str[] =
 {
-    "DBG",
 		"IPS",
 		"APN",
 		"SCS",
@@ -605,6 +604,38 @@ static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_fr
     uint8_t * p_arg_field;
     uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
 
+		/*<password>*/
+    p_arg_field = frame->password;
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SCS_PASSWORD, 
+                                   buffer, sizeof(buffer));
+    if(ret)
+    {
+        ret = btlink_util_password_match(p_arg_field);
+    }
+    if(ret == false) 
+    {
+				frame->step = BTLINK_PARSE_STEP_PWD;
+				goto error;
+    }
+	
+		// <New Password>
+    p_arg_field = frame->arg.scs.dev_password;
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SCS_PASSWORD, 
+                                   buffer, sizeof(buffer));
+    if (ret)
+    {
+        uint8_t len = strlen((char *)p_arg_field);
+        if (BTLINK_MIN_PASSWORD_LEN <=len && len <= BTLINK_MAX_PASSWORD_LEN) 
+        {
+            ret = btlink_util_isalnum_buffer(p_arg_field, BTLINK_LEN_SCS_PASSWORD);
+        }
+        else if (len !=0 ) 
+        {
+            ret = false;
+        }
+    }
+    if(ret == false) goto error;
+		
     //<data zone Mask>
     p_arg_field = NULL;
     ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SCS_DATA_ZONE_MASK,
@@ -1171,6 +1202,32 @@ static bool btlink_get_dnlnk_frame_ack (btlink_raw_dnlnk_frame_struct *raw_frame
     return ret;
 }
 
+/******************************************************************************
+* Function    : btlink_get_dnlnk_frame_password
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+bool btlink_get_dnlnk_frame_password(btlink_raw_dnlnk_frame_struct *raw_frame, 
+                                       btlink_parsed_dnlnk_frame_struct *frame)
+{
+    bool ret = true;
+    uint8_t* p_arg_field = NULL;
+    uint8_t buffer[BTLINK_LEN_SCS_PASSWORD+1] = {0};
+
+    p_arg_field = frame->password;
+    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SCS_PASSWORD, 
+                                   buffer, sizeof(buffer));
+		
+    return (bool)(ret && btlink_util_password_match(p_arg_field));
+
+}
+
 /*****************************************************************************
  * FUNCTION
  *  btlink_verify_dnlnk_frame_tail
@@ -1192,6 +1249,17 @@ static bool btlink_verify_dnlnk_frame_tail(btlink_raw_dnlnk_frame_struct *raw_fr
     return (raw_frame->data[raw_frame->position] == BTLINK_CHR_TAIL);
 }
 
+/******************************************************************************
+* Function    : btlink_parse_dnlnk_frame
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
 bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
                             uint8_t * number,
                             btlink_parsed_dnlnk_frame_struct *frame)
@@ -1216,6 +1284,14 @@ bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
         raw_frame->position++; //skip '='
         para_pos = raw_frame->position;
 
+				//get password
+        if ( frame->type != BTLINK_FH_ID_SCS) 
+        {
+            frame->step = BTLINK_PARSE_STEP_PWD;
+            ret = btlink_get_dnlnk_frame_password(raw_frame, frame);
+        }
+        if (ret == false) goto error;
+				
         //get the detailed args
         frame->step = BTLINK_PARSE_STEP_ARG;
         ret = btlink_get_dnlnk_frame_arg(raw_frame, frame);
@@ -1254,7 +1330,17 @@ error:
     return  ret;
 }
 
-
+/******************************************************************************
+* Function    : btlink_assemble_ack_frame
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
 bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
     bool ret = true;
@@ -1277,6 +1363,17 @@ bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
     return ret;
 }
 
+/******************************************************************************
+* Function    : btlink_check_and_exec_protocol
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
 bool btlink_check_and_exec_protocol(uint8_t *msg_content, uint16_t msg_length, uint8_t *number)
 {
     bool valid = false;
@@ -1302,6 +1399,17 @@ bool btlink_check_and_exec_protocol(uint8_t *msg_content, uint16_t msg_length, u
     return valid;
 }
 
+/******************************************************************************
+* Function    : btlink_cmd_parse
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
 int btlink_cmd_parse(char *cmd, int16_t cmd_len)
 {
 	int retcode = -1;
@@ -1331,6 +1439,17 @@ int btlink_cmd_parse(char *cmd, int16_t cmd_len)
 	return retcode;
 }
 
+/******************************************************************************
+* Function    : btlink_is_protocol_format
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
 bool btlink_is_protocol_format(uint8_t * msg_content, uint16_t msg_length)
 {
     bool ret = false;	
