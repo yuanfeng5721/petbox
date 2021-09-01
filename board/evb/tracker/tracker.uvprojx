@@ -565,11 +565,6 @@
           <GroupName>peripheral</GroupName>
           <Files>
             <File>
-              <FileName>btlink_protocol_cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\protocol\btlink_protocol_cmd.c</FilePath>
-            </File>
-            <File>
               <FileName>rtl876x_rcc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\peripheral\rtl876x_rcc.c</FilePath>
