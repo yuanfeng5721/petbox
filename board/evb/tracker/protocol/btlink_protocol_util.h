@@ -27,8 +27,8 @@
  *
  *******************************************************************************/
 
-#ifndef _GPSTRACKER_PROTOCOL_UTIL_H_
-#define _GPSTRACKER_PROTOCOL_UTIL_H_
+#ifndef _BTLINK_PROTOCOL_UTIL_H_
+#define _BTLINK_PROTOCOL_UTIL_H_
 
 //#include "..\base\base.h"
 #include "trace.h"
@@ -51,4 +51,9 @@ extern int btlink_utils_atoi_buffer(const char * str);
 extern uint16_t btlink_assemble_dat_cmd_string(uint8_t *data, uint8_t *dat_cmd);
 extern bool btlink_util_ip_all_zero(uint8_t* ip);
 extern bool btlink_soc_ip_check(char *asci_addr, uint8_t *ip_addr, bool *ip_validity);
-#endif //_GPSTRACKER_PROTOCOL_UTIL_H_
+extern uint8_t btlink_util_char_to_int(uint8_t character);
+extern bool btlink_util_password_match(uint8_t *password);
+extern bool btlink_util_isalnum_buffer(uint8_t *buffer, uint8_t length);
+extern bool btlink_util_is_same_str_ignore_lc(const char *str1, const char *str2);
+extern void btlink_util_protocol_init(void);
+#endif //_BTLINK_PROTOCOL_UTIL_H_

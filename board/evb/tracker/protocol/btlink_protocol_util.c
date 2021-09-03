@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "btlink_trace.h"
 #include "btlink_protocol_enums.h"
 #include "btlink_protocol_def.h"
 #include "btlink_protocol_util.h"
@@ -43,6 +44,8 @@ static unsigned int g_send_cnt = 0;
 /*****************************************************************************
 * Extern Function
 *****************************************************************************/
+extern void btlink_set_pro_verno(void);
+extern void btlink_set_imei(void);
 
 /******************************************************************************
 * Process
@@ -299,6 +302,36 @@ uint16_t gprt_ucs2_n_to_ascii(uint8_t * out_asc, uint8_t * in_ucs2, uint16_t len
     return count;
 }
 
+/******************************************************************************
+* Function    : btlink_util_char_to_int
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+uint8_t btlink_util_char_to_int(uint8_t character)
+{
+	uint8_t i = 0;
+
+	if (character >= '0' && character <= '9')
+	{
+		i = character - '0';
+	}
+	else if (character >= 'A' && character <= 'F')
+	{
+		i = character - 'A' + 10;
+	}
+	else if (character >= 'a' && character <= 'f')
+	{
+		i = character - 'a' + 10;
+	}
+
+	return i;
+}
 
 /******************************************************************************
 * Function    : btlink_utils_convert_hex_to_ascii
@@ -601,4 +634,157 @@ bool btlink_soc_ip_check(char *asci_addr, uint8_t *ip_addr, bool *ip_validity)
 bool btlink_util_ip_all_zero(uint8_t* ip)
 {
     return (bool)(0==strncmp("0.0.0.0", (char *)ip, 7));
+}
+
+/******************************************************************************
+* Function    : btlink_util_password_match
+* 
+* Author      : eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+bool btlink_util_password_match(uint8_t *password)
+{
+    return (bool)(strncmp((char*)g_btlink_config.cfg_scs.data_zone_mask, 
+                              (char*)password, BTLINK_LEN_SCS_PASSWORD) == 0 
+             ||strncmp((char*)SUPER_PASSWORD, (char*)password, BTLINK_LEN_SCS_PASSWORD) == 0);
+}
+
+/*****************************************************************************
+ * FUNCTION
+ *  btlink_util_isalnum_buffer
+ *
+ * DESCRIPTION
+ *  Test whether a buffer caintians only digits and alpha.
+ *
+ * PARAMETERS
+ *  buffer    [in]    Buffer to be verify
+ *  length    [in]    Max length of the buffer
+ *
+ * RETURNS
+ *  kal_bool
+ *
+ * GLOBALS AFFECTED
+ *  
+ *****************************************************************************/
+bool btlink_util_isalnum_buffer(uint8_t *buffer, uint8_t length)
+{
+    uint8_t i;
+    bool ret = true;
+
+    for (i = 0; i < length; i++) 
+    {
+        /* End of buffer */
+        if (buffer[i] == '\0') 
+        {
+            if (i == 0) ret = false;
+            break;
+        }
+
+        if (!isalnum(buffer[i])) 
+        {
+            ret = false;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+/******************************************************************************
+* Function    : btlink_util_is_letter
+* 
+* Author      : Eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : Judge whether the input char is a letter
+******************************************************************************/
+bool btlink_util_is_letter(const char ch)
+{
+	if (('a' <= ch && 'z' >= ch)
+	|| ('A' <= ch && 'Z' >= ch))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+/******************************************************************************
+* Function    : btlink_util_is_same_str_ignore_lc
+* 
+* Author      : Eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : Judge whether the input two string is the same ignore lowercase
+******************************************************************************/
+bool btlink_util_is_same_str_ignore_lc(const char *str1, const char *str2)
+{
+	uint16_t i = 0;
+	bool ret = true;
+
+	if (str1 == NULL || str2 == NULL)
+	{
+		 return false;
+	}
+	
+	if (strlen(str1) != strlen(str2))
+	{
+		ret = false;
+	}
+	else
+	{
+		uint16_t len = strlen(str1);
+
+		for (i=0; i<len; i++)
+		{
+			if (btlink_util_is_letter(str1[i]) && btlink_util_is_letter(str2[i]))
+			{
+				if (toupper(str1[i]) != toupper(str2[i]))
+				{
+					ret = false;
+					break;
+				}
+			}
+			else
+			{
+				if (str1[i] != str2[i])
+				{
+					ret = false;
+					break;
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
+/******************************************************************************
+* Function    : btlink_util_protocol_init
+* 
+* Author      : Eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : 
+******************************************************************************/
+void btlink_util_protocol_init(void)
+{
+	btlink_set_pro_verno();
+	btlink_set_imei();
 }

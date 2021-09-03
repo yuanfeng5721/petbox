@@ -549,6 +549,16 @@
               <FileType>1</FileType>
               <FilePath>.\protocol\btlink_assem_hex_msg.c</FilePath>
             </File>
+            <File>
+              <FileName>btlink_trace.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_trace.c</FilePath>
+            </File>
+            <File>
+              <FileName>btlink_cmd_rmmi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_cmd_rmmi.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -564,11 +574,6 @@
         <Group>
           <GroupName>peripheral</GroupName>
           <Files>
-            <File>
-              <FileName>btlink_protocol_cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\protocol\btlink_protocol_cmd.c</FilePath>
-            </File>
             <File>
               <FileName>rtl876x_rcc.c</FileName>
               <FileType>1</FileType>

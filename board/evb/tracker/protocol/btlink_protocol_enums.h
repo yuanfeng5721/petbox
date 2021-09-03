@@ -33,6 +33,10 @@
 #define IP_ADDR_LEN    (4)    
 #define IP_ALL_MATCH(a, b)  (!((a[0] ^ b[0]) | (a[1] ^ b[1]) | (a[2] ^ b[2]) | (a[3] ^ a[3])))
 
+#define BTLINK_MAX_ATCMD_NUM              8
+#define BTLINK_QUERY_SIZE                 256
+#define BTLINK_MAX_ATRSP_FRAME_SIZE       512
+
 /* Socket Type */
 typedef enum
 {
@@ -45,8 +49,7 @@ typedef enum
 //Index of downlink frame header & uplink ACK frame header string
 typedef enum
 {
-    BTLINK_FH_ID_DBG = 0,
-    BTLINK_FH_ID_IPS,
+    BTLINK_FH_ID_IPS = 0,
     BTLINK_FH_ID_APN,
     BTLINK_FH_ID_SCS,
     BTLINK_FH_ID_LSS,
@@ -60,12 +63,28 @@ typedef enum
 typedef enum
 {
     BTLINK_PARSE_STEP_TYPE,        //Parsing frame type
+    BTLINK_PARSE_STEP_PWD,         //Parsing password
     BTLINK_PARSE_STEP_ARG,         //Parsing frame arg
     BTLINK_PARSE_STEP_SN,          //Parsing frame serial number
     BTLINK_PARSE_STEP_ACK,         //Parsing frame ACK
     BTLINK_PARSE_STEP_TAIL,        //Parsing frame tail character
     BTLINK_PARSE_STEP_UNKNOWN
 } btlink_parse_step;
+
+typedef enum
+{
+    BTLINK_CMD_DEBUG,
+    BTLINK_CMD_IPS,
+		BTLINK_CMD_APN,
+		BTLINK_CMD_SCS,
+		BTLINK_CMD_LSS,
+		BTLINK_CMD_RTH,
+	
+    /*Please put the real command with entry in g_QuecAtCommandTable before this one*/
+    BTLINK_CMD_NUMS, 
+    /*the types here have no entry in g_QuecAtCommandTable, just use the mechanism*/
+    BTLINK_CMD_TYPE_END
+}btlin_cmd_type_e;
 
 //Index of response uplink frame header string
 typedef enum

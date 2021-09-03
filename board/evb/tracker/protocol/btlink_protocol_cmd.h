@@ -27,8 +27,8 @@
  *
  *******************************************************************************/
 
-#ifndef _GPSTRACKER_NVRAM_TYPE_H_
-#define _GPSTRACKER_NVRAM_TYPE_H_
+#ifndef _BTLINK_PROTOCOL_CMD_H_
+#define _BTLINK_PROTOCOL_CMD_H_
 
 #include "trace.h"
 #include "btlink_protocol_hdlr.h"
@@ -41,11 +41,11 @@ typedef struct {
     uint8_t   buffer_mode;
 		/* Main Server IP & DNS */
     uint8_t   pri_mode;
-    uint8_t 	pri_host[1+BTLINK_FLD_LEN_HOST];
+    uint8_t 	pri_host[1+BTLINK_LEN_IPS_HOST];
     sockaddr_struct pri;
 		/* Backup Server IP & DNS */
 		uint8_t   sec_mode;
-    uint8_t 	sec_host[1+BTLINK_FLD_LEN_HOST];
+    uint8_t 	sec_host[1+BTLINK_LEN_IPS_HOST];
     sockaddr_struct sec;
 } btlink_config_ips_struct;
 
@@ -58,6 +58,7 @@ typedef struct {
 } btlink_config_apn_struct;
 
 typedef struct {
+		char dev_password[BTLINK_LEN_SCS_PASSWORD];
     uint32_t   data_zone_mask;
 } btlink_config_scs_struct;
 
@@ -91,6 +92,8 @@ typedef struct {
 		btlink_config_scs_struct             cfg_scs;
 		btlink_config_lss_struct             cfg_lss;
 		btlink_config_rth_struct             cfg_rth;
+	
+		uint8_t imei[1+BTLINK_LEN_IMEI];
 } btlink_config_struct;
 
 /***************************************************************************** 
@@ -109,4 +112,4 @@ extern void btlink_cmd_process(btlink_parsed_dnlnk_frame_struct *dn_frame);
 //²¹³äËµÃ÷£º
 ******************************************************************************************/
 extern void btlink_print_reboot_log(void);
-#endif //_GPSTRACKER_NVRAM_TYPE_H_
+#endif //_BTLINK_PROTOCOL_CMD_H_
