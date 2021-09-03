@@ -85,7 +85,7 @@ void cmd_uart_init(void *event_queue_handle, void *io_queue_handle);
     }
  * \endcode
  */
-void cmd_uart_print(char *fmt, ...);
+void cmd_uart_print(const char *fmt, ...);
 /** End of DATA_UART_APIs_Exported_Functions
   * @}
   */

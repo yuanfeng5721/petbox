@@ -27,6 +27,18 @@
 extern "C" {
 #endif
 
+#define BIT0        (1)
+
+typedef enum {
+	BLUE_LED_ON = BIT0<<0,
+	BLUE_LED_BLINK = BIT0<<1,
+	BLUE_LED_OFF = BIT0<<2,
+	GREEN_LED_ON = BIT0<<4,
+	GREEN_LED_BLINK = BIT0<<5,
+	GREEN_LED_OFF = BIT0<<6,
+}LedEvent;
+
+
 void board_gpio_init(void);
 void sys_3v8_power(uint8_t onoff);
 void modem_power(uint8_t onoff);

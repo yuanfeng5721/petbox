@@ -108,10 +108,10 @@ void cmd_task(void *p_param)
                     cmd_handle_io_msg(io_msg);
                 }
             }
-            else
-            {
-                gap_handle_msg(event);
-            }
+//            else
+//            {
+//                gap_handle_msg(event);
+//            }
         }
     }
 }

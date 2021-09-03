@@ -337,7 +337,7 @@
               <MiscControls>--gnu --preinclude app_flags.h --bss_threshold=0</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal;..\..\..\src\mcu\module\cmd_uart;..\tracker\app</IncludePath>
+              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal;..\..\..\src\mcu\module\cmd_uart;..\tracker\app;..\..\..\src\mcu\module\nv\easyflash\inc;..\..\..\src\mcu\module\nv\hal</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -390,6 +390,16 @@
               <FileName>app_define.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\inc\platform\app_define.h</FilePath>
+            </File>
+            <File>
+              <FileName>mem_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\mem_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>flash_map.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\flash_map.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -673,6 +683,66 @@
               <FileName>at_device_sim7070.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\iot\platform\at_device\sim7070\at_device_sim7070.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>nv/port</GroupName>
+          <Files>
+            <File>
+              <FileName>ef_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\port\ef_port.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>nv/hal</GroupName>
+          <Files>
+            <File>
+              <FileName>nv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\hal\nv.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>nv/src</GroupName>
+          <Files>
+            <File>
+              <FileName>easyflash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\easyflash.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_env.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\ef_env.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_env_legacy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\ef_env_legacy.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_env_legacy_wl.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\ef_env_legacy_wl.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_iap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\ef_iap.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\ef_log.c</FilePath>
+            </File>
+            <File>
+              <FileName>ef_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\easyflash\src\ef_utils.c</FilePath>
             </File>
           </Files>
         </Group>

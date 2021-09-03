@@ -33,14 +33,15 @@
 
 #include "rtl876x_hal_bsp.h"
 #include "network_interface.h"
-
+#include "nv.h"
 
 uint8_t network_status = 0;
 /** @defgroup  BT5_CENTRAL_DEMO_MAIN BT5 Central Main
     * @brief Main file to initialize hardware and BT stack and start task scheduling
     * @{
     */
-void *app_test_task_handle;   //!< APP Task handle
+void *app_network_task_handle;   //!< APP Task handle
+void *app_main_task_handle;
 /*============================================================================*
  *                              Functions
  *============================================================================*/
@@ -156,8 +157,6 @@ void driver_init(void)
 	network_stack.type = NETWORK_TCP;
 	
 	rc = network_init(&network_stack);
-	//if(!network_stack.prase_domain(&network_stack))
-	//	network_stack.connect(&network_stack);
 	if(rc<0)
 	{
 		network_status = 0;
@@ -170,15 +169,7 @@ void driver_init(void)
 	}
 #endif
 	
-#if TEST_TICK
-	uint32_t start = os_sys_tick_get();
-	uint32_t end = 0, aa = 0;
-	os_delay(1000);
-	end = os_sys_tick_get();
-	
-	DBG_DIRECT("start = %d, end = %d\r\n", start, end);
-	aa = start - end;
-#endif
+
 }
 
 /**
@@ -194,7 +185,7 @@ void pwr_mgr_init(void)
  * @param[in]    p_param    Parameters sending to the task
  * @return       void
  */
-void app_test_task(void *p_param)
+void network_task(void *p_param)
 {
     uint8_t event;
 
@@ -217,11 +208,39 @@ void app_test_task(void *p_param)
  * @brief  Initialize App task
  * @return void
  */
-void test_task_init()
+void network_task_init()
 {
-    os_task_create(&app_test_task_handle, "app_test", app_test_task, 0, 256 * 5, 1);
+    os_task_create(&app_network_task_handle, "network_task", network_task, 0, 256 * 5, 1);
 }
 
+void test_nv(void)
+{
+	nv_item_write_string("SOFTWART_VERSION", "V1.0.2");
+	DBG_DIRECT("softwart version: %s ",nv_item_read_string("SOFTWART_VERSION"));
+}
+/**
+ * @brief        App test task to handle events & messages
+ * @param[in]    p_param    Parameters sending to the task
+ * @return       void
+ */
+void app_main_task(void *p_param)
+{
+	//init base module
+	//nv module initialize
+	nv_item_init();
+	
+	test_nv();
+	//
+    while (true)
+    {
+		//led ctl code
+		os_delay(1000);
+    }
+}
+void main_task_init(void)
+{
+	os_task_create(&app_main_task_handle, "app_main", app_main_task, 0, 256 * 4, 1);
+}
 /**
  * @brief    Contains the initialization of all tasks
  * @note     There is only one task in BT5 BLE Central APP, thus only one APP task is init here
@@ -229,11 +248,17 @@ void test_task_init()
  */
 void task_init(void)
 {
+#if 0
 #define TEST_DRIVER 0
 	cmd_task_init();
 #if TEST_DRIVER
 	test_task_init();
 #else
+#endif
+#else
+	cmd_task_init();
+	main_task_init();
+	network_task_init();
 #endif
 }
 

@@ -145,7 +145,7 @@ int cmd_uart_vsprintf(char *buf, const char *fmt, const int *dp)
     }
  * \endcode
  */
-void cmd_uart_print(char *fmt, ...)
+void cmd_uart_print(const char *fmt, ...)
 {
     (void)cmd_uart_vsprintf(0, fmt, ((const int *)&fmt) + 1);
 }

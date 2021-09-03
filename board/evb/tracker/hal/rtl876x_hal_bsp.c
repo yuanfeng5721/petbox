@@ -133,3 +133,7 @@ void blue_led_ctl(uint8_t onoff)
 		GPIO_WriteBit(BLUE_LED_OUTPUT, (BitAction)(0));
 }
 
+void status_led(LedEvent event)
+{
+	
+}

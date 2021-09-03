@@ -480,7 +480,7 @@ bool cmd_collect(T_CMD_IF *p_cmd_if, uint8_t *p_data, int32_t len)
 
                 cmd_clear(p_cmd_if);
                 break;
-
+#if 0
             case '\b':                        /* backspace */
                 if (p_cmd_if->accum_cmd_len > 0 && p_cmd_if->cmd_cur > 0)
                 {
@@ -587,7 +587,7 @@ bool cmd_collect(T_CMD_IF *p_cmd_if, uint8_t *p_data, int32_t len)
                     p_cmd_if->cmd_cur--;
                 }
                 break;
-
+#endif
             default:
                 /* Put character in command buffer */
                 if (p_cmd_if->accum_cmd_len < CMD_MAX_COMMAND_LINE)
