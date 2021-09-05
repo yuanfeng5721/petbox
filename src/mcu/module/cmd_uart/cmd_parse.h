@@ -34,7 +34,7 @@ extern "C" {
     * @{
     */
 
-#define CMD_MAX_COMMAND_LINE       184  /**< max. length of command line in bytes */
+#define CMD_MAX_COMMAND_LINE       256  /**< max. length of command line in bytes */
 #define CMD_MAX_HISTORY_LINE       1   /**< max. num of history command line */
 #define CMD_MAX_PARAMETERS         1   /**< max. number of parameters that the parser will scan */
 /** End of CMD_PARSE_Exported_Micros
