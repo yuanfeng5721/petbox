@@ -258,6 +258,34 @@ uint16_t btlink_prot_print_cfg_tail_ascii(uint8_t* buff, uint16_t buf_len)
 
 uint16_t btlink_prot_assemble_cfg_ips_ascii(uint8_t* buff, uint16_t buf_len)
 {
+	uint8_t addr_pri[1+BTLINK_LEN_IPS_HOST] = {0};
+	uint8_t addr_sec[1+BTLINK_LEN_IPS_HOST] = {0};
+
+	if (g_btlink_config.cfg_ips.pri_mode == BTLINK_IPS_PRI_IP)
+	{
+		snprintf((char*)addr_pri, BTLINK_LEN_IPS_IP+1, 
+						"%d.%d.%d.%d", 
+						g_btlink_config.cfg_ips.pri.addr[0], g_btlink_config.cfg_ips.pri.addr[1], 
+						g_btlink_config.cfg_ips.pri.addr[2], g_btlink_config.cfg_ips.pri.addr[3]);
+	}
+	else
+	{
+		snprintf((char*)addr_pri, BTLINK_LEN_IPS_HOST+1,"%s", g_btlink_config.cfg_ips.pri_host);
+	}
+	
+	if (g_btlink_config.cfg_ips.sec_mode == BTLINK_IPS_PRI_IP)
+	{
+		snprintf((char*)addr_sec, BTLINK_LEN_IPS_IP+1, 
+						"%d.%d.%d.%d", 
+						g_btlink_config.cfg_ips.sec.addr[0], g_btlink_config.cfg_ips.sec.addr[1], 
+						g_btlink_config.cfg_ips.sec.addr[2], g_btlink_config.cfg_ips.sec.addr[3]);
+	}
+	else
+	{
+		snprintf((char*)addr_sec, BTLINK_LEN_IPS_HOST+1,"%s", g_btlink_config.cfg_ips.sec_host);
+	}
+		
+		
 	snprintf((char *)buff, buf_len,
 		"%c%d%c%d%c%c"
 		"%c%s%c%d"
@@ -267,9 +295,9 @@ uint16_t btlink_prot_assemble_cfg_ips_ascii(uint8_t* buff, uint16_t buf_len)
 		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.buffer_mode,
 		BTLINK_CHR_SEPARATOR,
 		BTLINK_CHR_SEPARATOR,
-		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.pri_host,
+		BTLINK_CHR_SEPARATOR, addr_pri,
 		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.pri.port,
-		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.sec_host,
+		BTLINK_CHR_SEPARATOR, addr_sec,
 		BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_ips.sec.port,
 		BTLINK_CHR_SEPARATOR,
 		BTLINK_CHR_SEPARATOR,
@@ -295,10 +323,10 @@ uint16_t btlink_prot_assemble_cfg_apn_ascii(uint8_t* buff, uint16_t buf_len)
 		len = strlen((char *)buff);
 		snprintf((char *)&buff[len], buf_len,
 			"%c%s%c%s%c%s%c%s",
-			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.mcc_mnc,
-			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_name,
-			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_user_name,
-			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_password);
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.mcc_mnc[idx],
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_name[idx],
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_user_name[idx],
+			BTLINK_CHR_SEPARATOR, g_btlink_config.cfg_apn.apn_password[idx]);
 	}
 	
 	len = strlen((char *)buff);

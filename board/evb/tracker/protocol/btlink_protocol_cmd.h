@@ -51,10 +51,10 @@ typedef struct {
 
 typedef struct {
     uint8_t   apn_quantity;
-    char mcc_mnc[MAX_MCC_MNC_LEN];
-		char apn_name[MAX_APN_LEN];
-		char apn_user_name[MAX_APN_USER_NAME_LEN];
-		char apn_password[MAX_APN_PASSWORD_LEN];
+    char mcc_mnc[BTLINK_MAX_APN_NUMS][MAX_MCC_MNC_LEN];
+		char apn_name[BTLINK_MAX_APN_NUMS][MAX_APN_LEN];
+		char apn_user_name[BTLINK_MAX_APN_NUMS][MAX_APN_USER_NAME_LEN];
+		char apn_password[BTLINK_MAX_APN_NUMS][MAX_APN_PASSWORD_LEN];
 } btlink_config_apn_struct;
 
 typedef struct {

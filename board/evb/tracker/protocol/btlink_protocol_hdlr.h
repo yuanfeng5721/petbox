@@ -92,10 +92,10 @@ typedef struct {
 
 typedef struct {
     uint8_t apn_quantity;
-    uint8_t mcc_mnc[MAX_MCC_MNC_LEN];
-		uint8_t apn_name[MAX_APN_LEN];
-		uint8_t apn_user_name[MAX_APN_USER_NAME_LEN];
-		uint8_t apn_password[MAX_APN_PASSWORD_LEN];
+    uint8_t mcc_mnc[BTLINK_MAX_APN_NUMS][MAX_MCC_MNC_LEN];
+		uint8_t apn_name[BTLINK_MAX_APN_NUMS][MAX_APN_LEN];
+		uint8_t apn_user_name[BTLINK_MAX_APN_NUMS][MAX_APN_USER_NAME_LEN];
+		uint8_t apn_password[BTLINK_MAX_APN_NUMS][MAX_APN_PASSWORD_LEN];
 } btlink_arg_apn_struct;
 
 typedef struct {

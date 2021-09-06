@@ -775,9 +775,9 @@ T_CMD_PARSE_RESULT rmmi_protocol_cmd_entry(CommandLine_t *commandBuffer_p)
 						
             memset((void *)at_dnlnk_content, 0 , sizeof(at_dnlnk_content));
             strncpy((char*)at_dnlnk_content, (char*)commandBuffer_p->character, min_len);
-            dnlnk_len = strlen((const char*)at_dnlnk_content) - 1; /*remove CR*/
+            dnlnk_len = strlen((const char*)at_dnlnk_content);
  
-            cmd_uart_print("at_dnlnk_sms_content: %s,dnlnk_sms_len: %d", at_dnlnk_content, dnlnk_len);
+            BTLINK_DEBUG_TRACE(DBG_QPROT,"at_dnlnk_sms_content: %s,dnlnk_sms_len: %d", at_dnlnk_content, dnlnk_len);
 
 						if (!btlink_check_and_exec_protocol(at_dnlnk_content, dnlnk_len, NULL))
 						{
