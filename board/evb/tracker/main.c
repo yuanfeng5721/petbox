@@ -213,11 +213,30 @@ void network_task_init()
 {
     os_task_create(&app_network_task_handle, "network_task", network_task, 0, 256 * 5, 1);
 }
+#pragma pack (1)
+typedef struct{
+	uint8_t  data8;
+	uint32_t data32;
+	uint16_t data16;
+}st_nv_test;
+#pragma pack ()
 
 void test_nv(void)
 {
+	st_nv_test nv_test = {
+		0x99,
+		0x5a5a5a5a,
+		0x1234
+	};
+	st_nv_test nv_test_r;
+	
 	nv_item_write_string("SOFTWART_VERSION", "V1.0.2");
 	DBG_DIRECT("softwart version: %s ",nv_item_read_string("SOFTWART_VERSION"));
+	
+	nv_item_write("struct_nv", (uint8_t *)&nv_test, sizeof(nv_test));
+	nv_item_read("struct_nv", (uint8_t *)&nv_test_r, sizeof(nv_test_r));
+	DBG_DIRECT("struct_nv:data32 = %d, data16 = %d, data8 = %d", nv_test_r.data32, nv_test_r.data16, nv_test_r.data8);
+	
 }
 void imei_nv_test(void)
 {

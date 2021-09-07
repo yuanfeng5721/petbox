@@ -22,7 +22,7 @@ size_t nv_item_read(const char *key, uint8_t *value, uint32_t value_len)
 	char buf[EF_STR_ENV_VALUE_MAX_SIZE+1] = {0};
 	size_t get_size, copy_size;
 	
-	get_size = ef_get_env_blob(key, (uint8_t *)value, EF_STR_ENV_VALUE_MAX_SIZE, NULL);
+	get_size = ef_get_env_blob(key, (uint8_t *)buf, EF_STR_ENV_VALUE_MAX_SIZE, NULL);
 	
 	if(get_size)
 	{
