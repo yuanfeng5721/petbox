@@ -100,7 +100,7 @@ static bool btlink_get_frame_field(btlink_raw_dnlnk_frame_struct *raw_frame,
 
     //Reserved argument should accept anything between the two adjacent separators
     max_length = field_max_length == 0 ? (raw_frame->length - raw_frame->position) : field_max_length;
-
+	
     //|<---length--->|     length of raw_frame exclude the end null
     //+xxx,xxx,xxx,xx$\0
     //last position   ^    the last position is the end null
@@ -114,8 +114,8 @@ static bool btlink_get_frame_field(btlink_raw_dnlnk_frame_struct *raw_frame,
         raw_frame->position++;
         i++;
     }
-
     p_field[i] = '\0';
+		
     if ( raw_frame->position < raw_frame->length
          && raw_frame->data[raw_frame->position] == separator )
     {
@@ -127,9 +127,7 @@ static bool btlink_get_frame_field(btlink_raw_dnlnk_frame_struct *raw_frame,
         ret = true;
     }
 
-    //Dbg_UartPrint("GPSTRK_P: Next pos: %d, Next char: %c\r\n",
-    //raw_frame->position, raw_frame->data[raw_frame->position]);
-
+		//cmd_uart_print("Next char[%d]:%c, ret: %d\r\n", raw_frame->position, raw_frame->data[raw_frame->position], ret);
     return ret;
 }
 
@@ -160,7 +158,7 @@ bool btlink_get_frame_arg_field(btlink_raw_dnlnk_frame_struct *raw_frame,
 
     //clear temp buffer
     memset(p_buffer, 0, (buffer_size)*sizeof(uint8_t));
-
+	
     //copy raw arg to temp buffer
     ret = btlink_get_frame_field(raw_frame, p_buffer, max_frame_arg_length, BTLINK_CHR_SEPARATOR, BTLINK_CHR_TAIL);
 
@@ -169,14 +167,7 @@ bool btlink_get_frame_arg_field(btlink_raw_dnlnk_frame_struct *raw_frame,
     {
         strncpy((char *)p_frame_arg_field, (char *)p_buffer, max_frame_arg_length);
     }
-#if 0
-    if (ret)
-    {
-        DEBUG_TRACE(MOD_PROT, "GPSTRK_P: Get arg filed:");
-        DEBUG_TRACE(MOD_PROT, "%s", p_buffer);
-    }
-#endif //GV500W_APP_DEBUG
-
+		
     return ret;
 }
 
@@ -200,6 +191,7 @@ bool verify_serial_number(uint8_t * sn)
 					break;
 			}
     }
+		
     return ret;
 }
 
@@ -230,7 +222,7 @@ static bool btlink_get_dnlnk_frame_type(btlink_raw_dnlnk_frame_struct *raw_frame
         }
     }
 
-		cmd_uart_print("frame->type:%d\r\n", frame->type);
+		//cmd_uart_print("frame->type:%d\r\n", frame->type);
 		
     return ret;
 }
@@ -408,7 +400,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
         else 
         if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_IPS_PORT)) 
         {
-						uint16_t port = 0;
+						uint32_t port = 0;
             port = btlink_utils_atoi_buffer((char*)buffer);
             if (port <= BTLINK_MAX_IPS_PORT) 
             {
@@ -501,7 +493,7 @@ static bool btlink_get_dnlnk_frame_arg_ips(btlink_raw_dnlnk_frame_struct *raw_fr
         else 
         if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_IPS_PORT)) 
         {
-						uint16_t port = 0;
+						uint32_t port = 0;
             port = btlink_utils_atoi_buffer((char*)buffer);
             if (port <= BTLINK_MAX_IPS_PORT) 
             {
@@ -530,71 +522,87 @@ error:
 static bool btlink_get_dnlnk_frame_arg_apn(btlink_raw_dnlnk_frame_struct *raw_frame,
         btlink_parsed_dnlnk_frame_struct *frame)
 {
-    bool ret = true;
-    uint8_t * p_arg_field;
-    uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+	bool ret = true;
+	uint8_t * p_arg_field;
+	uint8_t buffer[BTLINK_LEN_CONTENT + 1]; //use the max filed length as the buffer size
+	uint8_t idx = 0;
 
-    //<APN Quantity>
-		p_arg_field = NULL;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_NUMS, 
-                                   buffer, sizeof(buffer));
-    if (ret) 
-    {
-			  if (buffer[0]=='\0') 
-        {
-            frame->arg.apn.apn_quantity = g_btlink_config.cfg_apn.apn_quantity;
-        }
-        else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_APN_NUMS)) 
-        {
-						uint16_t apn_nums = 0;
-            apn_nums = btlink_utils_atoi_buffer((char*)buffer);
-            if (apn_nums <= BTLINK_MAX_APN_NUMS) 
-            {
-                frame->arg.apn.apn_quantity = apn_nums;
-            }
-            else 
-            {
-                ret = false;
-            }
-        }
-        else 
-        {
-            ret = false;
-        }
-    }
-    if(ret == false) goto error;
+	//<APN Quantity>
+	p_arg_field = NULL;
+	ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_NUMS, 
+							buffer, sizeof(buffer));
+	if (ret) 
+	{
+		if (buffer[0]=='\0') 
+		{
+			frame->arg.apn.apn_quantity = g_btlink_config.cfg_apn.apn_quantity;
+		}
+		else 
+		if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_APN_NUMS)) 
+		{
+			uint16_t apn_nums = 0;
+			apn_nums = btlink_utils_atoi_buffer((char*)buffer);
+			if (apn_nums <= BTLINK_MAX_APN_NUMS) 
+			{
+				frame->arg.apn.apn_quantity = apn_nums;
+			}
+			else 
+			{
+				ret = false;
+			}
+		}
+		else 
+		{
+			ret = false;
+		}
+	}
+	if(ret == false) goto error;
 
+	BTLINK_DEBUG_TRACE(DBG_QPROT,"apn_quantity:%d", frame->arg.apn.apn_quantity);
+
+	for (idx = 0; idx <frame->arg.apn.apn_quantity; idx++)
+	{
 		/* MCC&MNC */
-    p_arg_field = frame->arg.apn.mcc_mnc;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_MCC_MNC,
-                                   buffer, sizeof(buffer));
-    if (ret == false) goto error;
+		p_arg_field = frame->arg.apn.mcc_mnc[idx];
+		ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_MCC_MNC,
+										buffer, sizeof(buffer));
+		if (ret == false) goto error;
+
+		BTLINK_DEBUG_TRACE(DBG_QPROT,"mcc_mnc:%s", frame->arg.apn.mcc_mnc[idx]);
 
 		/* APN NAME */
-    p_arg_field = frame->arg.apn.apn_name;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_NAME,
-                                   buffer, sizeof(buffer));
-    if (ret == false) goto error;
+		p_arg_field = frame->arg.apn.apn_name[idx];
+		ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_NAME,
+										buffer, sizeof(buffer));
+		if (ret == false) goto error;
+
+		BTLINK_DEBUG_TRACE(DBG_QPROT,"apn_name:%s", frame->arg.apn.apn_name[idx]);
 
 		/* APN USER NAME */
-    p_arg_field = frame->arg.apn.apn_user_name;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_USER_NAME,
-                                   buffer, sizeof(buffer));
-    if (ret == false) goto error;
+		p_arg_field = frame->arg.apn.apn_user_name[idx];
+		ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_USER_NAME,
+										buffer, sizeof(buffer));
+		if (ret == false) goto error;
+
+		BTLINK_DEBUG_TRACE(DBG_QPROT,"apn_name:%s", frame->arg.apn.apn_user_name[idx]);
 
 		/* APN Password */
-    p_arg_field = frame->arg.apn.apn_password;
-    ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_PASSWORD,
-                                   buffer, sizeof(buffer));
-    if (ret == false) goto error;
-
-		//<Reserved>
-		ret = btlink_get_frame_arg_reserved(raw_frame, buffer, 4);
+		p_arg_field = frame->arg.apn.apn_password[idx];
+		ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_APN_PASSWORD,
+										buffer, sizeof(buffer));
 		if (ret == false) goto error;
 		
-error:
-    return ret;
+		BTLINK_DEBUG_TRACE(DBG_QPROT,"apn_password:%s", frame->arg.apn.apn_password[idx]);
+	}
+
+	//<Reserved>
+	ret = btlink_get_frame_arg_reserved(raw_frame, buffer, 4);
+	if (ret == false) goto error;
+
+	BTLINK_DEBUG_TRACE(DBG_QPROT,"ret:%d", ret);
+	
+	error:
+	return ret;
 }
 
 static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_frame,
@@ -1173,6 +1181,7 @@ static bool btlink_get_dnlnk_frame_sn(btlink_raw_dnlnk_frame_struct *raw_frame,
     //<Serial number>
     p_arg_field = frame->serial_number;
     ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SERIAL_NUM, buffer, sizeof(buffer));
+
     return (ret && verify_serial_number(p_arg_field));
 }
 
@@ -1267,7 +1276,7 @@ bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
     bool ret = false;
     uint8_t para_pos = 0;
 
-		cmd_uart_print("raw_frame->data:%s\r\n", raw_frame->data);
+		//cmd_uart_print("raw_frame->data:%s\r\n", raw_frame->data);
 	
     if ( raw_frame->length > 0 &&
          ( strncmp((const char *)raw_frame->data, BTLINK_DNLNK_HEADER,  BTLINK_HEADER_CHKLEN) == 0 ||
@@ -1296,12 +1305,12 @@ bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
         frame->step = BTLINK_PARSE_STEP_ARG;
         ret = btlink_get_dnlnk_frame_arg(raw_frame, frame);
         if (ret == false) goto error;
-
+				
         //get serial number
         frame->step = BTLINK_PARSE_STEP_SN;
         ret = btlink_get_dnlnk_frame_sn(raw_frame, frame);
         if (ret == false) goto error;
-
+				
         //get ACK
         frame->step = BTLINK_PARSE_STEP_ACK;
         ret = btlink_get_dnlnk_frame_ack(raw_frame, frame);
@@ -1323,10 +1332,9 @@ bool btlink_parse_dnlnk_frame(btlink_raw_dnlnk_frame_struct *raw_frame,
         memset((char *)frame->para_string, 0, (BTLINK_LEN_PARAMETER + 1));
         strncpy((char *)frame->para_string, (char *)(&raw_frame->data[para_pos]), (raw_frame->position - para_pos));
     }
-
+		
 error:
     frame->valid = ret;
-
     return  ret;
 }
 
@@ -1377,8 +1385,8 @@ bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
 bool btlink_check_and_exec_protocol(uint8_t *msg_content, uint16_t msg_length, uint8_t *number)
 {
     bool valid = false;
-    btlink_raw_dnlnk_frame_struct raw_frame;
-    btlink_parsed_dnlnk_frame_struct dn_frame;
+    btlink_raw_dnlnk_frame_struct raw_frame = {0};
+    btlink_parsed_dnlnk_frame_struct dn_frame = {0};
 
     memset(&raw_frame, 0, sizeof(btlink_raw_dnlnk_frame_struct));
     raw_frame.position = 0;
@@ -1387,8 +1395,9 @@ bool btlink_check_and_exec_protocol(uint8_t *msg_content, uint16_t msg_length, u
 
     memset(&dn_frame, 0, sizeof(btlink_parsed_dnlnk_frame_struct));
     dn_frame.type = BTLINK_FH_ID_UNKNOWN;
+		
     if (btlink_parse_dnlnk_frame(&raw_frame, number, &dn_frame))
-    {
+		{
         valid = true;
         btlink_cmd_process(&dn_frame);
     }
@@ -1412,11 +1421,12 @@ bool btlink_check_and_exec_protocol(uint8_t *msg_content, uint16_t msg_length, u
 ******************************************************************************/
 int btlink_cmd_parse(char *cmd, int16_t cmd_len)
 {
+	
 	int retcode = -1;
 	CommandLine_t command_line = {0};
 	
-	//cmd_uart_print("cmd:%s, cmd_len:%d\r\n", cmd, cmd_len);
-	//BTLINK_DEBUG_TRACE(DBG_QPROT, "%s", cmd);
+	
+	BTLINK_DEBUG_TRACE(DBG_QPROT, "cmd:%s, len:%d", cmd, cmd_len);
 
 	if (cmd_len >= COMMAND_LINE_SIZE)
 	{
@@ -1435,7 +1445,7 @@ int btlink_cmd_parse(char *cmd, int16_t cmd_len)
 					retcode = 0;
 			}
 	}
-	
+
 	return retcode;
 }
 

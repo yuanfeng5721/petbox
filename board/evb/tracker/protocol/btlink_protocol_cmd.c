@@ -25,6 +25,7 @@
 #include "stdio.h"
 
 #include "cmd_uart.h"
+#include "btlink_trace.h"
 #include "btlink_protocol_cmd.h"
 #include "btlink_protocol_hdlr.h"
 #include "btlink_protocol_util.h"
@@ -166,6 +167,7 @@ static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
 
 static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
+		uint8_t idx = 0;
     btlink_arg_apn_struct *arg_apn = &(dn_frame->arg.apn);
     bool need_save = false;
 	
@@ -176,41 +178,54 @@ static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 			need_save = true;
 		}
 		
-		// <MCC & MNC>
-		if (strlen((char *)arg_apn->mcc_mnc) != 0
-        && strncmp((char *)g_btlink_config.cfg_apn.mcc_mnc, (char *)arg_apn->mcc_mnc, MAX_MCC_MNC_LEN) != 0)
-    {
-        memset(g_btlink_config.cfg_apn.mcc_mnc, 0, MAX_MCC_MNC_LEN);
-        strncpy((char *)g_btlink_config.cfg_apn.mcc_mnc, (char *)arg_apn->mcc_mnc, MAX_MCC_MNC_LEN);
-        need_save = true;
-    }
+		BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_quantity:%d", g_btlink_config.cfg_apn.apn_quantity);
+		
+		for (idx=0; idx<g_btlink_config.cfg_apn.apn_quantity; idx++)
+		{
+			// <MCC & MNC>
+			if (strlen((char *)arg_apn->mcc_mnc[idx]) != 0
+					&& strncmp((char *)g_btlink_config.cfg_apn.mcc_mnc[idx], (char *)arg_apn->mcc_mnc[idx], MAX_MCC_MNC_LEN) != 0)
+			{
+					memset(g_btlink_config.cfg_apn.mcc_mnc[idx], 0, MAX_MCC_MNC_LEN);
+					strncpy((char *)g_btlink_config.cfg_apn.mcc_mnc[idx], (char *)arg_apn->mcc_mnc[idx], MAX_MCC_MNC_LEN);
+					need_save = true;
+			}
 
-		// <APN Name>
-		if (strlen((char *)arg_apn->apn_name) != 0
-        && strncmp((char *)g_btlink_config.cfg_apn.apn_name, (char *)arg_apn->apn_name, MAX_APN_LEN) != 0)
-    {
-        memset(g_btlink_config.cfg_apn.apn_name, 0, MAX_APN_LEN);
-        strncpy((char *)g_btlink_config.cfg_apn.apn_name, (char *)arg_apn->apn_name, MAX_APN_LEN);
-        need_save = true;
-    }
-		
-		// <APN User Name>
-		if (strlen((char *)arg_apn->apn_user_name) != 0
-        && strncmp((char *)g_btlink_config.cfg_apn.apn_user_name, (char *)arg_apn->apn_user_name, MAX_APN_USER_NAME_LEN) != 0)
-    {
-        memset(g_btlink_config.cfg_apn.apn_user_name, 0, MAX_APN_USER_NAME_LEN);
-        strncpy((char *)g_btlink_config.cfg_apn.apn_user_name, (char *)arg_apn->apn_user_name, MAX_APN_USER_NAME_LEN);
-        need_save = true;
-    }
-		
-		// <APN Password>
-		if (strlen((char *)arg_apn->apn_password) != 0
-        && strncmp((char *)g_btlink_config.cfg_apn.apn_password, (char *)arg_apn->apn_password, MAX_APN_PASSWORD_LEN) != 0)
-    {
-        memset(g_btlink_config.cfg_apn.apn_password, 0, MAX_APN_PASSWORD_LEN);
-        strncpy((char *)g_btlink_config.cfg_apn.apn_password, (char *)arg_apn->apn_password, MAX_APN_PASSWORD_LEN);
-        need_save = true;
-    }
+			BTLINK_DEBUG_TRACE(DBG_QPROT,"11mcc_mnc:%s", g_btlink_config.cfg_apn.mcc_mnc[idx]);
+			
+			// <APN Name>
+			if (strlen((char *)arg_apn->apn_name[idx]) != 0
+					&& strncmp((char *)g_btlink_config.cfg_apn.apn_name[idx], (char *)arg_apn->apn_name[idx], MAX_APN_LEN) != 0)
+			{
+					memset(g_btlink_config.cfg_apn.apn_name[idx], 0, MAX_APN_LEN);
+					strncpy((char *)g_btlink_config.cfg_apn.apn_name[idx], (char *)arg_apn->apn_name[idx], MAX_APN_LEN);
+					need_save = true;
+			}
+			
+			BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_name:%s", g_btlink_config.cfg_apn.apn_name[idx]);
+			
+			// <APN User Name>
+			if (strlen((char *)arg_apn->apn_user_name[idx]) != 0
+					&& strncmp((char *)g_btlink_config.cfg_apn.apn_user_name[idx], (char *)arg_apn->apn_user_name[idx], MAX_APN_USER_NAME_LEN) != 0)
+			{
+					memset(g_btlink_config.cfg_apn.apn_user_name[idx], 0, MAX_APN_USER_NAME_LEN);
+					strncpy((char *)g_btlink_config.cfg_apn.apn_user_name[idx], (char *)arg_apn->apn_user_name[idx], MAX_APN_USER_NAME_LEN);
+					need_save = true;
+			}
+			
+			BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_user_name:%s", g_btlink_config.cfg_apn.apn_user_name[idx]);
+			
+			// <APN Password>
+			if (strlen((char *)arg_apn->apn_password[idx]) != 0
+					&& strncmp((char *)g_btlink_config.cfg_apn.apn_password[idx], (char *)arg_apn->apn_password[idx], MAX_APN_PASSWORD_LEN) != 0)
+			{
+					memset(g_btlink_config.cfg_apn.apn_password[idx], 0, MAX_APN_PASSWORD_LEN);
+					strncpy((char *)g_btlink_config.cfg_apn.apn_password[idx], (char *)arg_apn->apn_password[idx], MAX_APN_PASSWORD_LEN);
+					need_save = true;
+			}
+			
+			BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_password:%s", g_btlink_config.cfg_apn.apn_password[idx]);
+		}
 		
 		if (need_save == true)
 		{
