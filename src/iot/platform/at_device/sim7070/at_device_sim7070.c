@@ -26,6 +26,7 @@
 #include "utils_param_check.h"
 
 //#define USING_RTC
+#define USING_GNSS
 
 #undef DEVICE_NAME
 #define DEVICE_NAME    "SIM7070"
@@ -40,6 +41,8 @@ static at_evt_cb_t at_evt_cb_table[] = {
     [AT_SOCKET_EVT_CLOSED] = NULL,
 };
 
+#define IMEI_MAX_LEN 16
+static char g_IMEI[IMEI_MAX_LEN] = {0};
 /* power up sim7070 modem */
 void sim7070_power_on(void)
 {
@@ -65,12 +68,19 @@ void sim7070_power_on(void)
 	HAL_SleepMs(1500);
     GPIO_WriteBit(MODEM_PWR_KEY_OUTPUT, Bit_RESET);
 	HAL_SleepMs(1000);
+	
+#ifdef USING_GNSS	
+	gnss_power(SET);
+#endif
 	//while(1);
 }
 
 /* power off sim7070 modem */
 static void sim7070_power_off(void)
 {
+#ifdef USING_GNSS	
+	gnss_power(RESET);
+#endif
 	modem_power(RESET);
     GPIO_WriteBit(MODEM_PWR_KEY_OUTPUT, Bit_RESET);
 	//HAL_SleepMs(2000);
@@ -213,6 +223,18 @@ static void urc_recv_func(const char *data, size_t size)
     }
 }
 
+static void urc_gnss_func(const char *data, size_t size)
+{
+	int mode;
+	char time[10]= {0};
+	float lat,lon,accuracy,altitude,alt_sea_level,speed,course;
+    POINTER_SANITY_CHECK_RTN(data);
+	//+SGNSCMD: 2,08:14:43,31.16211,121.30720,13.12,50.54,41.15,0.00,0.00,0x17bba2c7d38,375  
+    Log_d("GNSS: %s \r\n", data);
+	sscanf(data, "+SGNSCMD: %d,%s,%f,%f,%f,%f,%f,%f,%f", &mode, time, &lat, &lon, &accuracy, &altitude, &alt_sea_level, &speed, &course);
+	Log_d("GNSS: (lat:%f,lon:%f)(time:%s) \r\n", lat, lon, time);
+}
+
 static void urc_func(const char *data, size_t size)
 {
     POINTER_SANITY_CHECK_RTN(data);
@@ -236,6 +258,7 @@ static at_urc urc_table[] = {
     {"+CAOPEN",  "\r\n", urc_send_func},
     {"+CACLOSE", "\r\n", urc_close_func},
     {"+CAURC",   "\r\n", urc_recv_func},
+	{"+SGNSCMD:","\r\n", urc_gnss_func},
 };
 
 static void sim7070_set_event_cb(at_socket_evt_t event, at_evt_cb_t cb)
@@ -254,6 +277,7 @@ static int sim7070_init(void)
 #define CGREG_RETRY                    10
 #define CGATT_RETRY                    50
 #define CCLK_RETRY                     10
+#define GNSS_RETRY					 	3
     at_response_t resp = NULL;
     int           ret;
     int           i;
@@ -279,6 +303,7 @@ static int sim7070_init(void)
 //			HAL_AT_Uart_Send("AT\r\n",strlen("AT\r\n"));
 //			at_delayms(1000);
 //		}
+		memset(g_IMEI, 0, IMEI_MAX_LEN);
 		/* wait SIM7070 startup finish, Send AT every 5s, if receive OK, SYNC success*/
 		if(at_obj_wait_connect(SIM7070_WAIT_CONNECT_TIME))
 		{
@@ -318,8 +343,13 @@ static int sim7070_init(void)
 
 		/* show module version */
 		for (i = 0; i < resp->line_counts - 1; i++) {
-			Log_d("%s", at_resp_get_line(resp, i + 1));
+			const char *str = at_resp_get_line(resp, i + 1);
+			Log_d("%s", str);
+			/* get imei */
+			if(strstr(str, "IMEI"))
+				sscanf(str, "IMEI:%s", g_IMEI);
 		}
+		
 		
 		/* check SIM card */
 		at_delayms(1000);
@@ -511,6 +541,30 @@ static int sim7070_init(void)
         }
 #endif /* USING_RTC */
 
+#ifdef USING_GNSS
+		/* open GNSS */
+		for (i = 0; i < GNSS_RETRY; i++)
+        {
+			if (at_exec_cmd(resp, "AT+SGNSCFG=\"OUTURC\",1") < 0)
+			{
+				at_delayms(500);
+				continue;
+			}
+			if (at_exec_cmd(resp, "AT+SGNSCMD=2,1000,0,1") < 0)
+			{
+				at_delayms(500);
+				continue;
+			}
+			
+			break;
+		}
+		if (i == GNSS_RETRY)
+		{
+			Log_e("%s device GNSS open failed.", DEVICE_NAME);
+			ret = QCLOUD_ERR_FAILURE;
+			goto __exit;
+		}
+#endif
         /* initialize successfully  */
         ret = QCLOUD_RET_SUCCESS;
         break;
@@ -729,9 +783,9 @@ static int sim7070_parse_domain(const char *host_name, char *host_ip, size_t hos
 
     char          recv_ip[16] = {0};
     at_response_t resp;
-    int           ret, i;
+    int           ret, i, status = 0;
 	uint8_t retry = 5;
-	int timeout = 2000;
+	int timeout = 10000;
 	char temp[20] = {0};
 
     POINTER_SANITY_CHECK(host_name, QCLOUD_ERR_INVAL);
@@ -754,13 +808,19 @@ static int sim7070_parse_domain(const char *host_name, char *host_ip, size_t hos
             Log_e("exec AT+CDNSGIP=\"%s\" fail", host_name);
             goto __exit;
         }
-		//at_delayms(2000);
+		//at_delayms(5000);
         /* parse the third line of response data, get the IP address */
-        if (at_resp_parse_line_args_by_kw(resp, "+CDNSGIP:", "+CDNSGIP: 1,%[^,],\"%[^\"]", temp, recv_ip) < 0) {
+        if (at_resp_parse_line_args_by_kw(resp, "+CDNSGIP:", "+CDNSGIP: %d,%[^,],\"%[^\"]", &status, temp, recv_ip) < 0) {
             at_delayms(100);
             /* resolve failed, maybe receive an URC CRLF */
             continue;
-        }
+        } else {
+			if(!status)
+			{
+				at_delayms(100);
+				continue;
+			}
+		}
 
         if (strlen(recv_ip) < 8) {
             at_delayms(100);
@@ -772,7 +832,14 @@ static int sim7070_parse_domain(const char *host_name, char *host_ip, size_t hos
             break;
         }
     }
-
+	
+	if (i == RESOLVE_RETRY)
+	{
+		Log_e("%s device parse domain failed.", DEVICE_NAME);
+		ret = QCLOUD_ERR_FAILURE;
+		goto __exit;
+	}
+		
 __exit:
 
     if (resp) {
@@ -842,6 +909,13 @@ exit:
     return ret;
 }
 
+char *at_device_get_imei(void)
+{
+	if(strlen(g_IMEI) >= 15)
+		return g_IMEI;
+	else
+		return NULL;
+}
 /*at device driver must realize this api which called by HAL_AT_TCP_Init*/
 int at_device_init(void)
 {

@@ -152,7 +152,7 @@ void driver_init(void)
 	Network network_stack;
 	char ip_addr[16]={0};
 	
-	network_stack.domain = "www.baidu.com";
+	network_stack.domain = "www.163.com";
 	network_stack.host = ip_addr;
 	network_stack.port = 6522;
 	network_stack.type = NETWORK_TCP;
@@ -219,6 +219,19 @@ void test_nv(void)
 	nv_item_write_string("SOFTWART_VERSION", "V1.0.2");
 	DBG_DIRECT("softwart version: %s ",nv_item_read_string("SOFTWART_VERSION"));
 }
+void imei_nv_test(void)
+{
+	char *imei;
+	if(!nv_item_read_string("IMEI"))
+	{
+		imei = at_device_get_imei();
+		if(imei)
+		{
+			nv_item_write_string("IMEI", imei);
+			DBG_DIRECT("device imei: %s ",nv_item_read_string("IMEI"));
+		}
+	}
+}
 /**
  * @brief        App test task to handle events & messages
  * @param[in]    p_param    Parameters sending to the task
@@ -235,7 +248,8 @@ void app_main_task(void *p_param)
     while (true)
     {
 		//led ctl code
-		os_delay(1000);
+		os_delay(5000);
+		imei_nv_test();
     }
 }
 void main_task_init(void)

@@ -20,6 +20,6 @@
 
 
 int at_device_sim7070_init(void);
-
+char *at_device_get_imei(void);
 #endif /* __AT_DEVICE_SIM7070_H__ */
 
