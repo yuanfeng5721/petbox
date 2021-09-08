@@ -26,6 +26,7 @@
 
 #include "cmd_uart.h"
 #include "btlink_trace.h"
+#include "btlink_nv.h"
 #include "btlink_protocol_cmd.h"
 #include "btlink_protocol_hdlr.h"
 #include "btlink_protocol_util.h"
@@ -161,7 +162,7 @@ static void btlink_cmd_exec_ips(btlink_parsed_dnlnk_frame_struct *dn_frame)
 		
 		if (need_save == true)
 		{
-			//FlashCfgCmdParaWrite(BTLINK_FLASH_CFG_STRUCT_ADDR, (uint32 *)(&g_btlink_config.cfg_glob));
+			btlink_pro_nv_ips_write();
     }
 }
 
@@ -178,8 +179,6 @@ static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 			need_save = true;
 		}
 		
-		BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_quantity:%d", g_btlink_config.cfg_apn.apn_quantity);
-		
 		for (idx=0; idx<g_btlink_config.cfg_apn.apn_quantity; idx++)
 		{
 			// <MCC & MNC>
@@ -190,8 +189,6 @@ static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 					strncpy((char *)g_btlink_config.cfg_apn.mcc_mnc[idx], (char *)arg_apn->mcc_mnc[idx], MAX_MCC_MNC_LEN);
 					need_save = true;
 			}
-
-			BTLINK_DEBUG_TRACE(DBG_QPROT,"11mcc_mnc:%s", g_btlink_config.cfg_apn.mcc_mnc[idx]);
 			
 			// <APN Name>
 			if (strlen((char *)arg_apn->apn_name[idx]) != 0
@@ -202,8 +199,6 @@ static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 					need_save = true;
 			}
 			
-			BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_name:%s", g_btlink_config.cfg_apn.apn_name[idx]);
-			
 			// <APN User Name>
 			if (strlen((char *)arg_apn->apn_user_name[idx]) != 0
 					&& strncmp((char *)g_btlink_config.cfg_apn.apn_user_name[idx], (char *)arg_apn->apn_user_name[idx], MAX_APN_USER_NAME_LEN) != 0)
@@ -213,8 +208,6 @@ static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 					need_save = true;
 			}
 			
-			BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_user_name:%s", g_btlink_config.cfg_apn.apn_user_name[idx]);
-			
 			// <APN Password>
 			if (strlen((char *)arg_apn->apn_password[idx]) != 0
 					&& strncmp((char *)g_btlink_config.cfg_apn.apn_password[idx], (char *)arg_apn->apn_password[idx], MAX_APN_PASSWORD_LEN) != 0)
@@ -223,13 +216,11 @@ static void btlink_cmd_exec_apn(btlink_parsed_dnlnk_frame_struct *dn_frame)
 					strncpy((char *)g_btlink_config.cfg_apn.apn_password[idx], (char *)arg_apn->apn_password[idx], MAX_APN_PASSWORD_LEN);
 					need_save = true;
 			}
-			
-			BTLINK_DEBUG_TRACE(DBG_QPROT,"11apn_password:%s", g_btlink_config.cfg_apn.apn_password[idx]);
 		}
 		
 		if (need_save == true)
 		{
-			//FlashCfgCmdParaWrite(BTLINK_FLASH_CFG_STRUCT_ADDR, (uint32 *)(&g_btlink_config.cfg_glob));
+			btlink_pro_nv_apn_write();
     }
 }
 
