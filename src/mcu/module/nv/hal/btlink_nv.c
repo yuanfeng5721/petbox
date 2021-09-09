@@ -129,6 +129,35 @@ btlink_config_apn_struct  nv_default_apn =
 		}
 	},
 };
+
+btlink_config_scs_struct  nv_default_scs = 
+{
+	{
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	},
+	
+	0x00000000
+};
+
+btlink_config_lss_struct  nv_default_lss = 
+{
+	0x00,           /* mode_selection */  
+	0x0000,         /* continue_send_interval */  
+	0x00,           /* start_mode */  
+	{               /* spec_time_of_day */  
+		0x00, 0x00, 0x00, 0x00, 0x00
+	},
+	0x00,           /* wakeup_interval */  
+	0x00000000,     /* psm_net_hold_time */  
+	0x00,           /* report_freq */ 
+	0x00,           /* gnss_enable */ 
+	0x00,           /* gnss_fix_delay */ 
+	0x00,           /* agps_mode */ 
+	0x00,           /* bat_low_percent */ 
+	0x00,           /* sensor_enable */ 
+	0x00            /* non_move_duration */ 
+};
 /*****************************************************************************
  * Local variable
  *****************************************************************************/
@@ -149,6 +178,18 @@ void btlink_pro_nv_init(void)
 		nv_item_write("nv_bt_apn", (uint8_t *)&nv_default_apn, sizeof(btlink_config_apn_struct));
 		nv_item_read("nv_bt_apn", (uint8_t *)&g_btlink_config.cfg_apn, sizeof(btlink_config_apn_struct));
 	}
+	
+	if (!nv_item_read("nv_bt_scs", (uint8_t *)&g_btlink_config.cfg_scs, sizeof(btlink_config_scs_struct)))
+	{
+		nv_item_write("nv_bt_scs", (uint8_t *)&nv_default_scs, sizeof(btlink_config_scs_struct));
+		nv_item_read("nv_bt_scs", (uint8_t *)&g_btlink_config.cfg_scs, sizeof(btlink_config_scs_struct));
+	}
+	
+	if (!nv_item_read("nv_bt_lss", (uint8_t *)&g_btlink_config.cfg_lss, sizeof(btlink_config_lss_struct)))
+	{
+		nv_item_write("nv_bt_lss", (uint8_t *)&nv_default_lss, sizeof(btlink_config_lss_struct));
+		nv_item_read("nv_bt_lss", (uint8_t *)&g_btlink_config.cfg_lss, sizeof(btlink_config_lss_struct));
+	}
 }
 
 void btlink_pro_nv_ips_write(void)
@@ -160,4 +201,15 @@ void btlink_pro_nv_apn_write(void)
 {
 	nv_item_write("nv_bt_apn", (uint8_t *)&g_btlink_config.cfg_apn, sizeof(btlink_config_apn_struct));
 }
+
+void btlink_pro_nv_scs_write(void)
+{
+	nv_item_write("nv_bt_scs", (uint8_t *)&g_btlink_config.cfg_scs, sizeof(btlink_config_scs_struct));
+}
+
+void btlink_pro_nv_lss_write(void)
+{
+	nv_item_write("nv_bt_lss", (uint8_t *)&g_btlink_config.cfg_lss, sizeof(btlink_config_lss_struct));
+}
+
 

@@ -70,8 +70,8 @@
             <nStopU2X>0</nStopU2X>
           </BeforeCompile>
           <BeforeMake>
-            <RunUserProg1>1</RunUserProg1>
-            <RunUserProg2>1</RunUserProg2>
+            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg2>0</RunUserProg2>
             <UserProg1Name>..\..\..\tool\before_build_common.bat $K</UserProg1Name>
             <UserProg2Name>before_build_special.bat</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
@@ -80,8 +80,8 @@
             <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
-            <RunUserProg1>1</RunUserProg1>
-            <RunUserProg2>1</RunUserProg2>
+            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg2>0</RunUserProg2>
             <UserProg1Name>..\..\..\tool\after_build_common.bat $J #L @L</UserProg1Name>
             <UserProg2Name>after_build_special.bat</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
