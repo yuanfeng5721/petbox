@@ -38,3 +38,5 @@
 extern void btlink_pro_nv_init(void);
 extern void btlink_pro_nv_ips_write(void);
 extern void btlink_pro_nv_apn_write(void);
+extern void btlink_pro_nv_scs_write(void);
+extern void btlink_pro_nv_lss_write(void);

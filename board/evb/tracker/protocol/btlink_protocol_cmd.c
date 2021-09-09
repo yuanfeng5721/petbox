@@ -237,7 +237,7 @@ static void btlink_cmd_exec_scs(btlink_parsed_dnlnk_frame_struct *dn_frame)
         strncpy((char *)g_btlink_config.cfg_scs.dev_password, (char *)arg_scs->dev_password, BTLINK_LEN_SCS_PASSWORD);
         need_save = true;
     }
-		
+
 		// <Data Zone Mask>
 		if (g_btlink_config.cfg_scs.data_zone_mask != arg_scs->data_zone_mask)
 		{
@@ -247,7 +247,7 @@ static void btlink_cmd_exec_scs(btlink_parsed_dnlnk_frame_struct *dn_frame)
 		
 		if (need_save == true)
 		{
-			//FlashCfgCmdParaWrite(BTLINK_FLASH_CFG_STRUCT_ADDR, (uint32 *)(&g_btlink_config.cfg_glob));
+			btlink_pro_nv_scs_write();
     }
 }
 
@@ -351,11 +351,11 @@ static void btlink_cmd_exec_lss(btlink_parsed_dnlnk_frame_struct *dn_frame)
 		
 		if (need_save == true)
 		{
-			//FlashCfgCmdParaWrite(BTLINK_FLASH_CFG_STRUCT_ADDR, (uint32 *)(&g_btlink_config.cfg_glob));
+			btlink_pro_nv_lss_write();
     }
 }
 
-static void btlink_cmd_exec(btlink_parsed_dnlnk_frame_struct *dn_frame)
+static void btlink_cmd_exec (btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
     switch (dn_frame->type)
     {

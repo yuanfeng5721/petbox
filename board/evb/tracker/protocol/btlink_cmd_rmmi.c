@@ -801,7 +801,7 @@ T_CMD_PARSE_RESULT rmmi_protocol_cmd_entry(CommandLine_t *commandBuffer_p)
                 }
                 else 
                 {
-										cmd_uart_print("Password error %d\r\n");
+										cmd_uart_print("Password error\r\n");
                     result = RESULT_ERR;
                 }
             }

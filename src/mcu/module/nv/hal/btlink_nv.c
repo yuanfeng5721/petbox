@@ -133,30 +133,30 @@ btlink_config_apn_struct  nv_default_apn =
 btlink_config_scs_struct  nv_default_scs = 
 {
 	{
-		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x62, 0x74, 0x6c, 0x31, 0x30, 0x30, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	},
 	
-	0x00000000
+	0x0000000F
 };
 
 btlink_config_lss_struct  nv_default_lss = 
 {
 	0x00,           /* mode_selection */  
-	0x0000,         /* continue_send_interval */  
+	0x0005,         /* continue_send_interval */  
 	0x00,           /* start_mode */  
 	{               /* spec_time_of_day */  
-		0x00, 0x00, 0x00, 0x00, 0x00
+		0x31, 0x32, 0x30, 0x30, 0x00
 	},
-	0x00,           /* wakeup_interval */  
+	0x01,           /* wakeup_interval */  
 	0x00000000,     /* psm_net_hold_time */  
-	0x00,           /* report_freq */ 
+	0x01,           /* report_freq */ 
 	0x00,           /* gnss_enable */ 
-	0x00,           /* gnss_fix_delay */ 
+	0x05,           /* gnss_fix_delay */ 
 	0x00,           /* agps_mode */ 
-	0x00,           /* bat_low_percent */ 
+	0x0a,           /* bat_low_percent */ 
 	0x00,           /* sensor_enable */ 
-	0x00            /* non_move_duration */ 
+	0x06            /* non_move_duration */
 };
 /*****************************************************************************
  * Local variable
