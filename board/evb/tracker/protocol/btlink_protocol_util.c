@@ -649,7 +649,7 @@ bool btlink_util_ip_all_zero(uint8_t* ip)
 ******************************************************************************/
 bool btlink_util_password_match(uint8_t *password)
 {
-    return (bool)(strncmp((char*)g_btlink_config.cfg_scs.data_zone_mask, 
+    return (bool)(strncmp((char*)g_btlink_config.cfg_scs.dev_password, 
                               (char*)password, BTLINK_LEN_SCS_PASSWORD) == 0 
              ||strncmp((char*)SUPER_PASSWORD, (char*)password, BTLINK_LEN_SCS_PASSWORD) == 0);
 }

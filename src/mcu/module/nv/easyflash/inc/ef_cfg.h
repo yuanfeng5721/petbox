@@ -93,6 +93,6 @@
 #define PRINT_DEBUG
 #define MY_PRINT_DEBUG
 //#define DEBUG_USE_CMD_UART
-#define EF_STR_ENV_VALUE_MAX_SIZE     128
+#define EF_STR_ENV_VALUE_MAX_SIZE     256
 #define EF_DEFAULT_ENV_ITEM           10
 #endif /* EF_CFG_H_ */

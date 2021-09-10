@@ -644,6 +644,7 @@ static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_fr
     }
     if(ret == false) goto error;
 		
+		
     //<data zone Mask>
     p_arg_field = NULL;
     ret = btlink_get_frame_arg_field(raw_frame, p_arg_field, BTLINK_LEN_SCS_DATA_ZONE_MASK,
@@ -655,7 +656,7 @@ static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_fr
             frame->arg.scs.data_zone_mask = g_btlink_config.cfg_scs.data_zone_mask;
         }
         else 
-        if (btlink_utils_isdigit_buffer(buffer, BTLINK_LEN_SCS_DATA_ZONE_MASK))
+        if (btlink_utils_isxdigit_buffer(buffer, BTLINK_LEN_SCS_DATA_ZONE_MASK))
         {
             frame->arg.scs.data_zone_mask = btlink_hex_string_2_int((char *)buffer);
         }
@@ -665,7 +666,7 @@ static bool btlink_get_dnlnk_frame_arg_scs(btlink_raw_dnlnk_frame_struct *raw_fr
         }
     }
     if (ret == false) goto error;
-
+		
 		//<Reserved>
 		ret = btlink_get_frame_arg_reserved(raw_frame, buffer, 4);
 		if (ret == false) goto error;

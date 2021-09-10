@@ -69,7 +69,7 @@ typedef struct {
 typedef struct 
 {
     socket_type_enum	sock_type; /* socket type */
-    int16_t	addr_len; /* address length */
+    uint16_t	addr_len; /* address length */
     uint16_t	port; /* port number */
     uint8_t	addr[MAX_SOCK_ADDR_LEN];
     /* IP address. For keep the 4-type boundary, 

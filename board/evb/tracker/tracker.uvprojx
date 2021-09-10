@@ -724,6 +724,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\module\nv\hal\nv.c</FilePath>
             </File>
+            <File>
+              <FileName>btlink_nv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\nv\hal\btlink_nv.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

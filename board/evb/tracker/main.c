@@ -36,6 +36,7 @@
 #include "gnss_interface.h"
 #include "nv.h"
 #include "btlink_protocol_util.h"
+#include "btlink_nv.h"
 
 uint8_t network_status = 0;
 /** @defgroup  BT5_CENTRAL_DEMO_MAIN BT5 Central Main
@@ -221,7 +222,7 @@ typedef struct{
 	uint16_t data16;
 }st_nv_test;
 #pragma pack ()
-
+  
 void test_nv(void)
 {
 	st_nv_test nv_test = {
@@ -264,6 +265,9 @@ void app_main_task(void *p_param)
 	nv_item_init();
 	
 	test_nv();
+	
+	btlink_pro_nv_init();
+	
 	//
     while (true)
     {
