@@ -25,11 +25,15 @@ extern "C" {
 
 #include "qcloud_iot_import.h"
 
+#define MAX_SOCKET_IPADRESS_LEN   20
+#define MAX_SOCKET_DOMAIN_LEN     128
+
+#define AT_NO_CONNECTED_FD 0xffffffff
 /*
  * Type of network interface
  */
 
-typedef enum { NETWORK_TCP = 0, NETWORK_UDP = 1, NETWORK_TLS = 2, NETWORK_DTLS = 3 } NETWORK_TYPE;
+typedef enum { NETWORK_TCP = 0, NETWORK_UDP = 1/*, NETWORK_TLS = 2, NETWORK_DTLS = 3*/ } NETWORK_TYPE;
 
 /**
  * @brief Define structure for network stack
@@ -75,57 +79,43 @@ struct Network {
     NETWORK_TYPE type;
 };
 
+typedef struct sockaddr{
+	int port;
+	char host[MAX_SOCKET_IPADRESS_LEN];
+	NETWORK_TYPE type;
+}sockaddr_t;
 /*
  * Init network stack
  */
-int network_init(Network *pNetwork);
-
+int network_init(void);
+int network_deinit(void);
+int network_connect(const sockaddr_t *addr);
+int network_prase_domain(const char *domain, sockaddr_t *addr);
+size_t network_recv(int fd, uint8_t *data, size_t datalen);
+size_t network_send(int fd, uint8_t *data, size_t datalen);
+int network_disconnect(int fd);
 /* return the handle */
-int is_network_connected(Network *pNetwork);
+int is_network_connected(int fd);
 
 /* network stack API */
 #ifdef AT_TCP_ENABLED
-
-#define AT_NO_CONNECTED_FD 0xffffffff
-
-int  network_at_tcp_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len);
-int  network_at_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms,
-                          size_t *written_len);
-void network_at_tcp_disconnect(Network *pNetwork);
-int  network_at_tcp_connect(Network *pNetwork);
-int  network_at_tcp_init(Network *pNetwork);
-int  network_at_tcp_parse_domain(Network *pNetwork);
-#else
-int network_tcp_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len);
-int network_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *written_len);
-void network_tcp_disconnect(Network *pNetwork);
-int  network_tcp_connect(Network *pNetwork);
-int  network_tcp_init(Network *pNetwork);
+size_t  network_at_tcp_read(int fd, unsigned char *data, size_t datalen, uint32_t timeout_ms);
+size_t  network_at_tcp_write(int fd, unsigned char *data, size_t datalen, uint32_t timeout_ms);
+int network_at_tcp_disconnect(int fd);
+int  network_at_tcp_connect(const sockaddr_t *addr);
+int  network_at_tcp_init(void);
+int  network_at_tcp_deinit(void);
+int  network_at_tcp_parse_domain(const char *domain, sockaddr_t *addr);
 #endif
 
-#ifndef AUTH_WITH_NOTLS
-int network_tls_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len);
-int network_tls_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *written_len);
-void network_tls_disconnect(Network *pNetwork);
-int  network_tls_connect(Network *pNetwork);
-int  network_tls_init(Network *pNetwork);
-#endif
 
-#ifdef COAP_COMM_ENABLED
-#ifdef AUTH_WITH_NOTLS
+
+#ifdef AT_UDP_ENABLED
 int network_udp_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len);
 int network_udp_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *written_len);
 void network_udp_disconnect(Network *pNetwork);
 int  network_udp_connect(Network *pNetwork);
 int  network_udp_init(Network *pNetwork);
-#else
-int  network_dtls_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len);
-int  network_dtls_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms,
-                        size_t *written_len);
-void network_dtls_disconnect(Network *pNetwork);
-int  network_dtls_connect(Network *pNetwork);
-int  network_dtls_init(Network *pNetwork);
-#endif
 #endif
 
 #ifdef __cplusplus

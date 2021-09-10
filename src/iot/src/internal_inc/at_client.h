@@ -108,7 +108,7 @@ typedef at_client *at_client_t;
 int at_client_init(at_client_t *pClient);
 
 /* AT client deinitial*/
-int at_client_deinit(at_client_t pClient);
+int at_client_deinit(at_client_t *pClient);
 
 /* get AT client handle*/
 at_client_t at_client_get(void);

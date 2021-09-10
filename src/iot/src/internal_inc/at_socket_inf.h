@@ -43,12 +43,12 @@ typedef enum {
     AT_SOCKET_EVT_RECV = 0,
     AT_SOCKET_EVT_CLOSED,
 } at_socket_evt_t;
-
 typedef void (*at_evt_cb_t)(int fd, at_socket_evt_t event, char *buff, size_t bfsz);
 
 /*at device driver ops, use at_device_op_register register to at socket*/
 typedef struct {
     int (*init)(void);
+	int (*deinit)(void);
     int (*get_local_mac)(char *macbuff, size_t bufflen);
     int (*get_local_ip)(char *ip, size_t iplen, char *gw, size_t gwlen, char *mask, size_t masklen);
     int (*parse_domain)(const char *host_name, char *host_ip, size_t host_ip_len);
@@ -77,6 +77,7 @@ typedef struct {
 // at socket api
 int at_device_op_register(at_device_op_t *device_op);
 int at_socket_init(void);
+int at_socket_deinit(void);
 int at_socket_parse_domain(const char *host_name, char *host_ip, size_t host_ip_len);
 int at_socket_get_local_mac(char *macbuff, size_t bufflen);
 int at_socket_get_local_ip(char *ip, size_t iplen, char *gw, size_t gwlen, char *mask, size_t masklen);

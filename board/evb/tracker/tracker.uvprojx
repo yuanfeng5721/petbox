@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.3.0</PackID>
+          <PackID>ARM.CMSIS.5.7.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x00000000,0x80000) IRAM(0x20000000,0x20000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -513,6 +513,21 @@
               <FileName>cmd_uart_dlps.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\module\cmd_uart\cmd_uart_dlps.c</FilePath>
+            </File>
+            <File>
+              <FileName>leds_blink.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\leds_blink.c</FilePath>
+            </File>
+            <File>
+              <FileName>custom_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\custom_log.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\rtc.c</FilePath>
             </File>
           </Files>
         </Group>

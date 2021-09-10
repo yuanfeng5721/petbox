@@ -274,6 +274,36 @@ int at_socket_init(void)
     return rc;
 }
 
+int at_socket_deinit(void)
+{
+	int i;
+    int rc = QCLOUD_RET_SUCCESS;
+
+    if (NULL != sg_at_device_ops) {
+        if (QCLOUD_RET_SUCCESS == sg_at_device_ops->deinit()) {
+            Log_d("at device %s deinit success",
+                  (NULL == sg_at_device_ops->deviceName) ? "noname" : sg_at_device_ops->deviceName);
+            sg_at_device_ops->set_event_cb(AT_SOCKET_EVT_RECV, NULL);
+            sg_at_device_ops->set_event_cb(AT_SOCKET_EVT_CLOSED, NULL);
+        } else {
+			rc = QCLOUD_ERR_FAILURE;
+            Log_e("at device %s deinit fail",
+                  (NULL == sg_at_device_ops->deviceName) ? "noname" : sg_at_device_ops->deviceName);
+        }
+    }
+
+	if(sg_at_socket_mutex)
+		HAL_MutexDestroy(sg_at_socket_mutex);
+	
+	for (i = 0; i < MAX_AT_SOCKET_NUM; i++) {
+        at_socket_ctxs[i].fd           = UNUSED_SOCKET;
+        at_socket_ctxs[i].state        = eSOCKET_CLOSED;
+        at_socket_ctxs[i].dev_op       = NULL;
+        at_socket_ctxs[i].recvpkt_list = NULL;
+    }
+    return rc;
+}
+
 int at_socket_parse_domain(const char *host_name, char *host_ip, size_t host_ip_len)
 {
     at_device_op_t *at_op = _at_device_op_get();

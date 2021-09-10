@@ -79,6 +79,7 @@ extern "C" {
  */
 void at_uart_init(void (*func)(uint8_t *, uint8_t));
 
+void at_uart_deinit(void);
 /**
  * @brief  Print the trace information through data uart.
  * @param[in] fmt   Print parameters.

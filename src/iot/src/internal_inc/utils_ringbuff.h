@@ -36,6 +36,7 @@ typedef struct _ring_buff_ {
 typedef sRingbuff* ring_buff_t;
 
 int ring_buff_init(sRingbuff* ring_buff, char* buff, uint32_t size);
+int ring_buff_deinit(sRingbuff* ring_buff);
 int ring_buff_flush(sRingbuff* ring_buff);
 int ring_buff_push_data(sRingbuff* ring_buff, uint8_t* pData, int len);
 int ring_buff_pop_data(sRingbuff* ring_buff, uint8_t* pData, int len);

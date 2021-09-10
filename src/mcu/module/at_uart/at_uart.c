@@ -163,6 +163,30 @@ void at_uart_init(void (*func)(uint8_t *, uint8_t))
     NVIC_Init(&nvic_init_struct);
 }
 
+void at_uart_deinit(void)
+{
+	at_uart_rcv_data = NULL;
+    
+	/*  Disable UART IRQ  */
+    NVIC_InitTypeDef nvic_init_struct;
+    nvic_init_struct.NVIC_IRQChannel         = UART1_IRQn;
+    nvic_init_struct.NVIC_IRQChannelCmd      = DISABLE;
+    nvic_init_struct.NVIC_IRQChannelPriority = 5;
+    NVIC_Init(&nvic_init_struct);
+	
+	/* uart deinit */
+	UART_INTConfig(UART1, UART_INT_RD_AVA, DISABLE);
+	UART_DeInit(UART1);
+	
+	RCC_PeriphClockCmd(APBPeriph_UART1, APBPeriph_UART1_CLOCK, DISABLE);
+//    Pinmux_Config(AT_UART_TX_PIN, UART1_TX);
+//    Pinmux_Config(AT_UART_RX_PIN, UART1_RX);
+//    Pad_Config(AT_UART_TX_PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_NONE, PAD_OUT_ENABLE,
+//               PAD_OUT_HIGH);
+//    Pad_Config(AT_UART_RX_PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_UP, PAD_OUT_DISABLE,
+//               PAD_OUT_LOW);
+}
+
 void at_uart_set_buadrate(uint8_t buadrate)
 {
 	/* uart init */

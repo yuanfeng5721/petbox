@@ -19,7 +19,6 @@
 #include <string.h>
 #include "os_mem.h"
 #include "os_sched.h"
-#include "trace.h"
 #include "gap.h"
 #include "gap_bond_le.h"
 #include "gap_msg.h"
@@ -30,9 +29,11 @@
 #include "link_mgr.h"
 #include "otp_config.h"
 #include "os_task.h"
+#include "custom_log.h"
 
 #include "rtl876x_hal_bsp.h"
 #include "network_interface.h"
+#include "gnss_interface.h"
 #include "nv.h"
 #include "btlink_protocol_util.h"
 
@@ -135,9 +136,34 @@ void app_le_gap_init(void)
 void board_init(void)
 {
 	board_gpio_init();
+	leds_init();
 	sys_3v8_power(1);
 }
 
+void gnss_report_cb(at_gnss_event_t event, gnss_report_t *report)
+{
+	//do some thing to deal gnss report
+	if(report) {
+		LOG_I("GNSS: (lat:%f,lon:%f)(time:%d:%d:%d) \r\n", report->lat, report->lon, 
+					report->time.hour, report->time.minute, report->time.sec);
+	}
+}
+
+void network_test()
+{
+#define TEST_NETWORK 1
+#if TEST_NETWORK
+	int socket_fd;
+	sockaddr_t addr;
+	char *domain = "www.163.com";
+	
+	addr.port = 6522;
+	addr.type = NETWORK_TCP;
+	
+	if(!network_prase_domain(domain, &addr))
+		socket_fd = network_connect(&addr);
+#endif
+}
 /**
  * @brief    Contains the initialization of peripherals
  * @note     Both new architecture driver and legacy driver initialization method can be used
@@ -145,32 +171,11 @@ void board_init(void)
  */
 void driver_init(void)
 {
-#define TEST_NETWORK 1
-#define TEST_TICK 0
-#if TEST_NETWORK
-	int rc;
-	Network network_stack;
-	char ip_addr[16]={0};
+	// register gnss callback function
+	at_device_gnss_init(AT_GNSS_EVT_GET_FIX, gnss_report_cb);
 	
-	network_stack.domain = "www.163.com";
-	network_stack.host = ip_addr;
-	network_stack.port = 6522;
-	network_stack.type = NETWORK_TCP;
-	
-	rc = network_init(&network_stack);
-	if(rc<0)
-	{
-		network_status = 0;
-	}
-	else
-	{
-		network_status = 1;
-		if(!network_stack.prase_domain(&network_stack))
-			network_stack.connect(&network_stack);
-	}
-#endif
-	
-
+	// init at device and network
+	network_status = (!network_init())?1:0;	
 }
 
 /**
@@ -189,20 +194,16 @@ void pwr_mgr_init(void)
 void network_task(void *p_param)
 {
     uint8_t event;
-
-    driver_init();
+	
+	driver_init();
+	network_test();
+	
     while (true)
     {
 		os_delay(1000);
-		if(network_status)
-			blue_led_ctl(1);
-		else
-			green_led_ctl(1);
+		led_ctl_tab[network_status](1);
 		os_delay(100);
-		if(network_status)
-			blue_led_ctl(0);
-		else
-			green_led_ctl(0);
+		led_ctl_tab[network_status](0);
     }
 }
 /**
@@ -231,11 +232,11 @@ void test_nv(void)
 	st_nv_test nv_test_r;
 	
 	nv_item_write_string("SOFTWART_VERSION", "V1.0.2");
-	DBG_DIRECT("softwart version: %s ",nv_item_read_string("SOFTWART_VERSION"));
+	LOG_I("softwart version: %s ",nv_item_read_string("SOFTWART_VERSION"));
 	
 	nv_item_write("struct_nv", (uint8_t *)&nv_test, sizeof(nv_test));
 	nv_item_read("struct_nv", (uint8_t *)&nv_test_r, sizeof(nv_test_r));
-	DBG_DIRECT("struct_nv:data32 = %d, data16 = %d, data8 = %d", nv_test_r.data32, nv_test_r.data16, nv_test_r.data8);
+	LOG_I("struct_nv:data32 = %d, data16 = %d, data8 = %d", nv_test_r.data32, nv_test_r.data16, nv_test_r.data8);
 	
 }
 void imei_nv_test(void)
@@ -247,7 +248,7 @@ void imei_nv_test(void)
 		if(imei)
 		{
 			nv_item_write_string("IMEI", imei);
-			DBG_DIRECT("device imei: %s ",nv_item_read_string("IMEI"));
+			LOG_I("device imei: %s ",nv_item_read_string("IMEI"));
 		}
 	}
 }
@@ -282,18 +283,9 @@ void main_task_init(void)
  */
 void task_init(void)
 {
-#if 0
-#define TEST_DRIVER 0
-	cmd_task_init();
-#if TEST_DRIVER
-	test_task_init();
-#else
-#endif
-#else
 	cmd_task_init();
 	main_task_init();
 	network_task_init();
-#endif
 }
 
 /**

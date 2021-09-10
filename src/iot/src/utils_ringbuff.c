@@ -30,6 +30,17 @@ int ring_buff_init(sRingbuff* ring_buff, char* buff, uint32_t size)
     return RINGBUFF_OK;
 }
 
+int ring_buff_deinit(sRingbuff* ring_buff)
+{
+	ring_buff->buffer     = NULL;
+    ring_buff->size       = 0;
+    ring_buff->readpoint  = 0;
+    ring_buff->writepoint = 0;
+    ring_buff->full = false;
+
+    return RINGBUFF_OK;
+}
+
 int ring_buff_flush(sRingbuff* ring_buff)
 {
     ring_buff->readpoint  = 0;

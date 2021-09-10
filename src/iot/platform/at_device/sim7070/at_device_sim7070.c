@@ -18,12 +18,14 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "at_client.h"
 #include "at_socket_inf.h"
 #include "qcloud_iot_export.h"
 #include "qcloud_iot_import.h"
 #include "utils_param_check.h"
+#include "gnss_interface.h"
 
 //#define USING_RTC
 #define USING_GNSS
@@ -39,6 +41,12 @@ volatile uint8_t sg_SocketBitMap = 0;
 static at_evt_cb_t at_evt_cb_table[] = {
     [AT_SOCKET_EVT_RECV]   = NULL,
     [AT_SOCKET_EVT_CLOSED] = NULL,
+};
+
+static at_gnss_evt_cb_t at_gnss_evt_cb_table[] = {
+    [AT_GNSS_EVT_GET_FIX]   = NULL,
+    [AT_GNSS_EVT_GET_TIME] = NULL,
+	[AT_GNSS_EVT_GET_EXTRAS] = NULL,
 };
 
 #define IMEI_MAX_LEN 16
@@ -167,7 +175,7 @@ static void urc_close_func(const char *data, size_t size)
     int fd = 0;
     POINTER_SANITY_CHECK_RTN(data);
 
-    sscanf(data, "%d,CLOSED", &fd);
+    sscanf(data, "+CACLOSE: %d", &fd);
 
     /* notice the socket is disconnect by remote */
     if (at_evt_cb_table[AT_SOCKET_EVT_CLOSED]) {
@@ -225,14 +233,23 @@ static void urc_recv_func(const char *data, size_t size)
 
 static void urc_gnss_func(const char *data, size_t size)
 {
-	int mode;
-	char time[10]= {0};
-	float lat,lon,accuracy,altitude,alt_sea_level,speed,course;
+	gnss_report_t gnss_report;
     POINTER_SANITY_CHECK_RTN(data);
 	//+SGNSCMD: 2,08:14:43,31.16211,121.30720,13.12,50.54,41.15,0.00,0.00,0x17bba2c7d38,375  
     Log_d("GNSS: %s \r\n", data);
-	sscanf(data, "+SGNSCMD: %d,%s,%f,%f,%f,%f,%f,%f,%f", &mode, time, &lat, &lon, &accuracy, &altitude, &alt_sea_level, &speed, &course);
-	Log_d("GNSS: (lat:%f,lon:%f)(time:%s) \r\n", lat, lon, time);
+	sscanf(data, "+SGNSCMD: %d,%d:%d:%d,%f,%f,%f,%f,%f,%f,%f", 
+			&gnss_report.mode, 
+			&gnss_report.time.hour, &gnss_report.time.minute, &gnss_report.time.sec,
+	        &gnss_report.lat, &gnss_report.lon, 
+			&gnss_report.accuracy, &gnss_report.altitude, 
+	        &gnss_report.alt_sea_level, &gnss_report.speed, &gnss_report.course);
+	
+	//Log_d("GNSS: (lat:%f,lon:%f)(time:%d:%d:%d) \r\n", gnss_report.lat, gnss_report.lon, gnss_report.time.hour, gnss_report.time.minute, gnss_report.time.sec);
+	if(gnss_report.mode > 0) {
+		if(at_gnss_evt_cb_table[AT_GNSS_EVT_GET_FIX]) {
+			at_gnss_evt_cb_table[AT_GNSS_EVT_GET_FIX](AT_GNSS_EVT_GET_FIX, &gnss_report);
+		}
+	}
 }
 
 static void urc_func(const char *data, size_t size)
@@ -258,7 +275,7 @@ static at_urc urc_table[] = {
     {"+CAOPEN",  "\r\n", urc_send_func},
     {"+CACLOSE", "\r\n", urc_close_func},
     {"+CAURC",   "\r\n", urc_recv_func},
-	{"+SGNSCMD:","\r\n", urc_gnss_func},
+	{"+SGNSCMD","\r\n", urc_gnss_func},
 };
 
 static void sim7070_set_event_cb(at_socket_evt_t event, at_evt_cb_t cb)
@@ -587,6 +604,15 @@ static int sim7070_init(void)
     return ret;
 }
 
+static int sim7070_deinit(void)
+{
+    /* power off the sim76xx device */
+	sim7070_power_off();
+
+	Log_i("%s device deinit", DEVICE_NAME);
+	return QCLOUD_RET_SUCCESS;
+}
+
 static int sim7070_close(int fd)
 {
     at_response_t resp;
@@ -853,6 +879,7 @@ __exit:
 
 at_device_op_t at_ops_sim7070 = {
     .init         = sim7070_init,
+	.deinit       = sim7070_deinit,
     .connect      = sim7070_connect,
     .send         = sim7070_send,
     .recv_timeout = sim7070_recv_timeout,
@@ -902,11 +929,18 @@ int at_device_sim7070_init(void)
 exit:
     if (QCLOUD_RET_SUCCESS != ret) {
         if (NULL != p_client) {
-            at_client_deinit(p_client);
+            at_client_deinit(&p_client);
         }
     }
 
     return ret;
+}
+
+int at_device_sim7070_deinit(void)
+{
+    at_client_deinit(NULL);
+	HAL_AT_Uart_Deinit();
+    return QCLOUD_RET_SUCCESS;
 }
 
 char *at_device_get_imei(void)
@@ -916,8 +950,21 @@ char *at_device_get_imei(void)
 	else
 		return NULL;
 }
+
+void at_device_gnss_init(at_gnss_event_t event, at_gnss_evt_cb_t cb)
+{
+	if(event < AT_GNSS_EVT_MAX) {
+		at_gnss_evt_cb_table[event] = cb;
+	}
+}
+
 /*at device driver must realize this api which called by HAL_AT_TCP_Init*/
 int at_device_init(void)
 {
     return at_device_sim7070_init();
+}
+
+int at_device_deinit(void)
+{
+	return at_device_sim7070_deinit();
 }

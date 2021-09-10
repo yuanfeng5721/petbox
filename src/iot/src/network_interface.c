@@ -22,91 +22,115 @@ extern "C" {
 #include "qcloud_iot_export_error.h"
 #include "utils_param_check.h"
 
-int is_network_connected(Network *pNetwork)
+int is_network_connected(int fd)
 {
-    return pNetwork->handle;
+    return fd == AT_NO_CONNECTED_FD ? 0 : fd == AT_NO_CONNECTED_FD;
 }
 
 #ifdef AT_TCP_ENABLED
-int is_network_at_connected(Network *pNetwork)
+int is_network_at_connected(int fd)
 {
-    return pNetwork->handle == AT_NO_CONNECTED_FD ? 0 : pNetwork->handle == AT_NO_CONNECTED_FD;
+    return fd == AT_NO_CONNECTED_FD ? 0 : fd == AT_NO_CONNECTED_FD;
 }
 #endif
-
-int network_init(Network *pNetwork)
-{
-    POINTER_SANITY_CHECK(pNetwork, QCLOUD_ERR_INVAL);
-
-    // to avoid process crash when writing to a broken socket
-#if defined(__linux__)
-    signal(SIGPIPE, SIG_IGN);
-#endif
-
-    switch (pNetwork->type) {
-        case NETWORK_TCP:
-#ifdef AT_TCP_ENABLED
-            pNetwork->init         = network_at_tcp_init;
-            pNetwork->connect      = network_at_tcp_connect;
-            pNetwork->read         = network_at_tcp_read;
-            pNetwork->write        = network_at_tcp_write;
-			pNetwork->prase_domain = network_at_tcp_parse_domain;
-            pNetwork->disconnect   = network_at_tcp_disconnect;
-            pNetwork->is_connected = is_network_at_connected;
-            pNetwork->handle       = AT_NO_CONNECTED_FD;
-#else
-            pNetwork->init         = network_tcp_init;
-            pNetwork->connect      = network_tcp_connect;
-            pNetwork->read         = network_tcp_read;
-            pNetwork->write        = network_tcp_write;
-            pNetwork->disconnect   = network_tcp_disconnect;
-            pNetwork->is_connected = is_network_connected;
-            pNetwork->handle       = 0;
-#endif
-            break;
-
-#ifndef AUTH_WITH_NOTLS
-        case NETWORK_TLS:
-            pNetwork->init         = network_tls_init;
-            pNetwork->connect      = network_tls_connect;
-            pNetwork->read         = network_tls_read;
-            pNetwork->write        = network_tls_write;
-            pNetwork->disconnect   = network_tls_disconnect;
-            pNetwork->is_connected = is_network_connected;
-            pNetwork->handle       = 0;
-            break;
-#endif
-
-#ifdef COAP_COMM_ENABLED
-#ifdef AUTH_WITH_NOTLS
-        case NETWORK_UDP:
-            pNetwork->init         = network_udp_init;
-            pNetwork->connect      = network_udp_connect;
-            pNetwork->read         = network_udp_read;
-            pNetwork->write        = network_udp_write;
-            pNetwork->disconnect   = network_udp_disconnect;
-            pNetwork->is_connected = is_network_connected;
-            pNetwork->handle       = 0;
-            break;
-#else
-        case NETWORK_DTLS:
-            pNetwork->init         = network_dtls_init;
-            pNetwork->connect      = network_dtls_connect;
-            pNetwork->read         = network_dtls_read;
-            pNetwork->write        = network_dtls_write;
-            pNetwork->disconnect   = network_dtls_disconnect;
-            pNetwork->is_connected = is_network_connected;
-            pNetwork->handle       = 0;
-            break;
-#endif
-#endif
-        default:
-            Log_e("unknown network type: %d", pNetwork->type);
-            return QCLOUD_ERR_INVAL;
-    }
-    return pNetwork->init(pNetwork);
+/**
+ * network initialize.
+ *
+ * @param null
+ * @return @see IoT_Return_Code
+ */
+int network_init(void)
+{	
+    return network_at_tcp_init();
 }
 
+/**
+ * network deinitialize.
+ *
+ * @param null
+ * @return @see IoT_Return_Code
+ */
+int network_deinit(void)
+{
+	return network_at_tcp_deinit();
+}
+
+/**
+ * network connect.
+ *
+ * @param addr is socket address struct
+ * @return network fd handle
+ */
+int network_connect(const sockaddr_t *addr)
+{
+	POINTER_SANITY_CHECK(addr, QCLOUD_ERR_INVAL);
+	int fd = AT_NO_CONNECTED_FD;
+	
+	switch(addr->type)
+	{
+		case NETWORK_TCP:
+			fd = network_at_tcp_connect(addr);
+		break;
+		
+		case NETWORK_UDP:
+			//udp connect
+		break;
+		
+		default:
+			Log_e("network type isn't tcp or udp: %s", (addr->type==NETWORK_TCP)?"tcp":((addr->type==NETWORK_UDP)?"udp":"unknown"));
+		break;
+	}
+	return fd;
+}
+
+/**
+ * network prase domain.
+ *
+ * @param domain is server url
+ * @param addr is socket address struct
+ * @return @see IoT_Return_Code
+ */
+int network_prase_domain(const char *domain, sockaddr_t *addr)
+{
+	return network_at_tcp_parse_domain(domain, addr);
+}
+
+/**
+ * network receive data.
+ *
+ * @param fd is socket handle
+ * @param data is recevice buffer point
+ * @param datalen is want recevice data len
+ * @return receive data len
+ */
+size_t network_recv(int fd, uint8_t *data, size_t datalen)
+{
+	return network_at_tcp_read(fd, data, datalen, 1000);
+}
+
+/**
+ * network send data.
+ *
+ * @param fd is socket handle
+ * @param data is send data buffer
+ * @param datalen is want recevice data len
+ * @return send data len
+ */
+size_t network_send(int fd, uint8_t *data, size_t datalen)
+{
+	return network_at_tcp_write(fd, data, datalen, 1000);
+}
+
+/**
+ * network disconnect.
+ *
+ * @param fd is socket handle
+ * @return @see IoT_Return_Code
+ */
+int network_disconnect(int fd)
+{
+	return network_at_tcp_disconnect(fd);
+}
 #ifdef __cplusplus
 }
 #endif

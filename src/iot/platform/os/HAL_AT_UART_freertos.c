@@ -110,6 +110,7 @@ int HAL_AT_Uart_Init(void)
 
 int HAL_AT_Uart_Deinit(void)
 {
+	at_uart_deinit();
     return QCLOUD_RET_SUCCESS;
 }
 #endif

@@ -44,7 +44,7 @@ void HAL_SleepMs(_IN_ uint32_t ms)
 void HAL_Printf(_IN_ const char *fmt, ...)
 {
 	va_list list;
-	char buf[128]={0};
+	char buf[256]={0};
 	
 	va_start(list, fmt);
 	vsnprintf(buf,sizeof(buf), fmt, list);
@@ -193,6 +193,24 @@ int HAL_ThreadCreate(ThreadParams *params)
     return QCLOUD_RET_SUCCESS;
 }
 
+int HAL_ThreadDelete(ThreadParams *params)
+{
+    if (params == NULL)
+        return QCLOUD_ERR_INVAL;
+
+    if (params->thread_id == NULL) {
+        HAL_Printf("thread id is required for FreeRTOS platform!\n");
+        return QCLOUD_ERR_INVAL;
+    }
+
+	if(os_task_delete(params->thread_id) != true)
+	{
+		HAL_Printf("%s: xTaskDelete failed\n", __FUNCTION__);
+        return QCLOUD_ERR_FAILURE;
+	}
+
+    return QCLOUD_RET_SUCCESS;
+}
 #endif
 
 //#if defined(PLATFORM_HAS_CMSIS) && defined(AT_TCP_ENABLED)

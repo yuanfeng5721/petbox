@@ -29,7 +29,7 @@
 
 uint8_t tcp_has_initialled = 0;
 
-int network_at_tcp_init(Network *pNetwork)
+int network_at_tcp_init(void)
 {
     int rc;
 
@@ -57,30 +57,47 @@ int network_at_tcp_init(Network *pNetwork)
 	}
     return rc;
 }
-
-int network_at_tcp_connect(Network *pNetwork)
+int network_at_tcp_deinit(void)
 {
-    POINTER_SANITY_CHECK(pNetwork, QCLOUD_ERR_INVAL);
-
-    int fd = at_socket_connect(pNetwork->host, pNetwork->port, eNET_TCP);
-
-    if (fd < 0) {
-        Log_e("fail to connect with TCP server: %s:%u", STRING_PTR_PRINT_SANITY_CHECK(pNetwork->host), pNetwork->port);
-        pNetwork->handle = AT_NO_CONNECTED_FD;
-        return -1;
-    } else {
-        Log_d("connected with TCP server: %s:%u", pNetwork->host, pNetwork->port);
-        pNetwork->handle = fd;
-        return 0;
-    }
+	if(!tcp_has_initialled) {
+		Log_i("at network not initialled!!!");
+		return QCLOUD_RET_SUCCESS;
+	}
+		
+	at_socket_deinit();
+	at_device_deinit();
+	tcp_has_initialled = 0;
+	Log_i("at network deinit success");
+	
+    return QCLOUD_RET_SUCCESS;
 }
 
-int network_at_tcp_read(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms, size_t *read_len)
+int network_at_tcp_connect(const sockaddr_t *addr)
+{
+    POINTER_SANITY_CHECK(addr, QCLOUD_ERR_INVAL);
+
+    int fd = at_socket_connect(addr->host, addr->port, eNET_TCP);
+
+    if (fd < 0) {
+        Log_e("fail to connect with TCP server: %s:%u", STRING_PTR_PRINT_SANITY_CHECK(addr->host), addr->port);
+        fd = AT_NO_CONNECTED_FD;
+        //return -1;
+    } else {
+        Log_d("connected with TCP server: %s:%u", addr->host, addr->port);
+        //pNetwork->handle = fd;
+        //return 0;
+    }
+	
+	return fd;
+}
+
+size_t network_at_tcp_read(int fd, unsigned char *data, size_t datalen, uint32_t timeout_ms)
 {
     int      ret, err_code;
-    uint32_t len_recv;
+    size_t  len_recv;
     Timer    timer;
-
+	//size_t read_len;
+	
     InitTimer(&timer);
     countdown_ms(&timer, timeout_ms);
 
@@ -93,7 +110,7 @@ int network_at_tcp_read(Network *pNetwork, unsigned char *data, size_t datalen, 
             break;
         }
 
-        ret = at_socket_recv(pNetwork->handle, data + len_recv, datalen - len_recv);
+        ret = at_socket_recv(fd, data + len_recv, datalen - len_recv);
 
         if (ret > 0) {
             len_recv += ret;
@@ -111,13 +128,13 @@ int network_at_tcp_read(Network *pNetwork, unsigned char *data, size_t datalen, 
         err_code = QCLOUD_ERR_TCP_NOTHING_TO_READ;
     }
 
-    *read_len = len_recv;
+    //read_len = len_recv;
 
-    return (datalen == len_recv) ? QCLOUD_RET_SUCCESS : err_code;
+    //return (datalen == len_recv) ? QCLOUD_RET_SUCCESS : err_code;
+	return len_recv;
 }
 
-int network_at_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen, uint32_t timeout_ms,
-                         size_t *written_len)
+size_t network_at_tcp_write(int fd, unsigned char *data, size_t datalen, uint32_t timeout_ms)
 {
     int      ret;
     uint32_t len_sent;
@@ -131,7 +148,7 @@ int network_at_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen,
     ret      = 1; /* send one time if timeout_ms is value 0 */
 
     do {
-        ret = at_socket_send(pNetwork->handle, data + len_sent, datalen - len_sent);
+        ret = at_socket_send(fd, data + len_sent, datalen - len_sent);
 
         if (ret > 0) {
             len_sent += ret;
@@ -144,37 +161,39 @@ int network_at_tcp_write(Network *pNetwork, unsigned char *data, size_t datalen,
         }
     } while (!net_err && (len_sent < datalen) && (!expired(&timer)));
 
-    *written_len = (size_t)len_sent;
+    //*written_len = (size_t)len_sent;
 
-    return (len_sent > 0 && net_err == 0) ? QCLOUD_RET_SUCCESS : QCLOUD_ERR_TCP_WRITE_FAIL;
+    //return (len_sent > 0 && net_err == 0) ? QCLOUD_RET_SUCCESS : QCLOUD_ERR_TCP_WRITE_FAIL;
+	return len_sent;
 }
 
-int network_at_tcp_parse_domain(Network *pNetwork)
+int network_at_tcp_parse_domain(const char *domain, sockaddr_t *addr)
 {
     int ret;
-	POINTER_SANITY_CHECK(pNetwork, QCLOUD_ERR_INVAL);
+	POINTER_SANITY_CHECK(domain, QCLOUD_ERR_INVAL);
+	POINTER_SANITY_CHECK(addr, QCLOUD_ERR_INVAL);
 
-    ret = at_socket_parse_domain(pNetwork->domain, pNetwork->host, 16);
+    ret = at_socket_parse_domain(domain, addr->host, 16);
 
     if (ret < 0) {
-        Log_e("fail to parse domain: %s", STRING_PTR_PRINT_SANITY_CHECK(pNetwork->domain));
+        Log_e("fail to parse domain: %s", STRING_PTR_PRINT_SANITY_CHECK(domain));
         return -1;
     } else {
-        Log_d("success parse domain: %s -> %s", pNetwork->domain, pNetwork->host);
+        Log_d("success parse domain: %s -> %s", domain, addr->host);
         return 0;
     }
 }
 
-void network_at_tcp_disconnect(Network *pNetwork)
+int network_at_tcp_disconnect(int fd)
 {
     int rc;
 
-    rc = at_socket_close((int)pNetwork->handle);
+    rc = at_socket_close(fd);
     if (QCLOUD_RET_SUCCESS != rc) {
         Log_e("socket close error\n");
     }
 
-    return;
+    return rc;
 }
 
 #endif

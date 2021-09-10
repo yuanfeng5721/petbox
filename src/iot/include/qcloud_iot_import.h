@@ -70,6 +70,13 @@ typedef struct ThreadParams {
 int HAL_ThreadCreate(ThreadParams *params);
 
 /**
+ * @brief delete a thread/task
+ *
+ * @param params    thread parameters
+ * @return 0 when success, or error code otherwise
+ */
+int HAL_ThreadDelete(ThreadParams *params);
+/**
  * @brief create semaphore
  *
  * @return a valid semaphore handle when success, or NULL otherwise
@@ -330,6 +337,7 @@ int       HAL_AT_TCP_Disconnect(uintptr_t fd);
 int HAL_AT_TCP_Write(uintptr_t fd, const unsigned char *buf, uint32_t len, uint32_t timeout_ms, size_t *written_len);
 int HAL_AT_TCP_Read(uintptr_t fd, uint8_t *buf, uint32_t len, uint32_t timeout_ms, uint32_t *read_len);
 int at_device_init(void);
+int at_device_deinit(void);
 int HAL_AT_Uart_Buadrate_Set(uint8_t buadrate);
 int HAL_AT_Uart_Init(void);
 int HAL_AT_Uart_Deinit(void);

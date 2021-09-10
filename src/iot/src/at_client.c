@@ -34,7 +34,7 @@
 sRingbuff        g_ring_buff;
 static at_client sg_at_client = {0};
 static uint32_t  sg_flags     = 0;
-
+static ThreadParams thread_params = {0};
 /*this function can be called only by at_uart_isr, just push the data to the at_client ringbuffer.*/
 void at_client_uart_rx_isr_cb(uint8_t *pdata, uint8_t len)
 {
@@ -871,6 +871,43 @@ err_exit:
     return QCLOUD_ERR_FAILURE;
 }
 
+int at_client_para_deinit(at_client_t client)
+{
+    char *ringBuff = client->pRingBuff->buffer;
+    char *recvBuff = client->recv_buffer;
+
+
+    ring_buff_deinit(&g_ring_buff);
+
+    client->recv_buffer    = NULL;
+    client->pRingBuff      = NULL;
+    client->recv_bufsz     = 0;
+    client->cur_recv_len   = 0;
+    client->resp           = NULL;
+    client->urc_table      = NULL;
+    client->urc_table_size = 0;
+    client->end_sign       = 0;
+
+    if (client->lock) {
+        HAL_MutexDestroy(client->lock);
+        client->lock = NULL;
+    }
+
+#ifdef AT_OS_USED
+    if (client->resp_sem) {
+        HAL_SemaphoreDestroy(client->resp_sem);
+        client->resp_sem = NULL;
+    }
+	client->parser = NULL;
+#endif
+
+	if (ringBuff)
+		HAL_Free(ringBuff);
+	if (recvBuff)
+		HAL_Free(recvBuff);
+
+    return QCLOUD_RET_SUCCESS;
+}
 /**
  * AT client initialize.
  *
@@ -908,7 +945,7 @@ int at_client_init(at_client_t *pClient)
         if (NULL != client->parser) {
 #define AT_PARSER_THREAD_STACK    2048
 #define AT_PARSER_THREAD_PRIORITY 0
-            static ThreadParams thread_params = {0};
+            //static ThreadParams thread_params = {0};
             thread_params.thread_func  = client->parser;
             thread_params.thread_name  = "at_client_parser";
             thread_params.user_arg     = client;
@@ -938,8 +975,31 @@ exit:
     return result;
 }
 
-int at_client_deinit(at_client_t pClient)
+int at_client_deinit(at_client_t *pClient)
 {
-    // TO DO:
+	//POINTER_SANITY_CHECK(pClient, QCLOUD_ERR_INVAL);
+    at_client_t client;
+    int         result;
+
+    client = at_client_get();
+    // TO DO:	
+#if defined(AT_OS_USED) && defined(MULTITHREAD_ENABLED)
+	//  delete thread for at parser
+	thread_params.thread_func  = NULL;
+	thread_params.thread_name  = NULL;
+	thread_params.user_arg     = 0;
+	thread_params.stack_size   = 0;
+	thread_params.priority     = 0;
+
+	result = HAL_ThreadDelete(&thread_params);
+	if (QCLOUD_RET_SUCCESS == result) {
+		Log_d("delete at_parser thread success!");
+	} else {
+		Log_e("delete at_parser thread fail!");
+	}
+#endif
+	at_client_para_deinit(client);
+	client->status = AT_STATUS_UNINITIALIZED;
+	//*pClient = NULL;
     return QCLOUD_RET_SUCCESS;
 }

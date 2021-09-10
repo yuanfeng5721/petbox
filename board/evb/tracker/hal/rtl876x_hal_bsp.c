@@ -17,11 +17,16 @@
  *                              Header Files
  *============================================================================*/
 #include <board.h>
+#include <stdio.h>
 #include "rtl876x_gpio.h"
 #include "rtl876x_pinmux.h"
 #include "rtl876x_rcc.h"
 #include "rtl876x_hal_bsp.h"
 
+led_ctl led_ctl_tab[LED_MAX] = {
+	[LED_BLUE] = NULL,
+	[LED_GREEN] = NULL,
+};
 /**
   * @brief  Initialization of pinmux settings and pad settings.
   * @param  No parameter.
@@ -131,6 +136,12 @@ void blue_led_ctl(uint8_t onoff)
 		GPIO_WriteBit(BLUE_LED_OUTPUT, (BitAction)(1));
 	else
 		GPIO_WriteBit(BLUE_LED_OUTPUT, (BitAction)(0));
+}
+
+void leds_init(void)
+{
+	led_ctl_tab[LED_BLUE] = blue_led_ctl;
+	led_ctl_tab[LED_GREEN] = green_led_ctl;
 }
 
 void status_led(LedEvent event)
