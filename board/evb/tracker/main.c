@@ -30,6 +30,8 @@
 #include "otp_config.h"
 #include "os_task.h"
 #include "custom_log.h"
+#include "rtc.h"
+#include "sensor.h"
 
 #include "rtl876x_hal_bsp.h"
 #include "network_interface.h"
@@ -172,6 +174,12 @@ void network_test()
  */
 void driver_init(void)
 {
+	//RTC init
+	rtc_init();
+	
+	//Gsensor init
+	sensor_init();
+	
 	// register gnss callback function
 	at_device_gnss_init(AT_GNSS_EVT_GET_FIX, gnss_report_cb);
 	
@@ -213,7 +221,7 @@ void network_task(void *p_param)
  */
 void network_task_init()
 {
-    os_task_create(&app_network_task_handle, "network_task", network_task, 0, 256 * 5, 1);
+    os_task_create(&app_network_task_handle, "network_task", network_task, 0, 256 * 7, 1);
 }
 #pragma pack (1)
 typedef struct{
@@ -278,7 +286,7 @@ void app_main_task(void *p_param)
 }
 void main_task_init(void)
 {
-	os_task_create(&app_main_task_handle, "app_main", app_main_task, 0, 256 * 4, 1);
+	os_task_create(&app_main_task_handle, "app_main", app_main_task, 0, 256 * 5, 1);
 }
 /**
  * @brief    Contains the initialization of all tasks

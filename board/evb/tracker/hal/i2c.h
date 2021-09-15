@@ -4,26 +4,23 @@
   *                     Define to prevent recursive inclusion
   *============================================================================*/
 
-#ifndef _RTC_H_
-#define _RTC_H_
+#ifndef _I2C_H_
+#define _I2C_H_
 
 /*============================================================================*
   *                               Header Files
   *============================================================================*/
 #include <stdint.h>
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void rtc_init(void);
-size_t set_local_timestamp(size_t timestamp);
-size_t get_local_timestamp(void);
-time_t time (time_t *_timer);
-
+void i2c_init(uint8_t slaveAddr);
+int i2c_write(uint8_t i2cx, uint8_t addr, uint8_t val);
+int i2c_read(uint8_t i2cx, uint8_t addr, uint8_t *val);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _RTC_H_ */
+#endif /* _I2C_H_ */

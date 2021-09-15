@@ -27,6 +27,12 @@ extern "C" {
 #define DATA_UART_TX_PIN     P3_0
 #define DATA_UART_RX_PIN     P3_1
 
+#define I2C0_SCL_PIN     	 P3_2
+#define I2C0_SDA_PIN     	 P3_4
+
+#define GSENSOR_INT_PIN      P0_4
+#define GSENSOR_IRQ			 GPIO4_IRQn
+
 #define SYS_3V8_CTL_PIN      P3_3
 #define SYS_3V8_CTL_OUTPUT   GPIO_GetPin(SYS_3V8_CTL_PIN)
 

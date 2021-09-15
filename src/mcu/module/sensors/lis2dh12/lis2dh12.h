@@ -14,7 +14,11 @@
 // otherwise test mode is motion detect
 //#define   USE_MOTION_DETECT_FIFO_MODE
 
-#include "nrf_drv_gpiote.h"
+#include <stdint.h>
+#include <stdio.h>
+
+#define LIS2_ADDRESS  0x18
+#define LIS2_ID 	  
 
 // Public interface functions
 void vLIS2_Init(void);

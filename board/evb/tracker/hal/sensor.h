@@ -4,26 +4,27 @@
   *                     Define to prevent recursive inclusion
   *============================================================================*/
 
-#ifndef _RTC_H_
-#define _RTC_H_
+#ifndef _SENSOR_H_
+#define _SENSOR_H_
 
 /*============================================================================*
   *                               Header Files
   *============================================================================*/
 #include <stdint.h>
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void rtc_init(void);
-size_t set_local_timestamp(size_t timestamp);
-size_t get_local_timestamp(void);
-time_t time (time_t *_timer);
+#define MAX_SENSOR_NUM   2
+
+#define LIS2DH_NUM_ID    0
+#define STK8XXX_NUM_ID   1  
+
+int8_t sensor_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _RTC_H_ */
+#endif /* _SENSOR_H_ */

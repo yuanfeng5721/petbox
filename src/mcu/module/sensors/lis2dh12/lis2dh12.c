@@ -13,12 +13,14 @@
 *
 *  Author: Decawave, 2018
 */
-
-#include <stdio.h>
-
-#include "port_platform.h"
+#include "board.h"
+#include "rtl876x_nvic.h"
+#include "rtl876x_gpio.h"
 #include "lis2dh12.h"
 #include "lis2dh12registers.h"
+#include "i2c.h"
+#include "os_sched.h"
+#include "custom_log.h"
 
 // Local variables and constants
 
@@ -60,6 +62,44 @@ static void vDumpFifo(uint8_t u8Num);
 
 // Public interface functions
 
+void vLIS2_Int_Init()
+{
+	GPIO_InitTypeDef Gpio_Struct;
+    GPIO_StructInit(&Gpio_Struct);
+
+    Gpio_Struct.GPIO_Pin = GPIO_GetPin(GSENSOR_INT_PIN);
+    Gpio_Struct.GPIO_Mode = GPIO_Mode_IN;
+    Gpio_Struct.GPIO_ITCmd = ENABLE;
+    Gpio_Struct.GPIO_ITTrigger = GPIO_INT_Trigger_EDGE;
+    Gpio_Struct.GPIO_ITPolarity = GPIO_INT_POLARITY_ACTIVE_LOW;
+    Gpio_Struct.GPIO_ITDebounce = GPIO_INT_DEBOUNCE_DISABLE;
+    Gpio_Struct.GPIO_DebounceTime = 0;
+    GPIO_Init(&Gpio_Struct);
+
+    GPIO_MaskINTConfig(GPIO_GetPin(GSENSOR_INT_PIN), DISABLE);
+    GPIO_INTConfig(GPIO_GetPin(GSENSOR_INT_PIN), ENABLE);
+
+    NVIC_InitTypeDef NVIC_InitStruct;
+    NVIC_InitStruct.NVIC_IRQChannel = GSENSOR_IRQ;//P2_4
+    NVIC_InitStruct.NVIC_IRQChannelPriority = 3;
+    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStruct);
+}
+
+void Sleep(uint16_t ms)
+{
+	os_delay(ms);
+}
+
+void vTWI_Write(uint8_t reg, uint8_t val)
+{
+	i2c_write(0, reg, val);
+}
+
+void vTWI_Read(uint8_t reg, uint8_t *val)
+{
+	i2c_read(0, reg, val);
+}
 /*!
 * @brief Initialise the LIS2DH12 Accelerometer
 *
@@ -74,10 +114,11 @@ static void vDumpFifo(uint8_t u8Num);
 */
 void vLIS2_Init (void)
 {
+	uint8_t u8whoAmI;
     // If this function is called after power on, then the LIS2DH12
     // will still be in boot mode, allow time for boot to complete.
-    Sleep(10);
-
+    //Sleep(10);
+	
     // If called by a power on reset, then force the device to boot,
     // allowing time for the boot to complete.
     vTWI_Write(CTRL_REG5, BOOT);
@@ -86,7 +127,7 @@ void vLIS2_Init (void)
     // Put device into low-power mode.
     vTWI_Write(CTRL_REG4, HIRES_MODE);
     vTWI_Write(CTRL_REG1, (X_EN | LPEN | ODR_1Hz));
-
+	
     // Configure MCU to accept LIS2DH12 INT1 pin interrupts
     vInterruptInit();
 }
@@ -100,8 +141,9 @@ uint8_t u8LIS2_TestRead(void)
 {
     uint8_t u8whoAmI;
     vTWI_Read (WHO_AM_I, &u8whoAmI);
-
-    return u8whoAmI;
+	
+	LOG_I("LIS2 Gsensor id: %d \r\n", u8whoAmI);
+    return (u8whoAmI == I_AM);
 }
 
 /*!
@@ -275,7 +317,7 @@ static void vInterruptInit (void)
 {
     boInterruptEvent = false;
     
-    portSetInterruptHook(vInterruptHandler);
+    //portSetInterruptHook(vInterruptHandler);
 }
 
 /*!
@@ -334,7 +376,7 @@ static void vDumpFifo(uint8_t u8Num)
     for (u8Cnt=0; u8Cnt < u8Num; u8Cnt++)
     {
         // Convert twos-compliment into signed 16-bit integer and remove left justification
-        printf("%d %d %d\n",((int16_t)atsFifo[u8Cnt].u16_X) / (1 << u8SignExtend),
+        LOG_D("%d %d %d\n",((int16_t)atsFifo[u8Cnt].u16_X) / (1 << u8SignExtend),
                             ((int16_t)atsFifo[u8Cnt].u16_Y) / (1 << u8SignExtend),
                             ((int16_t)atsFifo[u8Cnt].u16_Z) / (1 << u8SignExtend));
     }

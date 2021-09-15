@@ -337,7 +337,7 @@
               <MiscControls>--gnu --preinclude app_flags.h --bss_threshold=0</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal;..\..\..\src\mcu\module\cmd_uart;..\tracker\app;..\..\..\src\mcu\module\nv\easyflash\inc;..\..\..\src\mcu\module\nv\hal</IncludePath>
+              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\tracker\ble;..\tracker;..\..\..\src\iot\include;..\..\..\src\iot\include\exports;..\..\..\src\iot\src\internal_inc;..\..\..\src\iot\platform\at_device\esp8266;..\..\..\src\mcu\module\at_uart;..\..\..\src\iot\platform\at_device\sim7070;..\..\..\src\iot\platform\at_device\sim76xx;..\tracker\protocol;..\tracker\hal;..\..\..\src\mcu\module\cmd_uart;..\tracker\app;..\..\..\src\mcu\module\nv\easyflash\inc;..\..\..\src\mcu\module\nv\hal;..\..\..\src\mcu\module\sensors\lis2dh12;..\..\..\src\mcu\module\sensors\stk8ba58</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -528,6 +528,31 @@
               <FileName>rtc.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\hal\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\sensor.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>sensor</GroupName>
+          <Files>
+            <File>
+              <FileName>lis2dh12.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\sensors\lis2dh12\lis2dh12.c</FilePath>
+            </File>
+            <File>
+              <FileName>stk8xxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\sensors\stk8ba58\stk8xxx.c</FilePath>
             </File>
           </Files>
         </Group>
