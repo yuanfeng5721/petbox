@@ -1340,39 +1340,6 @@ error:
 }
 
 /******************************************************************************
-* Function    : btlink_assemble_ack_frame
-* 
-* Author      : eric
-* 
-* Parameters  : 
-* 
-* Return      : 
-* 
-* Description : 
-******************************************************************************/
-bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
-{
-    bool ret = true;
-
-    #if 0
-    assert_param(dn_frame != NULL);
-
-    switch (dn_frame->type)
-    {
-        case BTLINK_FH_ID_BSI:     //Bearer Setting Information
-            //btlink_assemble_general_ack_frame(dn_frame, ack_frame, NULL);
-            btlink_assemble_general_ack_frame(dn_frame, 0xff);
-            break;
-
-        default:
-            ret  = false;
-            break;
-    }
-    #endif	
-    return ret;
-}
-
-/******************************************************************************
 * Function    : btlink_check_and_exec_protocol
 * 
 * Author      : eric

@@ -176,5 +176,6 @@ typedef struct
 extern btlink_parsed_at_cmd_struct   parsed_at_cmd;
 extern int btlink_cmd_parse(char *cmd, int16_t cmd_len);
 extern bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame);
+extern bool btlink_assemble_nack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame);
 extern bool btlink_is_protocol_format(uint8_t* msg_content, uint16_t msg_length);
 #endif //_BTLINK_PROTOCOL_HDLR_H_

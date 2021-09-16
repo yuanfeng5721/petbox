@@ -35,7 +35,8 @@
 * Extern Variable and Function
 *************************************************************************/
 extern const char *btlink_dn_frame_header_str[];
-
+extern void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, btlink_parsed_dnlnk_frame_struct *dn_frame);
+extern void btlink_pack_asc_nack_msg_hdlr(uint8_t* buff, uint16_t buf_len, btlink_parsed_dnlnk_frame_struct *dn_frame);
 /*************************************************************************
 * Global Variable
 *************************************************************************/
@@ -383,46 +384,35 @@ static void btlink_cmd_exec (btlink_parsed_dnlnk_frame_struct *dn_frame)
     }
 }
 
+bool btlink_assemble_ack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
+{
+	uint8_t buff[128] = {0};
+	btlink_pack_asc_ack_msg_hdlr(buff, sizeof(buff), dn_frame);
+}
+
+bool btlink_assemble_nack_frame(btlink_parsed_dnlnk_frame_struct *dn_frame)
+{
+	uint8_t buff[128] = {0};
+	btlink_pack_asc_nack_msg_hdlr(buff, sizeof(buff), dn_frame);
+}
+
 void btlink_cmd_process(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
 	//uint8_t tmp_buff[BTLINK_MAX_ACK_FRAME_SIZE] = {0};
 	btlink_cmd_exec(dn_frame);
 
-	#if 0
 	//Step2 Assemble and send ACK frame
 	if (dn_frame->ack)
 	{
-		memset(&(g_btlink_config.cfg_cmdack), 0, sizeof(btlink_config_cmd_ack_struct));
-		g_btlink_config.cfg_cmdack.flag = false;
-		#if 0
-		btlink_assemble_ack_frame(dn_frame);
-		//btlink_make_ack_report_packet(&g_resp_report_items.ack, parsed_at_cmd.character);
-		#else
-		switch (dn_frame->type)
+		if (dn_frame->valid == true)
 		{
-			case BTLINK_FH_ID_DBG:
-			case BTLINK_FH_ID_CFG:
-			{
-				snprintf((char *)tmp_buff, BTLINK_FLD_LEN_CAN_DATA,
-					"%s%s"    //+ACK:BTXXX
-					"%c%s"    //parameter string  //serial_number
-					"%c%04X"  //count number
-					"%c",    // Tail
-					BTLINK_ACK_HEADER, btlink_dn_frame_header_str[dn_frame->type],
-					BTLINK_CHR_SEPARATOR, dn_frame->para_string, /*dn_frame->serial_number,*/
-					BTLINK_CHR_SEPARATOR, btlink_get_report_count(),
-					BTLINK_CHR_TAIL);
-				btlink_assemble_dat_cmd_string(tmp_buff, g_btlink_config.cfg_cmdack.data);
-				g_btlink_config.cfg_cmdack.flag = true;
-				break;
-			}
-
-			default:
-				break;
+			btlink_assemble_ack_frame(dn_frame);
 		}
-		#endif
+		else
+		{
+			btlink_assemble_nack_frame(dn_frame);
+		}
 	}
-	#endif
 }
 
 /*****************************************************************************************
