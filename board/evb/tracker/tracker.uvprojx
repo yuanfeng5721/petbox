@@ -647,6 +647,16 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>gnss</GroupName>
+          <Files>
+            <File>
+              <FileName>gnss.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\gnss.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>iot</GroupName>
           <Files>
             <File>
