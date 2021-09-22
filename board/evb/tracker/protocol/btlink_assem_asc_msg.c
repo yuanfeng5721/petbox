@@ -32,7 +32,7 @@
 #include "btlink_protocol_def.h"
 #include "btlink_protocol_verno.h"
 #include "btlink_cmd_rmmi.h"
-
+#include "at_device_sim7070.h"
 /*****************************************************************************
 * Define
 *****************************************************************************/
@@ -527,23 +527,21 @@ uint16_t btlink_prot_frame_tail_ascii(uint8_t* buff, uint16_t buf_len)
 * 
 * Description : pack +ACK ASCII message.
 ******************************************************************************/ 
-void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, uint8_t* cmd_str)
+void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
-		uint8_t imei[1+BTLINK_LEN_IMEI] = "123456789012345";
+		char *imei = at_device_get_imei();
 		uint16_t len = 0;
-		//uint8_t device_type = 0;
-		//uint8_t mar_ver = 0;
-		//uint8_t min_ver = 0;
 	
 		/* Head */
 		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t *)ASC_ACK_HEAD, strlen(ASC_ACK_HEAD), false);
 
 		/* Command id */
-		//btlink_dn_frame_header_str[BTLINK_FH_ID_DBG]
-		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, cmd_str, strlen((char *)cmd_str), false);
+		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, 
+										(uint8_t *)btlink_dn_frame_header_str[dn_frame->type], 
+										strlen(btlink_dn_frame_header_str[dn_frame->type]), false);
 	
 		/* IMEI */
-		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, imei, strlen((char *)imei), true);
+		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t *)imei, strlen(imei), true);
 	
 		/* Device Type */
 		snprintf((char*)&buff[len], buf_len-len, "%c%02X", BTLINK_CHR_SEPARATOR, BTLINK_DEVICE_TYPE);
@@ -559,4 +557,50 @@ void btlink_pack_asc_ack_msg_hdlr(uint8_t* buff, uint16_t buf_len, uint8_t* cmd_
 		/* Tail(Send Time & Count Num & '#') */
 		len += btlink_prot_frame_tail_ascii(&buff[len], buf_len-len);
 	
+}
+
+/******************************************************************************
+* Function    : btlink_pack_asc_nack_msg_hdlr
+* 
+* Author      : Eric
+* 
+* Parameters  : 
+* 
+* Return      : 
+* 
+* Description : pack +ACK ASCII message.
+******************************************************************************/ 
+void btlink_pack_asc_nack_msg_hdlr(uint8_t* buff, uint16_t buf_len, btlink_parsed_dnlnk_frame_struct *dn_frame)
+{
+		char *imei = at_device_get_imei();
+		uint16_t len = 0;
+	
+		/* Head */
+		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t *)ASC_NACK_HEAD, strlen(ASC_NACK_HEAD), false);
+
+		/* Command id */
+		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, 
+										(uint8_t *)btlink_dn_frame_header_str[dn_frame->type], 
+										strlen(btlink_dn_frame_header_str[dn_frame->type]), false);
+	
+		/* IMEI */
+		len += btlink_prot_pack_string_ascii(&buff[len], buf_len-len, (uint8_t *)imei, strlen(imei), true);
+	
+		/* Device Type */
+		snprintf((char*)&buff[len], buf_len-len, "%c%02X", BTLINK_CHR_SEPARATOR, BTLINK_DEVICE_TYPE);
+    len += strlen((char*)&buff[len]);
+	
+		/* Protocol Version */
+		snprintf((char*)&buff[len], buf_len-len, "%c%d%d", BTLINK_CHR_SEPARATOR, BTLINK_SW_MAR_VER, BTLINK_SW_MIN_VER);
+    len += strlen((char*)&buff[len]);
+	
+		/* Sub Command */
+	  len += btlink_prot_pack_char_ascii(&buff[len], buf_len-len, BTLINK_CHR_SEPARATOR, 1);
+	
+		/* Cause */
+		snprintf((char*)&buff[len], buf_len-len, "%c%d", BTLINK_CHR_SEPARATOR, 0);
+    len += strlen((char*)&buff[len]);
+		
+		/* Tail(Send Time & Count Num & '#') */
+		len += btlink_prot_frame_tail_ascii(&buff[len], buf_len-len);
 }
