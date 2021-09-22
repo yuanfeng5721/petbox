@@ -52,7 +52,7 @@ time_t time (time_t *_timer)
 	int8_t time_zone = 8;
 	
 	//need get local time
-	timestamp_to_date(get_local_timestamp, &rtc_data_time, time_zone);
+	timestamp_to_date(get_local_timestamp(), &rtc_data_time, time_zone);
 	
 	ts.tm_hour = rtc_data_time.hour;
 	ts.tm_min  = rtc_data_time.minute;
