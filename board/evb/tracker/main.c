@@ -35,7 +35,7 @@
 
 #include "rtl876x_hal_bsp.h"
 #include "network_interface.h"
-#include "gnss_interface.h"
+#include "gnss.h"
 #include "nv.h"
 #include "btlink_protocol_util.h"
 #include "btlink_nv.h"
@@ -143,14 +143,7 @@ void board_init(void)
 	sys_3v8_power(1);
 }
 
-void gnss_report_cb(at_gnss_event_t event, gnss_report_t *report)
-{
-	//do some thing to deal gnss report
-	if(report) {
-		LOG_I("GNSS: (lat:%f,lon:%f)(time:%d:%d:%d) \r\n", report->lat, report->lon, 
-					report->time.hour, report->time.minute, report->time.sec);
-	}
-}
+
 
 void network_test()
 {
@@ -180,8 +173,8 @@ void driver_init(void)
 	//Gsensor init
 	sensor_init();
 	
-	// register gnss callback function
-	at_device_gnss_init(AT_GNSS_EVT_GET_FIX, gnss_report_cb);
+	//gnss init
+	gnss_init();
 	
 	// init at device and network
 	network_status = (!network_init())?1:0;	

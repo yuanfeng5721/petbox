@@ -15,6 +15,7 @@ typedef struct{
     int minute;
     int sec;
 }gnss_time;
+
 typedef struct{
 	int mode;
 	float lat;
@@ -25,6 +26,7 @@ typedef struct{
 	float speed;
 	float course;
 	gnss_time time;
+	int64_t timestamp;
 } gnss_report_t;
 
 typedef enum{
@@ -37,7 +39,7 @@ typedef enum{
 typedef void (*at_gnss_evt_cb_t)(at_gnss_event_t event, gnss_report_t *report);
 
 void at_device_gnss_init(at_gnss_event_t event, at_gnss_evt_cb_t cb);
-
+void at_device_gnss_set(bool enable);
 #ifdef __cplusplus
 }
 #endif

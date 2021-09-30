@@ -37,6 +37,7 @@
 #define SEND_FAIL_FLAG (1 << 2)
 
 volatile uint8_t sg_SocketBitMap = 0;
+static bool gnss_enable = true;
 
 static at_evt_cb_t at_evt_cb_table[] = {
     [AT_SOCKET_EVT_RECV]   = NULL,
@@ -237,12 +238,12 @@ static void urc_gnss_func(const char *data, size_t size)
     POINTER_SANITY_CHECK_RTN(data);
 	//+SGNSCMD: 2,08:14:43,31.16211,121.30720,13.12,50.54,41.15,0.00,0.00,0x17bba2c7d38,375  
     Log_d("GNSS: %s \r\n", data);
-	sscanf(data, "+SGNSCMD: %d,%d:%d:%d,%f,%f,%f,%f,%f,%f,%f", 
+	sscanf(data, "+SGNSCMD: %d,%d:%d:%d,%f,%f,%f,%f,%f,%f,%f,%lld", 
 			&gnss_report.mode, 
 			&gnss_report.time.hour, &gnss_report.time.minute, &gnss_report.time.sec,
 	        &gnss_report.lat, &gnss_report.lon, 
 			&gnss_report.accuracy, &gnss_report.altitude, 
-	        &gnss_report.alt_sea_level, &gnss_report.speed, &gnss_report.course);
+	        &gnss_report.alt_sea_level, &gnss_report.speed, &gnss_report.course,&gnss_report.timestamp);
 	
 	//Log_d("GNSS: (lat:%f,lon:%f)(time:%d:%d:%d) \r\n", gnss_report.lat, gnss_report.lon, gnss_report.time.hour, gnss_report.time.minute, gnss_report.time.sec);
 	if(gnss_report.mode > 0) {
@@ -559,27 +560,29 @@ static int sim7070_init(void)
 #endif /* USING_RTC */
 
 #ifdef USING_GNSS
-		/* open GNSS */
-		for (i = 0; i < GNSS_RETRY; i++)
-        {
-			if (at_exec_cmd(resp, "AT+SGNSCFG=\"OUTURC\",1") < 0)
+		if(gnss_enable) {
+			/* open GNSS */
+			for (i = 0; i < GNSS_RETRY; i++)
 			{
-				at_delayms(500);
-				continue;
+				if (at_exec_cmd(resp, "AT+SGNSCFG=\"OUTURC\",1") < 0)
+				{
+					at_delayms(500);
+					continue;
+				}
+				if (at_exec_cmd(resp, "AT+SGNSCMD=2,1000,0,1") < 0)
+				{
+					at_delayms(500);
+					continue;
+				}
+				
+				break;
 			}
-			if (at_exec_cmd(resp, "AT+SGNSCMD=2,1000,0,1") < 0)
+			if (i == GNSS_RETRY)
 			{
-				at_delayms(500);
-				continue;
+				Log_e("%s device GNSS open failed.", DEVICE_NAME);
+				ret = QCLOUD_ERR_FAILURE;
+				goto __exit;
 			}
-			
-			break;
-		}
-		if (i == GNSS_RETRY)
-		{
-			Log_e("%s device GNSS open failed.", DEVICE_NAME);
-			ret = QCLOUD_ERR_FAILURE;
-			goto __exit;
 		}
 #endif
         /* initialize successfully  */
@@ -956,6 +959,11 @@ void at_device_gnss_init(at_gnss_event_t event, at_gnss_evt_cb_t cb)
 	if(event < AT_GNSS_EVT_MAX) {
 		at_gnss_evt_cb_table[event] = cb;
 	}
+}
+
+void at_device_gnss_set(bool enable)
+{
+	gnss_enable = enable;
 }
 
 /*at device driver must realize this api which called by HAL_AT_TCP_Init*/
