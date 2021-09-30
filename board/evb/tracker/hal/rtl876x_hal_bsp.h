@@ -31,6 +31,8 @@ extern "C" {
 typedef enum{
 	START_TIMER_ID = 0x100,
 	LEDS_TIMER_ID,
+	SEC_TIMER_ID,    /* seconds base timer */
+	MIN_TIMER_ID,    /* minutes base timer */
 }CUSTOM_TIMER_ID;
 /********************************************************************************/
 
