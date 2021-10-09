@@ -19,10 +19,12 @@
 /******************************************************************************
 * Include Files
 ******************************************************************************/
-#include "btlink_timer.h"
 #include "os_timer.h"
 #include "rtl876x_hal_bsp.h"
 
+#include "btlink_timer.h"
+#include "btlink_protocol_cmd.h"
+#include "btlink_assem_hex_msg.h"
 /*****************************************************************************
 * Define
 *****************************************************************************/
@@ -35,6 +37,7 @@
 /*****************************************************************************
 * Extern Variable
 *****************************************************************************/
+extern uint16_t g_con_send_min_cnt;
 
 /*****************************************************************************
 * Extern Function
@@ -54,14 +57,23 @@ void *blink_min_timer_handle;
 void btlink_min_timer_callback(void *p_handle)
 {
 	uint32_t timer_id;
-
+	uint8_t buff[256] = {0};
+	
 	// Which timer expired?
 	os_timer_id_get(&p_handle, &timer_id);
 
 	if (timer_id == MIN_TIMER_ID)
 	{
+		g_con_send_min_cnt++;
+		if (g_con_send_min_cnt >= g_btlink_config.cfg_lss.continue_send_interval)
+		{
+			g_con_send_min_cnt = 0;
+			//assemble continue send message.
+		}
+		
+		btlink_assemm_hex_prt_msg_hdlr(buff, 0x00, NULL);
+		
 		btlink_start_min_timer();
-		//do something
 	}
 }
 
