@@ -30,6 +30,7 @@
 #include "btlink_protocol_cmd.h"
 #include "btlink_protocol_hdlr.h"
 #include "btlink_protocol_util.h"
+#include "btlink_timer.h"
 
 /*************************************************************************
 * Extern Variable and Function
@@ -41,6 +42,8 @@ extern void btlink_pack_asc_nack_msg_hdlr(uint8_t* buff, uint16_t buf_len, btlin
 * Global Variable
 *************************************************************************/
 char btlink_canack_sn[ 1 + BTLINK_LEN_SERIAL_NUM] = "";
+uint16_t g_con_send_min_cnt = 0;
+
 /*******************************************************/
 //Temporary  variables definition
 /*******************************************************/
@@ -252,6 +255,28 @@ static void btlink_cmd_exec_scs(btlink_parsed_dnlnk_frame_struct *dn_frame)
     }
 }
 
+void btlink_lss_con_send_interval_change_hdlr(uint16_t pre_send_interval, uint16_t curr_send_interval)
+{
+	if (pre_send_interval == 0)
+	{
+		btlink_start_min_timer();
+	}
+	else
+	if (curr_send_interval == 0)
+	{
+		btlink_stop_min_timer();
+	}
+	else
+	{
+		if (btlink_stop_min_timer())
+		{
+			btlink_start_min_timer();
+		}
+	}
+	
+	g_con_send_min_cnt = 0;
+}
+
 static void btlink_cmd_exec_lss(btlink_parsed_dnlnk_frame_struct *dn_frame)
 {
     btlink_arg_lss_struct *arg_lss = &(dn_frame->arg.lss);
@@ -267,7 +292,9 @@ static void btlink_cmd_exec_lss(btlink_parsed_dnlnk_frame_struct *dn_frame)
 		// <Continues Send Interval>
 		if (g_btlink_config.cfg_lss.continue_send_interval != arg_lss->continue_send_interval)
 		{
+			btlink_lss_con_send_interval_change_hdlr(g_btlink_config.cfg_lss.continue_send_interval, arg_lss->continue_send_interval);
 			g_btlink_config.cfg_lss.continue_send_interval = arg_lss->continue_send_interval;
+			 
 			need_save = true;
 		}
 
