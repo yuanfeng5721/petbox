@@ -286,6 +286,73 @@ static void sim7070_set_event_cb(at_socket_evt_t event, at_evt_cb_t cb)
     }
 }
 
+#ifdef USING_GNSS
+static int sim7070_gnss_init(bool enable)
+{
+#define GNSS_RETRY					   3
+    at_response_t resp = NULL;
+    int           ret;
+    int           i;
+	
+    resp = at_create_resp(64, 0, AT_RESP_TIMEOUT_MS);
+    if (NULL == resp) {
+        Log_e("No memory for response structure!");
+        ret = QCLOUD_ERR_FAILURE;
+        goto __exit;
+    }
+
+	/* wait SIM7070 startup finish, Send AT every 5s, if receive OK, SYNC success*/
+	if(at_obj_wait_connect(SIM7070_WAIT_CONNECT_TIME))
+	{
+		Log_e("sim7070 connect timeout!");
+		ret = QCLOUD_ERR_TIMEOUT;
+		goto __exit;
+	}
+
+	if(gnss_enable) {
+		at_delayms(10000);
+		/* open GNSS */
+		//at_exec_cmd(resp, "AT+CGNSPWR=1");
+		for (i = 0; i < GNSS_RETRY; i++)
+		{
+			if (at_exec_cmd(resp, "AT+SGNSCFG=\"OUTURC\",1") < 0)
+			{
+				at_delayms(500);
+				continue;
+			}
+			if (at_exec_cmd(resp, "AT+SGNSCMD=2,1000,0,1") < 0)
+			{
+				at_delayms(500);
+				continue;
+			}
+			
+			break;
+		}
+		if (i == GNSS_RETRY)
+		{
+			Log_e("%s device GNSS open failed.", DEVICE_NAME);
+			ret = QCLOUD_ERR_FAILURE;
+			goto __exit;
+		}
+	}
+
+	/* initialize successfully  */
+	ret = QCLOUD_RET_SUCCESS;
+
+__exit:
+	if (ret != QCLOUD_RET_SUCCESS)
+	{
+		Log_i("%s device gnss initialize error...", DEVICE_NAME);
+	}
+
+    if (resp) {
+        at_delete_resp(resp);
+    }
+
+    return ret;
+}
+#endif
+
 static int sim7070_init(void)
 {
 #define INIT_RETRY                     10
@@ -367,8 +434,10 @@ static int sim7070_init(void)
 			if(strstr(str, "IMEI"))
 				sscanf(str, "IMEI:%s", g_IMEI);
 		}
-		
-		
+#ifdef USING_GNSS		
+		sim7070_gnss_init(gnss_enable);
+#endif
+#if 1		
 		/* check SIM card */
 		at_delayms(1000);
 		for (i = 0; i < CPIN_RETRY; i++)
@@ -386,7 +455,9 @@ static int sim7070_init(void)
 		if (i == CPIN_RETRY)
 		{
 			ret = QCLOUD_ERR_FAILURE;
-			goto __exit;
+			Log_i("no sim card, pleast insert...");
+			//goto __exit;
+			break;
 		}
 		
 		
@@ -433,7 +504,7 @@ static int sim7070_init(void)
         {
             Log_e("%s device GPRS attach failed.", DEVICE_NAME);
             ret = QCLOUD_ERR_FAILURE;
-            goto __exit;
+            goto __exit;		
         }
 		at_delayms(1000);
 		/* check the GSM network is registered */
@@ -528,7 +599,9 @@ static int sim7070_init(void)
 #ifdef USING_RTC
         /* get real time */
         int year, month, day, hour, min, sec;
-
+		
+		at_obj_exec_cmd(resp, "AT+CLTS=1");
+		at_delayms(2000);
         for (i = 0; i < CCLK_RETRY; i++)
         {
             if (at_obj_exec_cmd(resp, "AT+CCLK?") < 0)
@@ -558,10 +631,12 @@ static int sim7070_init(void)
             goto __exit;
         }
 #endif /* USING_RTC */
-
-#ifdef USING_GNSS
+#endif
+#if 0
+		at_delayms(10000);
 		if(gnss_enable) {
 			/* open GNSS */
+			//at_exec_cmd(resp, "AT+CGNSPWR=1");
 			for (i = 0; i < GNSS_RETRY; i++)
 			{
 				if (at_exec_cmd(resp, "AT+SGNSCFG=\"OUTURC\",1") < 0)
@@ -964,6 +1039,82 @@ void at_device_gnss_init(at_gnss_event_t event, at_gnss_evt_cb_t cb)
 void at_device_gnss_set(bool enable)
 {
 	gnss_enable = enable;
+}
+
+int at_device_gnss_xtra(void)
+{
+#if 0
+	#define RESOLVE_RETRY 5
+
+    char          recv_ip[16] = {0};
+    at_response_t resp;
+    int           ret, i, status = 0;
+	uint8_t retry = 5;
+	int timeout = 10000;
+	char temp[20] = {0};
+
+    POINTER_SANITY_CHECK(host_name, QCLOUD_ERR_INVAL);
+    POINTER_SANITY_CHECK(host_ip, QCLOUD_ERR_INVAL);
+
+    if (host_ip_len < 16) {
+        Log_e("host ip buff too short");
+        return QCLOUD_ERR_FAILURE;
+    }
+
+    resp = at_create_resp(128, 4, 2 * AT_RESP_TIMEOUT_MS);
+    if (NULL == resp) {
+        Log_e("No memory for response structure!");
+        return QCLOUD_ERR_FAILURE;
+    }
+
+    for (i = 0; i < RESOLVE_RETRY; i++) {
+        ret = at_obj_exec_cmd(resp, "AT+CDNSGIP=\"%s\",%d,%d", host_name, retry, timeout);
+        if (QCLOUD_RET_SUCCESS != ret) {
+            Log_e("exec AT+CDNSGIP=\"%s\" fail", host_name);
+            goto __exit;
+        }
+		//at_delayms(5000);
+        /* parse the third line of response data, get the IP address */
+        if (at_resp_parse_line_args_by_kw(resp, "+CDNSGIP:", "+CDNSGIP: %d,%[^,],\"%[^\"]", &status, temp, recv_ip) < 0) {
+            at_delayms(100);
+            /* resolve failed, maybe receive an URC CRLF */
+            continue;
+        } else {
+			if(!status)
+			{
+				at_delayms(100);
+				continue;
+			}
+		}
+
+        if (strlen(recv_ip) < 8) {
+            at_delayms(100);
+            /* resolve failed, maybe receive an URC CRLF */
+            continue;
+        } else {
+            strncpy(host_ip, recv_ip, 15);
+            host_ip[15] = '\0';
+            break;
+        }
+    }
+	
+	if (i == RESOLVE_RETRY)
+	{
+		Log_e("%s device parse domain failed.", DEVICE_NAME);
+		ret = QCLOUD_ERR_FAILURE;
+		goto __exit;
+	}
+		
+__exit:
+
+    if (resp) {
+        at_delete_resp(resp);
+    }
+
+#undef RESOLVE_RETRY
+
+    return ret;
+#endif
 }
 
 /*at device driver must realize this api which called by HAL_AT_TCP_Init*/
