@@ -40,12 +40,13 @@
 #include "btlink_protocol_util.h"
 #include "btlink_nv.h"
 
-uint8_t network_status = 0;
+#include "network_task.h"
+#include "battery.h"
+
 /** @defgroup  BT5_CENTRAL_DEMO_MAIN BT5 Central Main
     * @brief Main file to initialize hardware and BT stack and start task scheduling
     * @{
     */
-void *app_network_task_handle;   //!< APP Task handle
 void *app_main_task_handle;
 /*============================================================================*
  *                              Functions
@@ -143,23 +144,6 @@ void board_init(void)
 	sys_3v8_power(1);
 }
 
-
-
-void network_test()
-{
-#define TEST_NETWORK 1
-#if TEST_NETWORK
-	int socket_fd;
-	sockaddr_t addr;
-	char *domain = "www.163.com";
-	
-	addr.port = 6522;
-	addr.type = NETWORK_TCP;
-	
-	if(!network_prase_domain(domain, &addr))
-		socket_fd = network_connect(&addr);
-#endif
-}
 /**
  * @brief    Contains the initialization of peripherals
  * @note     Both new architecture driver and legacy driver initialization method can be used
@@ -173,11 +157,8 @@ void driver_init(void)
 	//Gsensor init
 	sensor_init();
 	
-	//gnss init
-	gnss_init();
-	
-	// init at device and network
-	network_status = (!network_init())?1:0;	
+	//battery init
+	battery_init();
 }
 
 /**
@@ -188,34 +169,6 @@ void pwr_mgr_init(void)
 {
 }
 
-/**
- * @brief        App test task to handle events & messages
- * @param[in]    p_param    Parameters sending to the task
- * @return       void
- */
-void network_task(void *p_param)
-{
-    uint8_t event;
-	
-	driver_init();
-	network_test();
-	
-    while (true)
-    {
-		os_delay(1000);
-		led_ctl_tab[network_status](1);
-		os_delay(100);
-		led_ctl_tab[network_status](0);
-    }
-}
-/**
- * @brief  Initialize App task
- * @return void
- */
-void network_task_init()
-{
-    os_task_create(&app_network_task_handle, "network_task", network_task, 0, 256 * 7, 1);
-}
 #pragma pack (1)
 typedef struct{
 	uint8_t  data8;
@@ -262,11 +215,13 @@ void imei_nv_test(void)
 void app_main_task(void *p_param)
 {
 	//init base module
+	driver_init();
+	
 	//nv module initialize
 	nv_item_init();
 	
-	test_nv();
-	
+	//test_nv();
+	btlink_util_protocol_init();
 	btlink_pro_nv_init();
 	
 	//
@@ -300,13 +255,9 @@ void task_init(void)
 int main(void)
 {
     board_init();
-#if(TEST_DRIVER == 0)
-//    le_gap_init(APP_MAX_LINKS);
-//    gap_lib_init();
-//    app_le_gap_init();
-#endif
+
     pwr_mgr_init();
-    btlink_util_protocol_init();
+  
     task_init();
     os_sched_start();
 

@@ -28,12 +28,13 @@ extern "C" {
 #define LOG_DEBUG           3
 #define LOG_INFO            4
 
+#define LOG_USED_CMD_UART
 
 extern int g_current_dbg_level;
 void custom_printf(const char *fmt, ...);
 
 #ifndef LOG_TAG
-#define LOG_TAG ""
+#define LOG_TAG "LOG"
 #endif
 
 #define LOG(level, format, ...) \

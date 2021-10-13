@@ -416,6 +416,11 @@
               <FileType>4</FileType>
               <FilePath>..\..\..\bin\gap_bt5.lib</FilePath>
             </File>
+            <File>
+              <FileName>bee2_adc_lib.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\bin\bee2_adc_lib.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -489,6 +494,16 @@
               <FileType>1</FileType>
               <FilePath>.\app\cmd_task.c</FilePath>
             </File>
+            <File>
+              <FileName>report_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\app\report_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>network_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\app\network_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -538,6 +553,16 @@
               <FileName>sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\hal\sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>battery.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\battery.c</FilePath>
+            </File>
+            <File>
+              <FileName>alarm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\alarm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -599,6 +624,11 @@
               <FileType>1</FileType>
               <FilePath>.\protocol\btlink_cmd_rmmi.c</FilePath>
             </File>
+            <File>
+              <FileName>btlink_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\protocol\btlink_timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -643,6 +673,11 @@
               <FileName>rtl876x_tim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\peripheral\rtl876x_tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>rtl876x_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\peripheral\rtl876x_adc.c</FilePath>
             </File>
           </Files>
         </Group>

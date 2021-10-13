@@ -34,6 +34,10 @@
 #include "os_task.h"
 #endif
 
+#ifdef DEBUG_USED_CMD_UART
+extern void cmd_uart_print(const char *fmt, ...);
+#endif
+
 // TODO platform dependant
 void HAL_SleepMs(_IN_ uint32_t ms)
 {
@@ -49,8 +53,11 @@ void HAL_Printf(_IN_ const char *fmt, ...)
 	va_start(list, fmt);
 	vsnprintf(buf,sizeof(buf), fmt, list);
 	va_end(list);
-
+#ifdef DEBUG_USED_CMD_UART
+	cmd_uart_print("%s", buf);
+#else
     DBG_DIRECT("%s", buf);
+#endif
 }
 
 int HAL_Snprintf(_IN_ char *str, const int len, const char *fmt, ...)

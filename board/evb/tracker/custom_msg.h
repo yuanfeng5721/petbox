@@ -32,13 +32,12 @@ extern "C" {
 /**  @brief CUSTOM type definitions for IO message, may extend as requested */
 typedef enum
 {
-    CUSTOM_MSG_TYPE_LED,  
-    CUSTOM_MSG_TYPE_MODEM,    
-    CUSTOM_MSG_TYPE_GNSS,    
-    CUSTOM_MSG_TYPE_POWER,
+    CUSTOM_MSG_TYPE_LED = 0x01,  
+    CUSTOM_MSG_TYPE_MODEM = 0x02,    
+    CUSTOM_MSG_TYPE_GNSS = 0x03,    
+    CUSTOM_MSG_TYPE_POWER = 0x04,
+	CUSTOM_MSG_TYPE_REPORT = 0x05,
 } T_CUSTOM_MSG_TYPE;
-
-
 
 /**  @brief CUSTOM subtype definitions for @ref T_CUSTOM_MSG_LED type */
 typedef enum
@@ -66,6 +65,14 @@ typedef enum
 	CUSTOM_MSG_GNSS_EXTRAS,
 } T_CUSTOM_MSG_GNSS;
 
+typedef enum
+{
+    CUSTOM_MSG_REPORT_BATTERY_DATA,
+    CUSTOM_MSG_REPORT_GPS_DATA,
+    CUSTOM_MSG_REPORT_NETWORK_DATA,
+    CUSTOM_MSG_REPORT_OTHER,
+} T_CUSTOM_MSG_REPORT;
+
 /**  @brief custom message definition for communications between tasks*/
 typedef struct
 {
@@ -79,9 +86,18 @@ typedef struct
 	uint16_t msg_size;
 } T_CUSTOM_MSG;
 
+#define CUSTOM_MSG_QUEUE_MAX_NUM   10
 /** @} */ /* End of group APP_MSG_Exported_Types */
 
 /** @} */ /* End of group APP_MSG */
+
+
+typedef enum {
+	CUSTOM_TIMER_ID_START = 10,
+	CUSTOM_TIMER_BATTERY = CUSTOM_TIMER_ID_START,
+	CUSTOM_TIMER_ALARM,
+	CUSTOM_TIMER_ID_END,
+} T_CUSTOM_TIMER_ID;
 
 #ifdef __cplusplus
 }

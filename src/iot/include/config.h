@@ -18,3 +18,5 @@
 //#define BROADCAST_ENABLED
 //#define RRPC_ENABLED
 //#define REMOTE_CONFIG_MQTT
+
+//#define DEBUG_USED_CMD_UART

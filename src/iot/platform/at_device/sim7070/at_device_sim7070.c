@@ -237,7 +237,7 @@ static void urc_gnss_func(const char *data, size_t size)
 	gnss_report_t gnss_report;
     POINTER_SANITY_CHECK_RTN(data);
 	//+SGNSCMD: 2,08:14:43,31.16211,121.30720,13.12,50.54,41.15,0.00,0.00,0x17bba2c7d38,375  
-    Log_d("GNSS: %s \r\n", data);
+    //Log_d("GNSS: %s \r\n", data);
 	sscanf(data, "+SGNSCMD: %d,%d:%d:%d,%f,%f,%f,%f,%f,%f,%f,%lld", 
 			&gnss_report.mode, 
 			&gnss_report.time.hour, &gnss_report.time.minute, &gnss_report.time.sec,
