@@ -52,9 +52,8 @@ extern void at_client_uart_rx_isr_cb(uint8_t *pdata, uint8_t len);
  */
 void HAL_AT_UART_IRQHandler(void)
 {
-    uint8_t ch;
-	
 #ifdef USE_STM_MCU
+	uint8_t ch;
     if (__HAL_UART_GET_FLAG(pAtUart, UART_FLAG_RXNE) == SET) {
         ch = (uint8_t)READ_REG(pAtUart->Instance->RDR) & 0xFF;
         /*this callback for at_client*/
@@ -63,6 +62,7 @@ void HAL_AT_UART_IRQHandler(void)
     }
     __HAL_UART_CLEAR_PEFLAG(pAtUart);
 #else
+	//uint8_t ch;
 	//if(Uart_GetStatus(pAtUart, UartRC))         //UART0数据接收
     //{
     //    Uart_ClrStatus(pAtUart, UartRC);        //清中断状态位
@@ -99,6 +99,7 @@ int HAL_AT_Uart_Send(void *data, uint32_t size)
 int HAL_AT_Uart_Buadrate_Set(uint8_t buadrate)
 {
 	at_uart_set_buadrate(buadrate);
+	return 0;
 }
 
 int HAL_AT_Uart_Init(void)

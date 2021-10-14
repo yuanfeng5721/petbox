@@ -92,7 +92,7 @@ at_response_t at_create_resp(uint32_t buf_size, uint32_t line_num, uint32_t time
  */
 at_response_t at_resp_set_info(at_response_t resp, uint32_t line_num, uint32_t timeout)
 {
-    char *p_temp;
+    //char *p_temp;
     POINTER_SANITY_CHECK(resp, NULL);
 
     resp->line_num = line_num;

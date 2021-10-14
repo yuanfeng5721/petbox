@@ -113,46 +113,108 @@ int get_expiry_time(alarm_t  *alarm)
 #endif
 
 // Timer callback function.
-void alarm_timer_callback(void *p_handle)
+static void alarm_timer_callback(void *p_handle)
 {
     uint32_t timer_id;
-
+	int param;
     // Which timer expired?
     os_timer_id_get(&p_handle, &timer_id);
 
-    if (timer_id == CUSTOM_TIMER_ALARM)
+    if (timer_id >= ALARM_ID_START && timer_id<ALARM_ID_END)
     {
-         //do something
-		
+        //do something
+		g_Alarm[timer_id-ALARM_ID_START].handle((void *)&param);
     }
 }
 
-int set_timer(alarm_t  *alarm)
+int set_alarm(alarm_t  *alarm)
 {
     int t = get_expiry_time(alarm);
 	
     if(t <= 0) return -1;
 
-	if (os_timer_create(&alarm->xTimer, "alarm", CUSTOM_TIMER_ALARM,
+	if (os_timer_create(&alarm->xTimer, alarm->name, CUSTOM_TIMER_ALARM,
                        t*60*1000, false, alarm_timer_callback) == true)
     {
         // Timer created successfully, start the timer.
-        os_timer_start(&alarm->xTimer);
+        //os_timer_start(&alarm->xTimer);
+		return 0;
     } else {
         // Timer failed to create.
         return -1;
     }
-
-    return 0;
 }
 
-int alarm_create(cron_tm_t cron_tm)
+bool start_alarm(alarm_t  *alarm)
 {
+	return os_timer_start(&alarm->xTimer);
+}
+
+void stop_alarm(alarm_t  *alarm)
+{
+	os_timer_stop(&alarm->xTimer);
+}
+
+/**
+ * @brief  Create alarm
+ *
+ * @param  tm    alarm time, hour[0~23], min[0~59], day_interval[0~31]
+ * @param  handle   action handle
+ * @return pointer to skipped white spaces' new buffer.
+ */
+int alarm_create(cron_tm_t tm, action_handle handle)
+{
+	uint8_t i;
+	int ret = 0;
 	
+	for(i=0; i<ALARM_MAX_ITEM; i++)
+	{
+		if(g_Alarm[i].id == ALARM_ID_NO_USED)
+		{
+			g_Alarm[i].id = ALARM_ID_START+i;
+			g_Alarm[i].cron_tm.hour = tm.hour;
+			g_Alarm[i].cron_tm.min = tm.min;
+			g_Alarm[i].cron_tm.day_interval = tm.day_interval;
+			g_Alarm[i].handle = handle;
+			sprintf(g_Alarm[i].name, "alarm%d", i);
+			ret = set_alarm(&g_Alarm[i]);
+			break;
+		}
+	}
+	
+	return ret;
 }
 
-int alarm_init(void)
+int alarm_delete(uint8_t id)
 {
+	uint8_t i;
+	int ret = 0;
+	
+	for(i=0; i<ALARM_MAX_ITEM; i++)
+	{
+		if(g_Alarm[i].id == id)
+		{
+			stop_alarm(&g_Alarm[i]);
+			g_Alarm[i].id = ALARM_ID_NO_USED;
+			g_Alarm[i].cron_tm.hour = 0;
+			g_Alarm[i].cron_tm.min = 0;
+			g_Alarm[i].cron_tm.day_interval = 0;
+			g_Alarm[i].handle = NULL;
+			memset(g_Alarm[i].name, 0, ALARM_NAME_MAX_LEN);
+			break;
+		}
+	}
+	
+	return ret;
+}
+
+void alarm_init(void)
+{
+	uint8_t i;
 	memset(g_Alarm, 0, sizeof(alarm_t)*ALARM_MAX_ITEM);
+	for(i=0; i<ALARM_MAX_ITEM; i++)
+	{
+		g_Alarm[i].id = ALARM_ID_NO_USED;
+	}
 }
 

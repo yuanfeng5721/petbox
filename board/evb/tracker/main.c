@@ -42,6 +42,7 @@
 
 #include "network_task.h"
 #include "battery.h"
+#include "alarm.h"
 
 /** @defgroup  BT5_CENTRAL_DEMO_MAIN BT5 Central Main
     * @brief Main file to initialize hardware and BT stack and start task scheduling
@@ -154,6 +155,9 @@ void driver_init(void)
 	//RTC init
 	rtc_init();
 	
+	//alarm init
+	alarm_init();
+	
 	//Gsensor init
 	sensor_init();
 	
@@ -194,6 +198,7 @@ void test_nv(void)
 	LOG_I("struct_nv:data32 = %d, data16 = %d, data8 = %d", nv_test_r.data32, nv_test_r.data16, nv_test_r.data8);
 	
 }
+#if 0
 void imei_nv_test(void)
 {
 	char *imei;
@@ -207,6 +212,7 @@ void imei_nv_test(void)
 		}
 	}
 }
+#endif
 /**
  * @brief        App test task to handle events & messages
  * @param[in]    p_param    Parameters sending to the task
@@ -229,7 +235,7 @@ void app_main_task(void *p_param)
     {
 		//led ctl code
 		os_delay(5000);
-		imei_nv_test();
+		//imei_nv_test();
     }
 }
 void main_task_init(void)

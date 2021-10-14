@@ -17,6 +17,9 @@
 extern "C" {
 #endif
 
+typedef int (*action_handle)(void *param);  
+
+#define ALARM_NAME_MAX_LEN              8
 //#define USE_M_H_D_W_FMT   
 /* cron 格式时间表示 */
 #ifdef USE_M_H_D_W_FMT
@@ -40,14 +43,31 @@ typedef struct
 /* 闹钟任务 */
 typedef struct
 {
-	int             id;         // 任务ID
-    cron_tm_t       cron_tm;    // cron格式时间
-	int             action;     // 响应操作，对于灯控产品来说，action可以表示开关、颜色、场景等等
-    void			*xTimer;    // 定时器句柄
-    //ListNode        node;       // 节点，用于将一系列定时任务组织成list
+	int           id;                       // 任务ID
+    cron_tm_t     cron_tm;                  // cron格式时间
+	action_handle handle;					// 响应handle
+    void	      *xTimer;                  // 定时器句柄
+	char 		  name[ALARM_NAME_MAX_LEN];
+    //ListNode        node;                 // 节点，用于将一系列定时任务组织成list
 } alarm_t;
 
 #define ALARM_MAX_ITEM    5
+#define ALARM_ID_NO_USED     0xFFFFFFFF
+#define ALARM_ID_START       CUSTOM_TIMER_ALARM
+#define ALARM_ID_1			 (CUSTOM_TIMER_ALARM+0)
+#define ALARM_ID_2			 (CUSTOM_TIMER_ALARM+1)
+#define ALARM_ID_3           (CUSTOM_TIMER_ALARM+2)
+#define ALARM_ID_4           (CUSTOM_TIMER_ALARM+3)
+#define ALARM_ID_5           (CUSTOM_TIMER_ALARM+4)
+#define ALARM_ID_END		 (CUSTOM_TIMER_ALARM+ALARM_MAX_ITEM)
+
+
+
+void alarm_init(void);
+int alarm_create(cron_tm_t tm, action_handle handle);
+int alarm_delete(uint8_t id);
+bool start_alarm(alarm_t  *alarm);
+void stop_alarm(alarm_t  *alarm);
 
 #ifdef __cplusplus
 }

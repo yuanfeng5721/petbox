@@ -97,7 +97,6 @@ EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
  */
 EfErrCode ef_port_erase(uint32_t addr, size_t size) {
     EfErrCode result = EF_NO_ERR;
-	bool status = true;
 	uint32_t erase_count = 0, i;
 
     /* make sure the start address is a multiple of EF_ERASE_MIN_SIZE */

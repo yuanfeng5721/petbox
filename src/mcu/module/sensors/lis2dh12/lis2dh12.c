@@ -114,7 +114,7 @@ void vTWI_Read(uint8_t reg, uint8_t *val)
 */
 void vLIS2_Init (void)
 {
-	uint8_t u8whoAmI;
+	//uint8_t u8whoAmI;
     // If this function is called after power on, then the LIS2DH12
     // will still be in boot mode, allow time for boot to complete.
     //Sleep(10);

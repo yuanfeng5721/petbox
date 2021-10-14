@@ -248,7 +248,7 @@ void battery_timer_callback(void *p_handle)
     }
 }
 
-#define INTERVAL_MS 1000*20
+#define INTERVAL_MS 1000*60
 
 // Timer to be created.
 int battery_timer_init(void)
