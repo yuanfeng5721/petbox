@@ -93,7 +93,7 @@ void at_uart_deinit(void);
     }
  * \endcode
  */
-bool at_uart_send_data(const uint8_t *data, uint16_t size);
+int at_uart_send_data(const uint8_t *data, uint16_t size);
 /** End of DATA_UART_APIs_Exported_Functions
   * @}
   */

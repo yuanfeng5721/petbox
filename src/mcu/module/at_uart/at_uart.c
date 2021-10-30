@@ -34,7 +34,7 @@ bool uart_send_data(const uint8_t *data, uint16_t size)
 	return true;
 }
 
-bool at_uart_send_data(const uint8_t *data, uint16_t size)
+int at_uart_send_data(const uint8_t *data, uint16_t size)
 {
 //    UART_SendData(UART1, data, size);
 //    /* wait tx fifo empty */
