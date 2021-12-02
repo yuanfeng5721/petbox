@@ -10,3 +10,4 @@ board/evb/*/JLinkSettings.ini
 board/evb/*/Listings/
 doc/Bee2-SDK.chw
 tool/Bee2MPTool/Bee2MPTool/OTAHeader/
+board/evb/petbox/petbox.uvguix.*
