@@ -46,7 +46,7 @@
  *============================================================================*/
 void *cmd_task_handle;   //!< CMD Task handle
 void *evt_queue_handle;  //!< Event queue handle
-void *io_queue_handle;   //!< IO queue handle
+static void *io_queue_handle;   //!< IO queue handle
 
 T_CMD_IF    cmd_if;
 /*============================================================================*

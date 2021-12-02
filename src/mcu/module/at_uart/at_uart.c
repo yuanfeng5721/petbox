@@ -12,7 +12,7 @@
 #include "at_uart.h"
 
 
-void (* at_uart_rcv_data)(uint8_t *buf, uint8_t size) = NULL;
+void (* at_uart_rcv_data)(uint8_t *buf, uint16_t size) = NULL;
 bool uart_send_data(const uint8_t *data, uint16_t size)
 {
 	uint8_t i = 0;
@@ -134,7 +134,7 @@ void UART1_Handler(void)
     }
  * \endcode
  */
-void at_uart_init(void (*func)(uint8_t *, uint8_t))
+void at_uart_init(void (*func)(uint8_t *, uint16_t))
 {
 	at_uart_rcv_data = func;
     RCC_PeriphClockCmd(APBPeriph_UART1, APBPeriph_UART1_CLOCK, ENABLE);

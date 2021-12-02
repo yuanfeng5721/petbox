@@ -29,6 +29,7 @@
 ******************************************************************************/
 #define LOG_TAG "PROTOCOL"
 #include "wifi.h"
+#include "control_task.h"
 #include "custom_log.h"
 #ifdef WEATHER_ENABLE
 /**
@@ -173,36 +174,10 @@ static unsigned char dp_download_feed_num_handle(const unsigned char value[], un
     //VALUE类型数据处理
     
     */
-    LOG_I("feed_num = %d\r\n", feed_num);
+    //LOG_I("feed_num = %d\r\n", feed_num);
+	feed_num = control_feed_num(feed_num);
     //处理完DP数据后应有反馈
     ret = mcu_dp_value_update(DPID_FEED_NUM,feed_num);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_feed_weight_handle
-功能描述 : 针对DPID_FEED_WEIGHT的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_feed_weight_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long feed_weight;
-    
-    feed_weight = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    LOG_I("feed_weight = %d\r\n", feed_weight);
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_FEED_WEIGHT,feed_weight);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -227,8 +202,10 @@ static unsigned char dp_download_history_data_handle(const unsigned char value[]
 	LOG_I("history_data = %d\r\n", history_data);
     if(history_data == 0) {
         //开关关
+		control_history(history_data);
     }else {
         //开关开
+		control_history(history_data);
     }
   
     //处理完DP数据后应有反馈
@@ -274,44 +251,6 @@ static unsigned char dp_download_feed_voice_record_handle(const unsigned char va
         return ERROR;
 }
 /*****************************************************************************
-函数名称 : dp_download_realtime_data_handle
-功能描述 : 针对DPID_REALTIME_DATA的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_realtime_data_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为ENUM
-    unsigned char ret;
-    unsigned char realtime_data;
-    
-    realtime_data = mcu_get_dp_download_enum(value,length);
-	LOG_I("realtime_data = %d\r\n", realtime_data);
-    switch(realtime_data) {
-        case 0:
-        break;
-        
-        case 1:
-        break;
-        
-        case 2:
-        break;
-        
-        default:
-    
-        break;
-    }
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_enum_update(DPID_REALTIME_DATA, realtime_data);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
 函数名称 : dp_download_water_num_handle
 功能描述 : 针对DPID_WATER_NUM的处理函数
 输入参数 : value:数据源数据
@@ -333,7 +272,7 @@ static unsigned char dp_download_water_num_handle(const unsigned char value[], u
     }else {
         //开关开
     }
-  
+	control_feed_water(water_num);
     //处理完DP数据后应有反馈
     ret = mcu_dp_bool_update(DPID_WATER_NUM,water_num);
     if(ret == SUCCESS)
@@ -373,10 +312,6 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             //手动喂食处理函数
             ret = dp_download_feed_num_handle(value,length);
         break;
-        case DPID_FEED_WEIGHT:
-            //单份食物重量处理函数
-            ret = dp_download_feed_weight_handle(value,length);
-        break;
         case DPID_HISTORY_DATA:
             //投喂记录处理函数
             ret = dp_download_history_data_handle(value,length);
@@ -384,10 +319,6 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_FEED_VOICE_RECORD:
             //短音录制处理函数
             ret = dp_download_feed_voice_record_handle(value,length);
-        break;
-        case DPID_REALTIME_DATA:
-            //实时数据处理函数
-            ret = dp_download_realtime_data_handle(value,length);
         break;
         case DPID_WATER_NUM:
             //手动喂水处理函数

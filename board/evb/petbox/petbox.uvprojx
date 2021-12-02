@@ -311,7 +311,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>3</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
@@ -337,7 +337,7 @@
               <MiscControls>--gnu --preinclude app_flags.h --bss_threshold=0</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\bluetooth\profile\server;..\..\..\inc\bluetooth\profile\client;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\petbox;.\app;.\hal;.\tuya;.\utils;..\..\..\src\mcu\module\cmd_uart;..\..\..\src\mcu\module\at_uart</IncludePath>
+              <IncludePath>..\..\..\inc\app;..\..\..\inc\bluetooth\gap;..\..\..\inc\bluetooth\gap\gap_lib;..\..\..\inc\bluetooth\profile;..\..\..\inc\bluetooth\profile\server;..\..\..\inc\bluetooth\profile\client;..\..\..\inc\os;..\..\..\inc\peripheral;..\..\..\inc\platform;..\..\..\inc\platform\cmsis;..\petbox;.\app;.\hal;.\tuya;.\utils;..\..\..\src\mcu\module\cmd_uart;..\..\..\src\mcu\module\at_uart;.\drivers;..\..\..\src\mcu\module\sal</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -529,6 +529,16 @@
               <FileType>1</FileType>
               <FilePath>.\app\main.c</FilePath>
             </File>
+            <File>
+              <FileName>keyboard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\app\keyboard.c</FilePath>
+            </File>
+            <File>
+              <FileName>control_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\app\control_task.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -553,6 +563,11 @@
               <FileName>at_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\src\mcu\module\at_uart\at_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hal\control.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -603,6 +618,26 @@
               <FileName>wifi.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\tuya\wifi.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>drivers</GroupName>
+          <Files>
+            <File>
+              <FileName>hx711.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\drivers\hx711.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>sal</GroupName>
+          <Files>
+            <File>
+              <FileName>sal_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\src\mcu\module\sal\sal_gpio.c</FilePath>
             </File>
           </Files>
         </Group>

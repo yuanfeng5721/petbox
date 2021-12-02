@@ -13,6 +13,7 @@
 #ifndef _AT_UART_H_
 #define _AT_UART_H_
 
+#include <stdint.h>
 #ifdef  __cplusplus
 extern "C" {
 #endif      /* __cplusplus */
@@ -77,7 +78,7 @@ extern "C" {
     }
  * \endcode
  */
-void at_uart_init(void (*func)(uint8_t *, uint8_t));
+void at_uart_init(void (*func)(uint8_t *, uint16_t));
 
 void at_uart_deinit(void);
 /**

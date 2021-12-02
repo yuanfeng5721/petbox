@@ -36,6 +36,7 @@
 #endif
 #include "custom_log.h"
 #include "cmd_task.h"
+#include "control_task.h"
 #include "mcu_api.h"
 
 
@@ -67,7 +68,7 @@
  */
 void board_init(void)
 {
-
+	
 }
 
 /**
@@ -77,8 +78,13 @@ void board_init(void)
  */
 void driver_init(void)
 {
+	extern void Control_Init(void);
+	extern int KeyBoard_Init(void);
+	
 	LOG_I("petbox start running......\r\n");
 	wifi_protocol_init();
+	Control_Init();
+	//KeyBoard_Init();
 	at_uart_init(uart_receive_buff_input);
 }
 
@@ -110,6 +116,7 @@ void task_init(void)
 {
 	cmd_task_init();
     app_task_init();
+	control_task_init();
 }
 
 /**

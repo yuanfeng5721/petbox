@@ -17,6 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define USE_LOCK_BOARD
 
 /* include file */
 #include "rtl876x_gpio.h"
@@ -25,8 +26,53 @@ extern "C" {
 /* GPIO function define begin */
 #define DATA_UART_TX_PIN     P3_0
 #define DATA_UART_RX_PIN     P3_1
+
+#ifndef USE_LOCK_BOARD
 #define AT_UART_TX_PIN    	 P4_0
 #define AT_UART_RX_PIN    	 P4_1
+#else
+//#define AT_UART_TX_PIN    	 P2_4
+//#define AT_UART_RX_PIN    	 P2_5
+#define AT_UART_TX_PIN    	 P4_2
+#define AT_UART_RX_PIN    	 P4_1
+#endif
+
+#define HX711_SCK            P2_4
+#define HX711_DAT            P2_5
+
+#define CONFIG_KEY_PIN			 P1_6
+#define FEED_KEY_PIN			 P2_3
+
+//feed water control pin
+#define WATER_PUMP_EN_PIN    P4_0   //output
+#define WATER_PUMP_LED_PIN   P0_7	//output
+#define WATER_LEVEL_M_PIN	 P4_3	//input
+#define WATER_LEVEL_L_PIN    P0_6	//input
+#define WATER_AUTO_DET_PIN   P0_1	//input
+
+//feed moto control pin
+#define FEED_MOTO_EN_PIN     P0_0	//output
+#define FEED_MOTO_CTL1_PIN   P2_6	//output
+#define FEED_MOTO_CTL2_PIN   P2_7	//output
+
+#define FEED_BUCKET_DET_PIN  P0_4	//input
+#define FEED_AUTO_DET_PIN    P0_2	//input
+#define FEED_NUM_EN_PIN		 P3_2   //output
+#define FEED_NUM_COUNT_PIN   P3_3   //input
+
+#define FEED_STUCK_DET_TX_PIN   P2_1 //output
+#define FEED_STUCK_DET_RX_PIN   P2_2 //input
+
+//pad pinmux define
+#define PNUM(PIN)  GPIO_GetPin(PIN)
+
+#define PAD_CFG_GPIO(PIN, PULL, DIR)  \
+		Pad_Config(PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PULL, DIR, (DIR==PAD_OUT_ENABLE)?PAD_OUT_HIGH:PAD_OUT_LOW); \
+		Pinmux_Config(PIN, DWGPIO);
+
+#define GPIO_SET(PIN, VAL) GPIO_WriteBit(PNUM(PIN), (BitAction)(VAL)) 
+#define GPIO_GET(PIN)  GPIO_ReadInputDataBit(PNUM(PIN))
+
 /* GPIO function define end */
 /* custom define */
 #define PIN_LOW            0
