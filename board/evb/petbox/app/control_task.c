@@ -75,15 +75,20 @@ void control_handle_io_msg(T_IO_MSG io_msg)
 
     switch (subtype)
     {
+		case CONTROL_MSG_INIT:
+		{
+			Control_Init();
+		}
+		break;
 		case CONTROL_MSG_FEEDFOOD:
 		{
-			//feed_food(io_msg.u.param);
+			feed_food(io_msg.u.param);
 		}
 		break;
 		
 		case CONTROL_MSG_FEEDWATER:
 		{
-			//feed_water(io_msg.u.param);
+			feed_water(io_msg.u.param);
 		}
 		break;
 		
@@ -119,8 +124,8 @@ void control_main_task(void *p_param)
 				control_handle_io_msg(io_msg);
 			}
 		}
-		os_delay(2000);
-		LOG_I("control info......\r\n");
+		//os_delay(2000);
+		//LOG_I("control info......\r\n");
     }
 }
 

@@ -83,7 +83,6 @@ void driver_init(void)
 	
 	LOG_I("petbox start running......\r\n");
 	wifi_protocol_init();
-	Control_Init();
 	//KeyBoard_Init();
 	at_uart_init(uart_receive_buff_input);
 }

@@ -78,7 +78,10 @@
 #define         VOICE_AWAKEN_TEST_CMD           0x64                            //语音模组唤醒产测
 #define         VOICE_EXTEND_FUN_CMD            0x65                            //语音模组扩展功能
 
-
+//add by wangkun
+#define         VOICE_RECORD_START_CMD          0xa0                            //语音模块开始录音
+#define         VOICE_RECORD_STOP_CMD           0xa1                            //语音模块停止录音
+#define         VOICE_PLAY_RECORD_CMD           0xa2                            //语音模块播放录音
 //=============================================================================
 #define MCU_RX_VER              0x00                                            //模块发送帧协议版本号
 #define MCU_TX_VER              0x03                                            //MCU 发送帧协议版本号(默认)
@@ -192,4 +195,7 @@ unsigned char with_data_rxbuff(void);
 unsigned char take_byte_rxbuff(void);
 #endif
   
-  
+//add by wangkun
+void module_record(unsigned char status);
+void module_play_voice(unsigned char num);
+	

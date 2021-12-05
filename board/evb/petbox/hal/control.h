@@ -23,8 +23,8 @@ extern "C" {
 //#define FEED_BUCKET_DET_HANDLER  GPIO4_Handler
 #define FEED_FOOD_DET_HANDLER    GPIO2_Handler
 #define FEED_FOOD_DET_IRQn		 GPIO2_IRQn
-#define FOOD_STUCK_DET_HANDLER   GPIO17_Handler
-#define FOOD_STUCK_DET_IRQn		 GPIO17_IRQn
+#define FOOD_STUCK_DET_HANDLER   GPIO18_Handler
+#define FOOD_STUCK_DET_IRQn		 GPIO18_IRQn
 
 
 

@@ -176,6 +176,7 @@ static unsigned char dp_download_feed_num_handle(const unsigned char value[], un
     */
     //LOG_I("feed_num = %d\r\n", feed_num);
 	feed_num = control_feed_num(feed_num);
+	module_play_voice(feed_num);
     //处理完DP数据后应有反馈
     ret = mcu_dp_value_update(DPID_FEED_NUM,feed_num);
     if(ret == SUCCESS)
@@ -231,17 +232,8 @@ static unsigned char dp_download_feed_voice_record_handle(const unsigned char va
     
     feed_voice_record = mcu_get_dp_download_enum(value,length);
 	LOG_I("feed_voice_record = %d\r\n", feed_voice_record);
-    switch(feed_voice_record) {
-        case 0:
-        break;
-        
-        case 1:
-        break;
-        
-        default:
-    
-        break;
-    }
+	
+	module_record(feed_voice_record); 
     
     //处理完DP数据后应有反馈
     ret = mcu_dp_enum_update(DPID_FEED_VOICE_RECORD, feed_voice_record);

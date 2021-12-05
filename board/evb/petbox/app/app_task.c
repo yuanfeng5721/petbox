@@ -28,6 +28,7 @@
 #include "custom_msg.h"
 #include "custom_log.h"
 #include "mcu_api.h"
+#include "wifi.h"
 
 /** @defgroup  PERIPH_APP_TASK Peripheral App Task
     * @brief This file handles the implementation of application task related functions.
@@ -69,15 +70,32 @@ void app_task_init()
 void app_handle_io_msg(T_IO_MSG io_msg)
 {
     uint16_t msg_type = io_msg.type;
-
-    switch (msg_type)
-    {
-		case CUSTOM_MSG_WIFI:
+	uint16_t msg_subtype = io_msg.subtype;
+	if(msg_type == CUSTOM_MSG_WIFI)
+	{
+		switch (msg_subtype)
+		{
+			case CUSTOM_MSG_WIFI_RESET:
+			{
+				
+			}
+			break;
 			
+			case CUSTOM_MSG_WIFI_STATE:
+			{
+				uint8_t state = io_msg.u.param;
+				if(state == WIFI_CONN_CLOUD)
+				{
+					MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_INIT);
+					control_send_msg(msg);
+				}
+			}
 			break;
-		default:
-			break;
-    }
+			
+			default:
+				break;
+		}
+	}
 }
 
 /**
@@ -118,11 +136,15 @@ void app_main_task(void *p_param)
 				app_handle_io_msg(io_msg);
 			}
 		}
-		os_delay(2000);
-		LOG_I("Test info......\r\n");
+		os_delay(100);
+		//LOG_I("Test info......\r\n");
     }
 }
 
+void app_send_msg(T_IO_MSG msg)
+{
+	os_msg_send(io_queue_handle, &msg, 0);
+}
 /** @} */ /* End of group PERIPH_APP_TASK */
 
 

@@ -21,6 +21,7 @@
 
 #include "wifi.h"
 #include "custom_log.h"
+#include "custom_msg.h"
 
 extern const DOWNLOAD_CMD_S download_cmd[];
 
@@ -195,6 +196,35 @@ static void get_mcu_wifi_mode(void)
 #endif
     
     wifi_uart_write_frame(WORK_MODE_CMD, MCU_TX_VER, length);
+}
+
+/**
+ * @brief  控制模块是否开始录音
+ * @param  stauts： 1 开始录音， 0 停止录音
+ * @return Null
+ */
+void module_record(unsigned char status)
+{
+    unsigned char length = 0;
+     
+	if(status)
+		wifi_uart_write_frame(VOICE_RECORD_START_CMD, MCU_TX_VER, length);
+	else
+		wifi_uart_write_frame(VOICE_RECORD_STOP_CMD, MCU_TX_VER, length);
+}
+
+/**
+ * @brief  控制模块是否开始录音
+ * @param  stauts： 1 开始录音， 0 停止录音
+ * @return Null
+ */
+void module_play_voice(unsigned char num)
+{
+    unsigned char length = 0;
+     
+	length = set_wifi_uart_byte(length, num);
+	
+	wifi_uart_write_frame(VOICE_PLAY_RECORD_CMD, MCU_TX_VER, length);
 }
 
 /**
@@ -431,6 +461,7 @@ void data_handle(unsigned short offset)
         break;
     
         case PRODUCT_INFO_CMD:                                  //产品信息
+			LOG_I("get product info .....\r\n");
             product_info_update();
         break;
     
@@ -448,6 +479,11 @@ void data_handle(unsigned short offset)
                 isWoSend = 1;
             }
 #endif
+			//add by wangkun
+			LOG_I("wifi state %d\r\n", wifi_work_state);
+			extern void app_send_msg(T_IO_MSG msg);
+			MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_WIFI, CUSTOM_MSG_WIFI_STATE, wifi_work_state);
+			app_send_msg(msg);
         break;
 
         case WIFI_RESET_CMD:                                    //重置wifi(wifi返回成功)

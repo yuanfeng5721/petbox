@@ -33,8 +33,8 @@ extern "C" {
 #else
 //#define AT_UART_TX_PIN    	 P2_4
 //#define AT_UART_RX_PIN    	 P2_5
-#define AT_UART_TX_PIN    	 P4_2
-#define AT_UART_RX_PIN    	 P4_1
+#define AT_UART_TX_PIN    	 P4_1//P4_2
+#define AT_UART_RX_PIN    	 P4_2//P4_1
 #endif
 
 #define HX711_SCK            P2_4

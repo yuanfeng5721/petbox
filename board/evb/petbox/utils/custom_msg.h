@@ -33,10 +33,12 @@ typedef enum
 typedef enum
 {
     CUSTOM_MSG_WIFI_RESET,
+	CUSTOM_MSG_WIFI_STATE,
 } T_CUSTOM_MSG_TYPE_WIFI;
 
 typedef enum
 {
+	CONTROL_MSG_INIT,
 	CONTROL_MSG_FEEDFOOD,
 	CONTROL_MSG_FEEDWATER,
 	CONTROL_MSG_FOODSTUCK,
@@ -72,6 +74,9 @@ typedef T_IO_MSG T_CUSTOM_MSG;
 #define ASSIGN_CUSTOM_MSG_BUFFER(msg, t, st, buf) \
 	{msg.type=(t), msg.subtype=(st), msg.u.buf=(buf)}
 	
+	
+void control_send_msg(T_IO_MSG msg);
+void app_send_msg(T_IO_MSG msg);	
 #ifdef  __cplusplus
 }
 #endif      /*  __cplusplus */
