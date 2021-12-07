@@ -9,7 +9,7 @@
 #include <rtl876x_gpio.h>
 #include <rtl876x_pinmux.h>
 #include <platform_utils.h>
-
+#include "custom_log.h"
 
 uint32_t HX711_Buffer;
 uint32_t Weight_Maopi;
@@ -28,7 +28,7 @@ uint8_t Flag_Error = 0;
   * @param  No parameter.
   * @return void
   */
-void board_gpio_init(void)
+void hx711_gpio_init(void)
 {
     Pad_Config(HX711_SCK, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_NONE, PAD_OUT_ENABLE, PAD_OUT_HIGH);
     Pinmux_Config(HX711_SCK, DWGPIO);
@@ -110,6 +110,7 @@ void Get_Maopi(void)
 {
 	Weight_Maopi = hx711_Read();	
 	//Weight_Maopi = 8321771;
+	LOG_I("hx711 read data: %d \r\n", Weight_Maopi);
 } 
 
 //****************************************************

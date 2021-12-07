@@ -29,6 +29,7 @@
 #include "custom_log.h"
 #include "mcu_api.h"
 #include "wifi.h"
+#include "keyboard.h"
 
 /** @defgroup  PERIPH_APP_TASK Peripheral App Task
     * @brief This file handles the implementation of application task related functions.
@@ -77,7 +78,8 @@ void app_handle_io_msg(T_IO_MSG io_msg)
 		{
 			case CUSTOM_MSG_WIFI_RESET:
 			{
-				
+				LOG_I("Reset wifi module!!!! \r\n");
+				mcu_reset_wifi();
 			}
 			break;
 			
@@ -88,6 +90,49 @@ void app_handle_io_msg(T_IO_MSG io_msg)
 				{
 					MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_INIT);
 					control_send_msg(msg);
+				}
+			}
+			break;
+			
+			case CUSTOM_MSG_WIFI_SEND:
+				
+			break;
+			
+			default:
+				break;
+		}
+	}
+	else if(msg_type == CUSTOM_MSG_KEYBOARD)
+	{
+		uint8_t keycode = msg_subtype;;
+		uint8_t keyaction = io_msg.u.param;
+		const char code[][8] = {"config","feed"};
+		const char action[][8] = {"null", "up", "down", "long"};
+		LOG_I("keycode:%s, keyaction:%s \r\n",code[keycode], action[keyaction]);
+		switch (keyaction)
+		{
+			case KEY_EVENT_UP:
+			{
+				if(keycode == KEY_FEED)
+				{
+					MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD, 1);
+					app_send_msg(msg);
+				}
+			}
+			break;
+			
+			case KEY_EVENT_DOWN:
+			{
+				
+			}
+			break;
+			
+			case KEY_EVENT_LONG:
+			{
+				if(keycode == KEY_CONFIG)
+				{
+					MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_WIFI, CUSTOM_MSG_WIFI_RESET);
+					app_send_msg(msg);
 				}
 			}
 			break;
@@ -138,6 +183,7 @@ void app_main_task(void *p_param)
 		}
 		os_delay(100);
 		//LOG_I("Test info......\r\n");
+		//Get_Maopi();
     }
 }
 

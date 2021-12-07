@@ -26,7 +26,7 @@ extern "C" {
 #define FOOD_STUCK_DET_HANDLER   GPIO18_Handler
 #define FOOD_STUCK_DET_IRQn		 GPIO18_IRQn
 
-
+#define EXCEPTION_CHECK_FREQ    (5*1000)  //1S
 
 void feed_food(uint8_t num);
 void feed_weight(uint32_t weight);

@@ -70,14 +70,14 @@ void Control_Init(void)
 		
 		//input no interrupt
 		GPIO_StructInit(&GPIO_InitStruct);
-		GPIO_InitStruct.GPIO_Pin    = PNUM(WATER_LEVEL_M_PIN)|PNUM(WATER_LEVEL_L_PIN)|PNUM(FEED_BUCKET_DET_PIN);
+		GPIO_InitStruct.GPIO_Pin    = PNUM(WATER_LEVEL_M_PIN)|PNUM(WATER_LEVEL_L_PIN)|PNUM(FEED_BUCKET_DET_PIN)|PNUM(FEED_STUCK_DET_RX_PIN);
 		GPIO_InitStruct.GPIO_Mode   = GPIO_Mode_IN;
 		GPIO_InitStruct.GPIO_ITCmd  = DISABLE;
 		GPIO_Init(&GPIO_InitStruct);
 		
 		//input with interrupt
 		GPIO_StructInit(&GPIO_InitStruct);
-		GPIO_InitStruct.GPIO_Pin        = PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN)|PNUM(FEED_STUCK_DET_RX_PIN);
+		GPIO_InitStruct.GPIO_Pin        = PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN);
 		GPIO_InitStruct.GPIO_Mode       = GPIO_Mode_IN;
 		GPIO_InitStruct.GPIO_ITCmd      = ENABLE;
 		GPIO_InitStruct.GPIO_ITTrigger  = GPIO_INT_Trigger_EDGE;
@@ -86,7 +86,7 @@ void Control_Init(void)
 		GPIO_InitStruct.GPIO_DebounceTime = 20;/* unit:ms , can be 1~64 ms */
 		GPIO_Init(&GPIO_InitStruct);
 
-		GPIO_ClearINTPendingBit(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN)|PNUM(FEED_STUCK_DET_RX_PIN));
+		GPIO_ClearINTPendingBit(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN));
 		
 		NVIC_InitTypeDef NVIC_InitStruct;
 		NVIC_InitStruct.NVIC_IRQChannel = FEED_WATER_DET_IRQn;
@@ -99,15 +99,15 @@ void Control_Init(void)
 		NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&NVIC_InitStruct);
 		
-		NVIC_InitStruct.NVIC_IRQChannel = FOOD_STUCK_DET_IRQn;
-		NVIC_InitStruct.NVIC_IRQChannelPriority = 3;
-		NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-		NVIC_Init(&NVIC_InitStruct);
+//		NVIC_InitStruct.NVIC_IRQChannel = FOOD_STUCK_DET_IRQn;
+//		NVIC_InitStruct.NVIC_IRQChannelPriority = 3;
+//		NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+//		NVIC_Init(&NVIC_InitStruct);
 		
 		control_timer_init();
 		
-		GPIO_MaskINTConfig(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN)|PNUM(FEED_STUCK_DET_RX_PIN), DISABLE);
-		GPIO_INTConfig(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN)|PNUM(FEED_STUCK_DET_RX_PIN), ENABLE);
+		GPIO_MaskINTConfig(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN), DISABLE);
+		GPIO_INTConfig(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN), ENABLE);
 		init_state = !init_state;
 	}
 	else
@@ -147,17 +147,20 @@ static void feed_food_timer(void)
 
 void feed_food(uint8_t num)
 {
-	g_feed_food_num += num;
-	
 	LOG_I("feed food %d !!!!\r\n", g_feed_food_num);
-	if(g_feed_food_num == num)
+	if(!g_feed_food_num)
 	{
+		g_feed_food_num = num;
 		LOG_I("feed food start!!!!\r\n");
 		//start moto and count 
 		os_timer_start(&feedfood_timer_handle);
 		GPIO_SET(FEED_MOTO_EN_PIN,Bit_SET);
 		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_SET);
 		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+	}
+	else
+	{
+		LOG_I("had been feed food!!!!\r\n");
 	}
 }
 
@@ -215,18 +218,29 @@ static void device_status_check_callback(void *param)
 	if(GPIO_GET(WATER_LEVEL_L_PIN))
 	{
 		LOG_I("Water level to the low!!!!\r\n");
+		MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_WATER_LOW);
+		control_send_msg(msg);
 	}
 	
 	if(GPIO_GET(FEED_BUCKET_DET_PIN))
 	{
 		LOG_I("Feed bucket had removed!!!!\r\n");
+		//MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FOODSTUCK);
+		//control_send_msg(msg);
+	}
+	
+	if(GPIO_GET(FEED_STUCK_DET_RX_PIN))
+	{
+		LOG_I("Feed stuck!!!!\r\n");
+		MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FOODSTUCK);
+		control_send_msg(msg);
 	}
 }
 
 static void device_status_check_start(void)
 {
 	if (os_timer_create(&device_status_timer_handle, "status", CUSTOM_DEVICE_STATUS_TIMER_ID,
-							   5*1000, true, device_status_check_callback) == true)
+							   EXCEPTION_CHECK_FREQ, true, device_status_check_callback) == true)
 	{
 			// Timer created successfully, start the timer.
 			os_timer_start(&device_status_timer_handle);
@@ -287,8 +301,8 @@ void FOOD_STUCK_DET_HANDLER(void)
     GPIO_MaskINTConfig(PNUM(FEED_STUCK_DET_RX_PIN), ENABLE);
 
 	LOG_I("food stuck!!!!\r\n");
-	//MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FOODSTUCK, true);
-	//control_send_msg(msg);
+	MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FOODSTUCK);
+	control_send_msg(msg);
     GPIO_ClearINTPendingBit(PNUM(FEED_STUCK_DET_RX_PIN));
     GPIO_MaskINTConfig(PNUM(FEED_STUCK_DET_RX_PIN), DISABLE);
     GPIO_INTConfig(PNUM(FEED_STUCK_DET_RX_PIN), ENABLE);

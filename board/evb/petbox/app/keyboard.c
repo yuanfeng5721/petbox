@@ -13,40 +13,36 @@
 #include <platform_utils.h>
 #include "os_timer.h"
 #include "custom_log.h"
-#include "cmd_task.h"
-#include "mcu_api.h"
 #include "custom_msg.h"
 #include "keyboard.h"
 #include "board.h"
 
+#define KEY_READ_PIN(n) GPIO_ReadInputDataBit(PNUM(n))
 
-uint8_t key_event[KEY_NUM][4];
-uint8_t key_pin[KEY_NUM] = 
-{
-	CONFIG_KEY_PIN,
-	FEED_KEY_PIN,
+uint8_t keypin[KEY_NUM] = {CONFIG_KEY_PIN, FEED_KEY_PIN};
+
+ST_KeyBoard keyboard[KEY_NUM] = {
+	{KEY_ENABLE, 0, KEY_LOW, KEY_LOW, KEY_NULL, KEY_EVENT_NULL, CONFIG_KEY_PIN},
+	{KEY_ENABLE, 0, KEY_LOW, KEY_LOW, KEY_NULL, KEY_EVENT_NULL, FEED_KEY_PIN},
 };
-void *keyboard_timer_handle;
+
+static void *keyboard_timer_handle;
 /*
 ************************************************************
 *	函数名称：	keyboard_gpio_init
-*
 *	函数功能：	按键IO初始化
-*
 *	入口参数：	无
-*
 *	返回参数：	无
-*
 *	说明：		按下为低电平		释放为高电平
 ************************************************************
 */
 
-void keyboard_gpio_init(void)
+static void keyboard_gpio_init(void)
 {
-    Pad_Config(CONFIG_KEY_PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_NONE, PAD_OUT_DISABLE, PAD_OUT_LOW);
+    Pad_Config(CONFIG_KEY_PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_UP, PAD_OUT_DISABLE, PAD_OUT_LOW);
     Pinmux_Config(CONFIG_KEY_PIN, DWGPIO);
 	
-	Pad_Config(FEED_KEY_PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_NONE, PAD_OUT_DISABLE, PAD_OUT_LOW);
+	Pad_Config(FEED_KEY_PIN, PAD_PINMUX_MODE, PAD_IS_PWRON, PAD_PULL_UP, PAD_OUT_DISABLE, PAD_OUT_LOW);
     Pinmux_Config(FEED_KEY_PIN, DWGPIO);
 	
 	/* Initialize GPIO peripheral */
@@ -55,146 +51,176 @@ void keyboard_gpio_init(void)
     GPIO_InitTypeDef GPIO_InitStruct;
   
 	GPIO_StructInit(&GPIO_InitStruct);
-    GPIO_InitStruct.GPIO_Pin    = GPIO_GetPin(CONFIG_KEY_PIN) | GPIO_GetPin(FEED_KEY_PIN);
+    GPIO_InitStruct.GPIO_Pin    = PNUM(CONFIG_KEY_PIN) | PNUM(FEED_KEY_PIN);
     GPIO_InitStruct.GPIO_Mode   = GPIO_Mode_IN;
     GPIO_InitStruct.GPIO_ITCmd  = DISABLE;
     GPIO_Init(&GPIO_InitStruct);
 	
-	uint8_t i = 0, j = 0, event_num = 0;
-	
-	for(; i < KEY_NUM; i++)
+	for(int i=0; i<KEY_NUM; i++)
 	{
-		for(j = 0; j < 4; j++)
-			key_event[i][j] = event_num++;
+		keyboard[i].KeyShield = KEY_ENABLE;
+		keyboard[i].KeyCount = 0;
+		keyboard[i].KeyLevel = KEY_LOW;
+		keyboard[i].KeyDownLevel = KEY_LOW;
+		keyboard[i].KeyStatus = KEY_NULL;
+		keyboard[i].KeyEvent = KEY_EVENT_NULL;
+		keyboard[i].KeyPin = keypin[i];
 	}
 }
 /*
 ************************************************************
-*	函数名称：	KEY_Scan
-*
+*	函数名称：	KeyReadLevel
 *	函数功能：	按键电平扫描
-*
-*	入口参数：	num：按键编号
-*
+*	入口参数：	NULL
 *	返回参数：	按键状态
-*
 *	说明：		
 ************************************************************
 */
-T_KEY_STATUS KeyRead(uint32_t num)
+//static void KeyReadLevel(void)
+static void KeyReadLevel(uint8_t num)
 {
-	T_KEY_STATUS key_event_s = KEY_NONE;
-	
-	if(num >= KEY_NUM)
-		return key_event_s;
-	
-	key_event_s = GPIO_ReadInputDataBit(GPIO_GetPin(key_pin[num]));
-	
-	if(key_event_s == 1)
-		return KEY_UP;
-	else if(key_event_s == 0)
-		return KEY_DOWN;
-	else
-		return KEY_NONE;
+//    uint8_t num;
+//    
+//    for(num=0; num<KEY_NUM; num++)
+//    {
+        if(keyboard[num].KeyShield == 0)
+            return;
+		
+		if(KEY_READ_PIN(keyboard[num].KeyPin) == keyboard[num].KeyDownLevel)
+			keyboard[num].KeyLevel = KEY_HIGH;
+		else
+			keyboard[num].KeyLevel = KEY_LOW;
+//    }
 }
 
 /*
 ************************************************************
 *	函数名称：	Keyboard
-*
 *	函数功能：	按键功能检测
-*
 *	入口参数：	无
-*
 *	返回参数：	按键键值
-*
 *	说明：		分单击、双击、长安
 ************************************************************
 */
-T_KEY_STATUS KeyScan(void)
+void ReadKeyStatus(void)
 {
-	static uint32_t key_busyflag = 0;									//按键处于非释放状态
-	static uint8_t key_count = 0;										  //按键按下时间
-	uint8_t time_out = 30, i = 0;										  //判断双击动作所需要的延时间隔
+    uint8_t i;
 	
-	for(; i < KEY_NUM; i++)
-	{
-		if(KeyRead(i) == KEY_DOWN && !(key_busyflag & (~(1 << i))))		//如果按下 且其他按键未按下
-		{
-			key_busyflag |= 1 << i;											//此按键处于忙状态
-			
-			if(++key_count >= KEYDOWN_LONG_TIME)							//按下计时
-				key_count = KEYDOWN_LONG_TIME;								//达到长按时长则不变
-			
-			return KEY_NONE;												//返回无动作状态
-		}
-		else if(KeyRead(i) == KEY_UP && key_busyflag & (1 << i))			//如果释放 且 按键之前是按下过的
-		{
-			key_busyflag &= ~(1 << i);										//此按键处于空闲状态
-			
-			if(key_count == KEYDOWN_LONG_TIME)								//如果是长按
-			{
-				key_count = 0;												//按下计时清零
-				return key_event[i][KEY_X_DOWNLONG];						//返回长按动作
-			}
-			else
-			{
-				key_count = 0;												//按下计时清零
-				while(--time_out)											//这里主要是等待约250ms，判断是否有第二次按下
+    for(i=0; i<KEY_NUM; i++)
+    {
+		KeyReadLevel(i);
+        switch(keyboard[i].KeyStatus)
+        {
+            //state 0：no key press
+            case KEY_NULL:
+                if(keyboard[i].KeyLevel == KEY_HIGH)//key press
+                {
+                    keyboard[i].KeyStatus = KEY_SURE;
+					keyboard[i].KeyEvent = KEY_EVENT_NULL;
+                }
+                else
+                {
+                    keyboard[i].KeyEvent = KEY_EVENT_NULL;
+                }
+                break;
+            //state 1：key press check
+            case KEY_SURE:
+                if(keyboard[i].KeyLevel == KEY_HIGH)
+                {
+                    keyboard[i].KeyStatus = KEY_DOWN;
+					keyboard[i].KeyEvent = KEY_EVENT_DOWN;
+                    keyboard[i].KeyCount = 0;//clear count
+                }
+                else
+                {
+                    keyboard[i].KeyStatus = KEY_NULL;
+                    keyboard[i].KeyEvent = KEY_EVENT_NULL;
+                }
+                break;
+            //state 2：key press
+            case KEY_DOWN:
+                if(keyboard[i].KeyLevel != KEY_HIGH)
+                {
+                    keyboard[i].KeyStatus = KEY_UP;
+                    keyboard[i].KeyEvent = KEY_EVENT_UP;
+                }
+                else if((keyboard[i].KeyLevel == KEY_HIGH) && (++keyboard[i].KeyCount >= KEY_EVENT_LONG_COUNT))
+                {
+                    keyboard[i].KeyStatus = KEY_LONG;
+                    keyboard[i].KeyEvent = KEY_EVENT_LONG;//long press event
+					//keyboard[i].KeyCount = 0;//clear count
+                }
+                else
+                {
+                    keyboard[i].KeyEvent = KEY_EVENT_NULL;//null event
+                }
+                break;
+			//state 3: key allways press
+            case KEY_LONG:
+                if(keyboard[i].KeyLevel != KEY_HIGH)//key release
+                {
+                    keyboard[i].KeyStatus = KEY_UP;
+                    keyboard[i].KeyEvent = KEY_EVENT_UP;//release event
+					//keyboard[i].KeyEvent = KEY_EVENT_NULL;
+                }
+                else if((keyboard[i].KeyLevel == KEY_HIGH) && (keyboard[i].KeyCount >= KEY_EVENT_LONG_COUNT))
+                {
+					keyboard[i].KeyStatus = KEY_LONG;
+                    keyboard[i].KeyEvent = KEY_EVENT_NULL;//long press event
+                    //keyboard[i].KeyCount = 0;//clear count
+                }
+                else
+                {
+                    keyboard[i].KeyEvent = KEY_EVENT_NULL;//null event
+                }
+                break;
+			//state 4: release key
+			case KEY_UP:
+				if(keyboard[i].KeyLevel != KEY_HIGH)
 				{
-					platform_delay_ms(10);											//让此任务进入阻塞态，这不影响代码正常的运行
-					
-					if(KeyRead(i) == KEY_DOWN)								//有第二次按下，说明为双击
-					{
-						while(KeyRead(i) == KEY_DOWN)						//等待释放，无此句，双击后会跟一个单击动作
-							platform_delay_ms(5);									//让此任务进入阻塞态，这不影响代码正常的运行
-						
-						return key_event[i][KEY_X_DOUBLE];					//返回双击动作
-					}
-					
+					keyboard[i].KeyStatus = KEY_NULL;
+					keyboard[i].KeyEvent = KEY_EVENT_NULL;
+					keyboard[i].KeyCount = 0;//clear count
 				}
-				
-				return key_event[i][KEY_X_DOWN];							//以上判断均无效，则为单击动作
-			}
+				break;
+        }
+		if(keyboard[i].KeyEvent != KEY_EVENT_NULL)
+		{
+			MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_KEYBOARD, i, keyboard[i].KeyEvent);
+			app_send_msg(msg);
 		}
 	}
-	
-	key_busyflag = 0;
-	key_count = 0;
-	
-	return KEY_NONE;
-	
 }
 
 void KeyTask(void)
 {
-	T_KEY_STATUS key_event_r = KEY_NONE;
-	uint8_t i = 0;
-	while(1)
-	{
-		key_event_r = KeyScan();
-		
-		for(i=0; i<KEY_NUM; i++)
-		{
-			//单击判断-------------------------------------------------------
-			if(key_event_r == key_event[i][KEY_X_DOWN])
-			{
-				LOG_I("(keycode:%d) short press\r\n", i);
-			}
-			
-			//双击判断-------------------------------------------------------
-			if(key_event_r == key_event[i][KEY_X_DOUBLE])
-			{
-				LOG_I("(keycode:%d) double press\r\n", i);
-			}
-			
-			//长按判断-------------------------------------------------------
-			if(key_event_r == key_event[i][KEY_X_DOWNLONG])
-			{
-				LOG_I("(keycode:%d)) long press\r\n", i);
-			}
-		}
-	}
+	ReadKeyStatus();
+	
+//	if(keyboard[KEY_CONFIG].KeyEvent == KEY_EVENT_UP)
+//	{
+//		LOG_I("KEY_CONFIG Up\n");
+//	}
+//	else if(keyboard[KEY_CONFIG].KeyEvent == KEY_EVENT_DOWN)
+//	{
+//		LOG_I("KEY_CONFIG Down\n");
+//	}
+//	else if(keyboard[KEY_CONFIG].KeyEvent == KEY_EVENT_LONG)
+//	{
+//		LOG_I("KEY_CONFIG Long Down\n");
+//	}
+//	
+//	if(keyboard[KEY_FEED].KeyEvent == KEY_EVENT_UP)
+//	{
+//		LOG_I("KEY_FEED Up\n");
+//	}
+//	else if(keyboard[KEY_FEED].KeyEvent == KEY_EVENT_DOWN)
+//	{
+//		LOG_I("KEY_FEED Down\n");
+//	}
+//	else if(keyboard[KEY_FEED].KeyEvent == KEY_EVENT_LONG)
+//	{
+//		LOG_I("KEY_FEED Long Down\n");
+//	}
 }
 
 void keyboard_timer_callback(void *p_handle)

@@ -31,7 +31,8 @@
 
 #include "control_task.h"
 #include "control.h"
-
+#include "mcu_api.h"
+#include "protocol.h"
 /** @defgroup  PERIPH_APP_TASK Peripheral App Task
     * @brief This file handles the implementation of application task related functions.
     *
@@ -59,6 +60,11 @@ static void *msg_queue_handle;   //!< IO queue handle
  *============================================================================*/
 void control_main_task(void *p_param);
 
+
+void control_exception_send(uint8_t exception)
+{
+	mcu_dp_enum_update(DPID_REALTIME_DATA,exception);
+}
 /**
  * @brief  Initialize App task
  * @return void
@@ -94,7 +100,13 @@ void control_handle_io_msg(T_IO_MSG io_msg)
 		
 		case CONTROL_MSG_FOODSTUCK:
 		{
-			
+			control_exception_send(1);
+		}
+		break;
+		
+		case CONTROL_MSG_WATER_LOW:
+		{
+			control_exception_send(2);
 		}
 		break;
 		

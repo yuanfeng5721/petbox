@@ -19,23 +19,14 @@
 extern "C" {
 #endif      /* __cplusplus */
 
-//#define KEY_NUM			  2
-//#define KEY_NONE		0xFF
-
 typedef enum
 {
-	KEY_UP			= 0,
-	KEY_DOWN		= 1,
-	KEY_NONE	    = 0xFF,
+	KEY_NULL        = 0x0,
+	KEY_SURE        = 0x1,
+	KEY_UP			= 0x2,
+	KEY_DOWN		= 0x4,
+	KEY_LONG        = 0x8,
 }T_KEY_STATUS;
-
-typedef enum
-{
-	KEY_X_DOWN		= 0,
-	KEY_X_UP		= 1,
-	KEY_X_DOUBLE	= 2,
-	KEY_X_DOWNLONG	= 3,
-}T_KEY_X_STATUS;
 
 typedef enum
 {
@@ -44,25 +35,42 @@ typedef enum
 	KEY_NUM			= 2,
 }T_KEY_VALUE;
 
-#define KEYDOWN_LONG_TIME		40		//计算长按时长。目前keyboard函数每50ms调用一次。
-
-
-extern uint8_t key_event[KEY_NUM][4];
-
-typedef struct ST_Key
+typedef enum
 {
-	uint8_t keycode;
-	uint8_t pin;
-	char name[10];
-	T_KEY_X_STATUS event;
-} ST_Key;
+	KEY_EVENT_NULL  = 0x0,
+	KEY_EVENT_UP	= 0x1,
+	KEY_EVENT_DOWN	= 0x2,
+	KEY_EVENT_LONG  = 0x3,
+}T_KEY_EVENT;
+
+typedef enum
+{
+	KEY_LOW    = 0,
+	KEY_HIGH   = 1,
+}T_KEY_LEVEL;
+
+typedef enum
+{
+	KEY_DISABLE    = 0,
+	KEY_ENABLE     = 1,
+}T_KEY_SHIELD;
+
+#define KEY_EVENT_LONG_COUNT		160		//计算长按时长。目前keyboard函数每50ms调用一次。
 
 
+typedef struct
+{
+    T_KEY_SHIELD KeyShield;       //按键屏蔽 0:屏蔽，1:不屏蔽
+	uint8_t KeyCount;             //按键长按计数
+    T_KEY_LEVEL KeyLevel;         //虚拟当前IO电平，按下1，抬起0
+    T_KEY_LEVEL KeyDownLevel;     //按下时IO实际的电平
+    T_KEY_STATUS KeyStatus;       //按键状态
+    T_KEY_EVENT KeyEvent;         //按键事件
+	uint8_t KeyPin;               //按键GPIO
+}ST_KeyBoard;
 
-void KEY_Init(void);
-uint8_t KEY_Scan(uint32_t num);
-uint8_t Keyboard(void);
-void KeyBoard_Task_Init(void);
+
+int KeyBoard_Init(void);
 
 
 

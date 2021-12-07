@@ -27,6 +27,7 @@ typedef enum
     CUSTOM_MSG_START = IO_MSG_TYPE_I2C,             /**< subtype to be defined */
 	CUSTOM_MSG_WIFI,
 	CUSTOM_MSG_CONTROL,
+	CUSTOM_MSG_KEYBOARD,
 } T_CUSTOM_MSG_TYPE;
 
 /**  @brief custom subtype definitions for @ref T_CUSTOM_MSG_TYPE_WIFI type */
@@ -34,6 +35,7 @@ typedef enum
 {
     CUSTOM_MSG_WIFI_RESET,
 	CUSTOM_MSG_WIFI_STATE,
+	CUSTOM_MSG_WIFI_SEND,
 } T_CUSTOM_MSG_TYPE_WIFI;
 
 typedef enum
@@ -42,7 +44,16 @@ typedef enum
 	CONTROL_MSG_FEEDFOOD,
 	CONTROL_MSG_FEEDWATER,
 	CONTROL_MSG_FOODSTUCK,
+	CONTROL_MSG_WATER_LOW,
+	CONTROL_MSG_FOOD_LITTLE,
 } T_CONTROL_MSG_SUBTYPE;
+
+typedef enum
+{
+    CUSTOM_MSG_KEY_DOWN,
+	CUSTOM_MSG_KEY_LONG,
+	CUSTOM_MSG_KEY_UP,
+} T_CUSTOM_MSG_TYPE_KEYBOARD;
 
 typedef enum
 {
