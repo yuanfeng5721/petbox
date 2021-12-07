@@ -25,6 +25,8 @@ extern "C" {
 #define FEED_FOOD_DET_IRQn		 GPIO2_IRQn
 #define FOOD_STUCK_DET_HANDLER   GPIO18_Handler
 #define FOOD_STUCK_DET_IRQn		 GPIO18_IRQn
+#define FEED_NUM_COUNT_HANDLER   GPIO27_Handler
+#define FEED_NUM_COUNT_IRQn      GPIO27_IRQn
 
 #define EXCEPTION_CHECK_FREQ    (5*1000)  //1S
 

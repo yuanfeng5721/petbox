@@ -18,6 +18,8 @@ void *feedfood_timer_handle;
 void *device_status_timer_handle;
 
 static uint8_t g_feed_food_num = 0;
+static uint8_t g_feed_count_pin = 0;
+static uint8_t g_feed_count = 0;
 
 void control_timer_init(void);
 extern void control_send_msg(T_IO_MSG msg);
@@ -85,7 +87,17 @@ void Control_Init(void)
 		GPIO_InitStruct.GPIO_ITDebounce = GPIO_INT_DEBOUNCE_ENABLE;
 		GPIO_InitStruct.GPIO_DebounceTime = 20;/* unit:ms , can be 1~64 ms */
 		GPIO_Init(&GPIO_InitStruct);
-
+		
+		GPIO_StructInit(&GPIO_InitStruct);
+		GPIO_InitStruct.GPIO_Pin        = PNUM(FEED_NUM_COUNT_PIN);
+		GPIO_InitStruct.GPIO_Mode       = GPIO_Mode_IN;
+		GPIO_InitStruct.GPIO_ITCmd      = ENABLE;
+		GPIO_InitStruct.GPIO_ITTrigger  = GPIO_INT_BOTH_EDGE;
+		GPIO_InitStruct.GPIO_ITPolarity = GPIO_INT_POLARITY_ACTIVE_HIGH;
+		GPIO_InitStruct.GPIO_ITDebounce = GPIO_INT_DEBOUNCE_ENABLE;
+		GPIO_InitStruct.GPIO_DebounceTime = 20;/* unit:ms , can be 1~64 ms */
+		GPIO_Init(&GPIO_InitStruct);
+		
 		GPIO_ClearINTPendingBit(PNUM(WATER_AUTO_DET_PIN)|PNUM(FEED_AUTO_DET_PIN));
 		
 		NVIC_InitTypeDef NVIC_InitStruct;
@@ -103,6 +115,11 @@ void Control_Init(void)
 //		NVIC_InitStruct.NVIC_IRQChannelPriority = 3;
 //		NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
 //		NVIC_Init(&NVIC_InitStruct);
+		
+		NVIC_InitStruct.NVIC_IRQChannel = FEED_NUM_COUNT_IRQn;
+		NVIC_InitStruct.NVIC_IRQChannelPriority = 3;
+		NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init(&NVIC_InitStruct);
 		
 		control_timer_init();
 		
@@ -306,4 +323,41 @@ void FOOD_STUCK_DET_HANDLER(void)
     GPIO_ClearINTPendingBit(PNUM(FEED_STUCK_DET_RX_PIN));
     GPIO_MaskINTConfig(PNUM(FEED_STUCK_DET_RX_PIN), DISABLE);
     GPIO_INTConfig(PNUM(FEED_STUCK_DET_RX_PIN), ENABLE);
+}
+
+static void control_feed_count(bool state)
+{
+	if(state) //start feed count
+	{
+		GPIO_SET(FEED_NUM_COUNT_PIN,Bit_SET);
+		g_feed_count_pin = GPIO_GET(FEED_NUM_COUNT_PIN);
+		g_feed_count = 0;
+		GPIO_ClearINTPendingBit(PNUM(FEED_NUM_COUNT_PIN));
+		GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), DISABLE);
+		GPIO_INTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
+	}
+	else //stop feed count
+	{
+		GPIO_INTConfig(PNUM(FEED_NUM_COUNT_PIN), DISABLE);
+		GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
+		GPIO_SET(FEED_NUM_COUNT_PIN,Bit_RESET);
+		g_feed_count = 0;
+	}
+}
+
+void FEED_NUM_COUNT_HANDLER(void)
+{
+	uint8_t state;
+	GPIO_INTConfig(PNUM(FEED_NUM_COUNT_PIN), DISABLE);
+    GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
+	state = GPIO_GET(FEED_NUM_COUNT_PIN);
+	if(g_feed_count_pin^state)
+	{
+		g_feed_count++;
+	}
+	LOG_I("feedd count: %d\r\n", g_feed_count);
+	
+    GPIO_ClearINTPendingBit(PNUM(FEED_NUM_COUNT_PIN));
+    GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), DISABLE);
+    GPIO_INTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
 }
