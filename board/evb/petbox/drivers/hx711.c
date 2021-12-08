@@ -12,6 +12,7 @@
 #include "os_timer.h"
 #include "custom_log.h"
 #include "custom_msg.h"
+#include "hx711.h"
 
 uint32_t HX711_Buffer;
 uint32_t Weight_Maopi;
@@ -35,14 +36,14 @@ static void weight_timer_callback(void *param)
 {
 	uint32_t weight;
 	weight = Get_Weight();
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_REPORT_REMAIN, 1500);
+	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_REPORT_REMAIN, weight);
 	control_send_msg(msg);
 }
 
 static void weight_timer(void)
 {
 	if (os_timer_create(&weight_timer_handle, "weight", CUSTOM_WEIGHT_TIMER_ID,
-							   10*1000, true, weight_timer_callback) == true)
+							   20*1000, true, weight_timer_callback) == true)
 	{
 		// Timer created successfully, start the timer.
 		os_timer_start(&weight_timer_handle);
@@ -159,9 +160,12 @@ uint32_t Get_Weight(void)
 																		//因为不同的传感器特性曲线不一样，因此，每一个传感器需要矫正这里的GapValue这个除数。
 																		//当发现测试出来的重量偏大时，增加该数值。
 		//LOG_I("Weight_Shiwu: %d g\r\n", Weight_Shiwu);																//如果测试出来的重量偏小时，减小改数值。
-		
+		if(Weight_Shiwu>MAX_WEIGHT)
+		{
+			Weight_Shiwu = 5000;
+		}
 	}
 
-	LOG_I("Weight_Shiwu: %d g\r\n", Weight_Shiwu);
+	LOG_I("Weight: %d g\r\n", Weight_Shiwu);
 	return Weight_Shiwu;
 }

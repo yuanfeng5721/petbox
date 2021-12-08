@@ -17,7 +17,7 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif      /* __cplusplus */
-
+#define MAX_WEIGHT  5000
 void hx711_gpio_init(void);
 void Get_Maopi(void);
   
