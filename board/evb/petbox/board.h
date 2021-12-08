@@ -23,6 +23,8 @@ extern "C" {
 #include "rtl876x_gpio.h"
 #include "rtl876x_pinmux.h"
 #include "rtl876x_rcc.h"
+#include <platform_utils.h>
+
 /* GPIO function define begin */
 #define DATA_UART_TX_PIN     P3_0
 #define DATA_UART_RX_PIN     P3_1
@@ -72,6 +74,17 @@ extern "C" {
 
 #define GPIO_SET(PIN, VAL) GPIO_WriteBit(PNUM(PIN), (BitAction)(VAL)) 
 #define GPIO_GET(PIN)  GPIO_ReadInputDataBit(PNUM(PIN))
+
+#define delay_us(us) platform_delay_us(us)
+//inline void delay_us(uint32_t us)
+//{
+//	platform_delay_us(us);
+//}
+#define delay_ms(ms) platform_delay_ms(ms)
+//inline void delay_ms(uint32_t ms)
+//{
+//	platform_delay_ms(ms);
+//}
 
 /* GPIO function define end */
 /* custom define */

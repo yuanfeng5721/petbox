@@ -20,6 +20,7 @@ void *device_status_timer_handle;
 static uint8_t g_feed_food_num = 0;
 static uint8_t g_feed_count_pin = 0;
 static uint8_t g_feed_count = 0;
+static uint8_t g_feed_max_count = 0;
 
 void control_timer_init(void);
 extern void control_send_msg(T_IO_MSG msg);
@@ -132,15 +133,32 @@ void Control_Init(void)
 		LOG_I("control hardware had been initialized!!!!\r\n");
 	}
 }
+void feed_moto(bool onoff)
+{
+	LOG_I("feed moto %s!!!!\r\n", onoff?"start":"stop");
+	if(onoff)
+	{
+		GPIO_SET(FEED_MOTO_EN_PIN,Bit_SET);
+		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_SET);
+		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+	}
+	else
+	{
+		GPIO_SET(FEED_MOTO_EN_PIN,Bit_RESET);
+		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_RESET);
+		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+	}
+}
 
 static void feedfood_timer_callback(void *param)
 {
 	if(--g_feed_food_num == 0)
 	{
 		LOG_I("feed food end!!!!\r\n");
-		GPIO_SET(FEED_MOTO_EN_PIN,Bit_RESET);
-		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_RESET);
-		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+//		GPIO_SET(FEED_MOTO_EN_PIN,Bit_RESET);
+//		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_RESET);
+//		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+		feed_moto(false);
 	}
 	else
 	{
@@ -171,9 +189,10 @@ void feed_food(uint8_t num)
 		LOG_I("feed food start!!!!\r\n");
 		//start moto and count 
 		os_timer_start(&feedfood_timer_handle);
-		GPIO_SET(FEED_MOTO_EN_PIN,Bit_SET);
-		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_SET);
-		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+//		GPIO_SET(FEED_MOTO_EN_PIN,Bit_SET);
+//		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_SET);
+//		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
+		feed_moto(true);
 	}
 	else
 	{
@@ -305,7 +324,7 @@ void FEED_FOOD_DET_HANDLER(void)
     GPIO_MaskINTConfig(PNUM(FEED_AUTO_DET_PIN), ENABLE);
 
 	LOG_I("auto feed food !!!!\r\n");
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD, 1);
+	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, 1);
 	control_send_msg(msg);
     GPIO_ClearINTPendingBit(PNUM(FEED_AUTO_DET_PIN));
     GPIO_MaskINTConfig(PNUM(FEED_AUTO_DET_PIN), DISABLE);
@@ -325,13 +344,14 @@ void FOOD_STUCK_DET_HANDLER(void)
     GPIO_INTConfig(PNUM(FEED_STUCK_DET_RX_PIN), ENABLE);
 }
 
-static void control_feed_count(bool state)
+static void control_feed_count(bool state, uint8_t max_count)
 {
 	if(state) //start feed count
 	{
 		GPIO_SET(FEED_NUM_COUNT_PIN,Bit_SET);
 		g_feed_count_pin = GPIO_GET(FEED_NUM_COUNT_PIN);
 		g_feed_count = 0;
+		g_feed_max_count = max_count;
 		GPIO_ClearINTPendingBit(PNUM(FEED_NUM_COUNT_PIN));
 		GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), DISABLE);
 		GPIO_INTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
@@ -342,6 +362,7 @@ static void control_feed_count(bool state)
 		GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
 		GPIO_SET(FEED_NUM_COUNT_PIN,Bit_RESET);
 		g_feed_count = 0;
+		g_feed_max_count = 0;
 	}
 }
 
@@ -352,10 +373,17 @@ void FEED_NUM_COUNT_HANDLER(void)
     GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), ENABLE);
 	state = GPIO_GET(FEED_NUM_COUNT_PIN);
 	if(g_feed_count_pin^state)
-	{
+	{	
+		g_feed_count_pin = state;
 		g_feed_count++;
 	}
-	LOG_I("feedd count: %d\r\n", g_feed_count);
+	LOG_I("feed count: %d\r\n", g_feed_count);
+	if(g_feed_count > g_feed_max_count)
+	{
+		feed_moto(false);
+		control_feed_count(false, 0);
+		return;
+	}
 	
     GPIO_ClearINTPendingBit(PNUM(FEED_NUM_COUNT_PIN));
     GPIO_MaskINTConfig(PNUM(FEED_NUM_COUNT_PIN), DISABLE);

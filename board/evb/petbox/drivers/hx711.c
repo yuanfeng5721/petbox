@@ -3,18 +3,23 @@
 #include <os_msg.h>
 #include <trace.h>
 #include <app_msg.h>
-#include <board.h>
 #include <rtl876x.h>
 #include <rtl876x_rcc.h>
 #include <rtl876x_gpio.h>
 #include <rtl876x_pinmux.h>
 #include <platform_utils.h>
+#include "board.h"
+#include "os_timer.h"
 #include "custom_log.h"
+#include "custom_msg.h"
 
 uint32_t HX711_Buffer;
 uint32_t Weight_Maopi;
 int32_t Weight_Shiwu;
 uint8_t Flag_Error = 0;
+
+
+void *weight_timer_handle;
 
 //校准参数
 //因为不同的传感器特性曲线不是很一致，因此，每一个传感器需要矫正这里这个参数才能使测量值很准确。
@@ -22,6 +27,27 @@ uint8_t Flag_Error = 0;
 //如果测试出来的重量偏小时，减小改数值。
 //该值可以为小数
 #define GapValue 106.5
+
+void Get_Maopi(void);
+
+static void weight_timer_callback(void *param)
+{
+	Get_Maopi();
+}
+
+static void weight_timer(void)
+{
+	if (os_timer_create(&weight_timer_handle, "weight", CUSTOM_WEIGHT_TIMER_ID,
+							   5*1000, true, weight_timer_callback) == true)
+	{
+		// Timer created successfully, start the timer.
+		os_timer_start(&weight_timer_handle);
+	}
+	else
+	{
+		LOG_I("weight timer error!!!!\r\n");
+	}
+}
 
 /**
   * @brief  Initialization of pinmux settings and pad settings.
@@ -53,6 +79,10 @@ void hx711_gpio_init(void)
     GPIO_Init(&GPIO_InitStruct);
 	
 	GPIO_WriteBit(GPIO_GetPin(HX711_SCK), (BitAction)(0));
+	
+	delay_ms(10);
+	
+	weight_timer();
 }
 
 
@@ -71,35 +101,30 @@ void hx711_set_clk(BitAction BitVal)
 	GPIO_WriteBit(GPIO_GetPin(HX711_SCK), BitVal);
 }
 
-void delay_us(uint32_t us)
-{
-	platform_delay_us(us);
-}
-
 uint32_t hx711_Read(void)	//增益128
 {
 	uint32_t count; 
 	uint8_t i; 
   	hx711_set_data(Bit_SET); 
-	delay_us(1);
-  	hx711_set_clk(0); 
+	delay_us(5);
+  	hx711_set_clk(Bit_RESET); 
 	
   	count=0; 
   	while(hx711_get_data()); 
   	for(i=0;i<24;i++)
 	{ 
-	  	hx711_set_clk(1); 
+	  	hx711_set_clk(Bit_SET); 
 	  	count=count<<1; 
-		delay_us(1);
-		hx711_set_clk(0);
+		delay_us(5);
+		hx711_set_clk(Bit_RESET);
 	  	if(hx711_get_data())
 			count++; 
-		delay_us(1);
+		delay_us(5);
 	} 
- 	hx711_set_clk(1); 
+ 	hx711_set_clk(Bit_SET); 
     count=count^0x800000;//第25个脉冲下降沿来时，转换数据
-	delay_us(1);
-	hx711_set_clk(0);  
+	delay_us(5);
+	hx711_set_clk(Bit_RESET);  
 	return(count);
 }
 
@@ -127,7 +152,8 @@ void Get_Weight(void)
 		Weight_Shiwu = (int32_t)((float)Weight_Shiwu/GapValue); 	//计算实物的实际重量
 																		//因为不同的传感器特性曲线不一样，因此，每一个传感器需要矫正这里的GapValue这个除数。
 																		//当发现测试出来的重量偏大时，增加该数值。
-																		//如果测试出来的重量偏小时，减小改数值。
+		LOG_I("Weight_Shiwu: %d \r\n", Weight_Shiwu);																//如果测试出来的重量偏小时，减小改数值。
+		
 	}
 
 	

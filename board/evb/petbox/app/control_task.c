@@ -86,9 +86,16 @@ void control_handle_io_msg(T_IO_MSG io_msg)
 			Control_Init();
 		}
 		break;
-		case CONTROL_MSG_FEEDFOOD:
+		
+		case CONTROL_MSG_FEEDFOOD_START:
 		{
 			feed_food(io_msg.u.param);
+		}
+		break;
+		
+		case CONTROL_MSG_FEEDFOOD_STOP:
+		{
+			
 		}
 		break;
 		
@@ -150,7 +157,7 @@ uint32_t control_feed_num(uint32_t num)
 {
 	uint8_t i;
 	LOG_I("need feed %d part\r\n", num);
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD, num);
+	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, num);
 	os_msg_send(msg_queue_handle, &msg, 0);
 	return num;
 }

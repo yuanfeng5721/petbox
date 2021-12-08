@@ -115,7 +115,7 @@ void app_handle_io_msg(T_IO_MSG io_msg)
 			{
 				if(keycode == KEY_FEED)
 				{
-					MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD, 1);
+					MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, 1);
 					app_send_msg(msg);
 				}
 			}
@@ -183,7 +183,7 @@ void app_main_task(void *p_param)
 		}
 		os_delay(100);
 		//LOG_I("Test info......\r\n");
-		//Get_Maopi();
+		//Get_Weight();
     }
 }
 
