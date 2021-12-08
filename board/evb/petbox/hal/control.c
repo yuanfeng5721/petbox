@@ -203,8 +203,9 @@ void feed_food(uint8_t num)
 
 static void feedwater_timer_callback(void *param)
 {
-	GPIO_SET(WATER_PUMP_EN_PIN,Bit_RESET);
-	GPIO_SET(WATER_PUMP_LED_PIN,Bit_RESET);
+//	GPIO_SET(WATER_PUMP_EN_PIN,Bit_RESET);
+//	GPIO_SET(WATER_PUMP_LED_PIN,Bit_RESET);
+	feed_water(false);
 	LOG_I("feed water end!!!!\r\n");
 }
 
@@ -226,10 +227,10 @@ void feed_water(bool status)
 {
 	static bool status_bak = 0;
 	
-	LOG_I("feed water %d !!!!\r\n", status);
 	if(status_bak != status)
 	{
 		status_bak = status;
+		LOG_I("feed water %d !!!!\r\n", status);
 		if(status)
 		{
 			os_timer_start(&feedwater_timer_handle);
@@ -246,7 +247,8 @@ void feed_water(bool status)
 
 static void device_status_check_callback(void *param)
 {
-	
+	static uint8_t stuck_count = 0;
+	static uint8_t water_level_count = 0;
 	if(GPIO_GET(WATER_LEVEL_M_PIN))
 	{
 		LOG_I("Water level to middle!!!!\r\n");
@@ -255,8 +257,17 @@ static void device_status_check_callback(void *param)
 	if(GPIO_GET(WATER_LEVEL_L_PIN))
 	{
 		LOG_I("Water level to the low!!!!\r\n");
-		MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_WATER_LOW);
-		control_send_msg(msg);
+		if(water_level_count++ == 0)
+		{
+			LOG_I("--------------Water level to the low---------------!!!!\r\n");
+			MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_WATER_LOW);
+			control_send_msg(msg);
+		}
+		water_level_count = water_level_count%(EXCEPTION_REPORT_FREQ/EXCEPTION_CHECK_FREQ);
+	}
+	else
+	{
+		water_level_count = 0;
 	}
 	
 	if(GPIO_GET(FEED_BUCKET_DET_PIN))
@@ -269,8 +280,17 @@ static void device_status_check_callback(void *param)
 	if(GPIO_GET(FEED_STUCK_DET_RX_PIN))
 	{
 		LOG_I("Feed stuck!!!!\r\n");
-		MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FOODSTUCK);
-		control_send_msg(msg);
+		if(stuck_count++ == 0)
+		{
+			LOG_I("--------------Feed stuck---------------!!!!\r\n");
+			MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FOODSTUCK);
+			control_send_msg(msg);
+		}
+		stuck_count = stuck_count%(EXCEPTION_REPORT_FREQ/EXCEPTION_CHECK_FREQ);
+	}
+	else
+	{
+		stuck_count = 0;
 	}
 }
 

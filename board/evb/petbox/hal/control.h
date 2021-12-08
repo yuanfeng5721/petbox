@@ -28,7 +28,8 @@ extern "C" {
 #define FEED_NUM_COUNT_HANDLER   GPIO27_Handler
 #define FEED_NUM_COUNT_IRQn      GPIO27_IRQn
 
-#define EXCEPTION_CHECK_FREQ    (5*1000)  //1S
+#define EXCEPTION_CHECK_FREQ    (5*1000)  //5S
+#define EXCEPTION_REPORT_FREQ   (60*1000*1)
 
 void feed_food(uint8_t num);
 void feed_weight(uint32_t weight);

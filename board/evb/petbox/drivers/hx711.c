@@ -35,14 +35,14 @@ static void weight_timer_callback(void *param)
 {
 	uint32_t weight;
 	weight = Get_Weight();
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_REPORT_REMAIN, weight);
+	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_REPORT_REMAIN, 1500);
 	control_send_msg(msg);
 }
 
 static void weight_timer(void)
 {
 	if (os_timer_create(&weight_timer_handle, "weight", CUSTOM_WEIGHT_TIMER_ID,
-							   3*1000, true, weight_timer_callback) == true)
+							   10*1000, true, weight_timer_callback) == true)
 	{
 		// Timer created successfully, start the timer.
 		os_timer_start(&weight_timer_handle);
@@ -162,6 +162,6 @@ uint32_t Get_Weight(void)
 		
 	}
 
-	//LOG_I("Weight_Shiwu: %d g\r\n", Weight_Shiwu);
+	LOG_I("Weight_Shiwu: %d g\r\n", Weight_Shiwu);
 	return Weight_Shiwu;
 }

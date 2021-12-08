@@ -198,7 +198,7 @@ uint8_t control_feed_water(uint8_t water)
 	os_msg_send(msg_queue_handle, &msg, 0);
 	
 	MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
-	os_msg_send(msg_queue_handle, &msg, 0);
+	os_msg_send(msg_queue_handle, &msg1, 0);
 	return water;
 }
 /** @} */ /* End of group PERIPH_APP_TASK */
