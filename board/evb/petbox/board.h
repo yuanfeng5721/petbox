@@ -50,7 +50,7 @@ extern "C" {
 #define WATER_PUMP_LED_PIN   P0_7	//output
 #define WATER_LEVEL_M_PIN	 P4_3	//input
 #define WATER_LEVEL_L_PIN    P0_6	//input
-#define WATER_AUTO_DET_PIN   P0_1	//input
+#define WATER_AUTO_DET_PIN   P0_2//P0_1	//input
 
 //feed moto control pin
 #define FEED_MOTO_EN_PIN     P0_0	//output
@@ -58,7 +58,7 @@ extern "C" {
 #define FEED_MOTO_CTL2_PIN   P2_7	//output
 
 #define FEED_BUCKET_DET_PIN  P0_4	//input
-#define FEED_AUTO_DET_PIN    P0_2	//input
+#define FEED_AUTO_DET_PIN    P0_1//P0_2	//input
 #define FEED_NUM_EN_PIN		 P3_2   //output
 #define FEED_NUM_COUNT_PIN   P3_3   //input
 
