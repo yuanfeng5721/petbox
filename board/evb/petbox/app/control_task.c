@@ -117,6 +117,18 @@ void control_handle_io_msg(T_IO_MSG io_msg)
 		}
 		break;
 		
+		case CONTROL_MSG_PLAY_VOICE:
+		{
+			module_play_voice(io_msg.u.param);
+		}
+		break;
+		
+		case CONTROL_MSG_REPORT_REMAIN:
+		{
+			mcu_dp_value_update(DPID_FEED_REMAINING,io_msg.u.param);
+		}
+		break;
+		
 		default:
 			break;
     }
@@ -143,7 +155,7 @@ void control_main_task(void *p_param)
 				control_handle_io_msg(io_msg);
 			}
 		}
-		//os_delay(2000);
+		os_delay(200);
 		//LOG_I("control info......\r\n");
     }
 }
@@ -159,6 +171,8 @@ uint32_t control_feed_num(uint32_t num)
 	LOG_I("need feed %d part\r\n", num);
 	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, num);
 	os_msg_send(msg_queue_handle, &msg, 0);
+	MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, num);
+	os_msg_send(msg_queue_handle, &msg1, 0);
 	return num;
 }
 
@@ -181,6 +195,9 @@ uint8_t control_feed_water(uint8_t water)
 	LOG_I("set feed water %s\r\n", water?"on":"off");
 	
 	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDWATER, water);
+	os_msg_send(msg_queue_handle, &msg, 0);
+	
+	MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
 	os_msg_send(msg_queue_handle, &msg, 0);
 	return water;
 }

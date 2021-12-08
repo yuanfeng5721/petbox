@@ -139,6 +139,7 @@ void feed_moto(bool onoff)
 	if(onoff)
 	{
 		GPIO_SET(FEED_MOTO_EN_PIN,Bit_SET);
+		delay_ms(500);
 		GPIO_SET(FEED_MOTO_CTL1_PIN,Bit_SET);
 		GPIO_SET(FEED_MOTO_CTL2_PIN,Bit_RESET);
 	}
@@ -182,7 +183,7 @@ static void feed_food_timer(void)
 
 void feed_food(uint8_t num)
 {
-	LOG_I("feed food %d !!!!\r\n", g_feed_food_num);
+	LOG_I("feed food %d !!!!\r\n", num);
 	if(!g_feed_food_num)
 	{
 		g_feed_food_num = num;

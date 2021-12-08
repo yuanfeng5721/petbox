@@ -176,7 +176,7 @@ static unsigned char dp_download_feed_num_handle(const unsigned char value[], un
     */
     //LOG_I("feed_num = %d\r\n", feed_num);
 	feed_num = control_feed_num(feed_num);
-	module_play_voice(feed_num);
+	//module_play_voice(feed_num);
     //处理完DP数据后应有反馈
     ret = mcu_dp_value_update(DPID_FEED_NUM,feed_num);
     if(ret == SUCCESS)

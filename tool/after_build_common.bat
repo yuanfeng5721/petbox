@@ -18,5 +18,5 @@ del "bin\%linker_output_file_name%_MP*.bin"
 del "bin\%linker_output_file_name%_MP.bin"
 rmdir /q /s "..\..\..\out\%linker_output_file_name%"
 md ..\..\..\out\%linker_output_file_name%
-xcopy /y ..\..\..\images\* ..\..\..\out\%linker_output_file_name%\
-xcopy /y bin\ ..\..\..\out\%linker_output_file_name%\
+copy /y ..\..\..\images\* ..\..\..\out\%linker_output_file_name%\
+copy /y bin\ ..\..\..\out\%linker_output_file_name%\
