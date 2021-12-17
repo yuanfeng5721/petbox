@@ -4,8 +4,8 @@
   *                     Define to prevent recursive inclusion
   *============================================================================*/
 
-#ifndef _CONTROL_TASK_H_
-#define _CONTROL_TASK_H_
+#ifndef _BATTERY_H_
+#define _BATTERY_H_
 
 /*============================================================================*
   *                               Header Files
@@ -15,16 +15,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+typedef struct {
+	uint16_t voltage;
+	uint8_t  cap;
+} T_BATTERY_CAP_MAP;
 
-void control_task_init(void);
-
-uint32_t control_feed_num(uint32_t num);
-uint32_t control_feed_weight(uint32_t weight);
-uint8_t control_history(uint8_t history);
-uint8_t control_feed_water(uint8_t water);
+void battery_init(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _CONTROL_TASK_H_ */
+#endif /* _BATTERY_H_ */

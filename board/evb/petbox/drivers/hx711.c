@@ -27,7 +27,23 @@ void *weight_timer_handle;
 //当发现测试出来的重量偏大时，增加该数值。
 //如果测试出来的重量偏小时，减小改数值。
 //该值可以为小数
-#define GapValue 106.5
+//1400,5
+//2810,10
+//5100,20
+//12100,50
+//23400,100
+//34900,150
+//46680,200
+//57762,250
+//69550,300
+//92650,400
+//115500,500
+//140000,600
+//207330,900
+//230500,1000
+//346680,1500
+//458050,2000
+#define GapValue 231.5
 
 void Get_Maopi(void);
 uint32_t Get_Weight(void);
@@ -36,6 +52,8 @@ static void weight_timer_callback(void *param)
 {
 	uint32_t weight;
 	weight = Get_Weight();
+	//Get_Maopi();
+	//Get_Weight();
 	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_REPORT_REMAIN, weight);
 	control_send_msg(msg);
 }
@@ -43,7 +61,7 @@ static void weight_timer_callback(void *param)
 static void weight_timer(void)
 {
 	if (os_timer_create(&weight_timer_handle, "weight", CUSTOM_WEIGHT_TIMER_ID,
-							   20*1000, true, weight_timer_callback) == true)
+							   5*1000, true, weight_timer_callback) == true)
 	{
 		// Timer created successfully, start the timer.
 		os_timer_start(&weight_timer_handle);
@@ -116,7 +134,10 @@ uint32_t hx711_Read(void)	//增益128
   	hx711_set_clk(Bit_RESET); 
 	
   	count=0; 
-  	while(hx711_get_data()); 
+  	while(hx711_get_data())
+	{
+		//timeout
+	}
   	for(i=0;i<24;i++)
 	{ 
 	  	hx711_set_clk(Bit_SET); 
@@ -139,9 +160,15 @@ uint32_t hx711_Read(void)	//增益128
 //****************************************************
 void Get_Maopi(void)
 {
-	Weight_Maopi = hx711_Read();	
-	//Weight_Maopi = 8321771;
-	LOG_I("hx711 read data: %d \r\n", Weight_Maopi);
+	Weight_Maopi = 0;
+	
+	for(int i=0; i<5; i++)
+	{
+		Weight_Maopi += hx711_Read();	
+		delay_ms(100);
+	}
+	Weight_Maopi = Weight_Maopi/5;
+	LOG_I("Maopi: %d \r\n", Weight_Maopi);
 } 
 
 //****************************************************
@@ -149,13 +176,22 @@ void Get_Maopi(void)
 //****************************************************
 uint32_t Get_Weight(void)
 {
-	Weight_Shiwu = 0;
-	HX711_Buffer = hx711_Read();
+	Weight_Shiwu = 0;	
+	HX711_Buffer = 0;
+	
+	for(int i=0; i<5; i++)
+	{
+		HX711_Buffer += hx711_Read();	
+		delay_ms(100);
+	}
+	
+	HX711_Buffer = HX711_Buffer/5;
 	if(HX711_Buffer > Weight_Maopi)			
 	{
 		Weight_Shiwu = HX711_Buffer;
 		Weight_Shiwu = Weight_Shiwu - Weight_Maopi;				//获取实物的AD采样数值。
-	
+		LOG_I("Weight raw: %d \r\n", HX711_Buffer);
+		LOG_I("Weight-Maopi: %d \r\n", Weight_Shiwu);
 		Weight_Shiwu = (int32_t)((float)Weight_Shiwu/GapValue); 	//计算实物的实际重量
 																		//因为不同的传感器特性曲线不一样，因此，每一个传感器需要矫正这里的GapValue这个除数。
 																		//当发现测试出来的重量偏大时，增加该数值。
@@ -165,7 +201,7 @@ uint32_t Get_Weight(void)
 			Weight_Shiwu = 5000;
 		}
 	}
-
+	
 	LOG_I("Weight: %d g\r\n", Weight_Shiwu);
 	return Weight_Shiwu;
 }

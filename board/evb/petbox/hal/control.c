@@ -24,6 +24,8 @@ static uint8_t g_feed_max_count = 0;
 
 void control_timer_init(void);
 extern void control_send_msg(T_IO_MSG msg);
+uint8_t control_feed_water(uint8_t water);
+uint32_t control_feed_num(uint32_t num);
 
 void Control_Init(void)
 {
@@ -329,8 +331,14 @@ void FEED_WATER_DET_HANDLER(void)
     GPIO_MaskINTConfig(PNUM(WATER_AUTO_DET_PIN), ENABLE);
 
 	LOG_I("auto feed water !!!!\r\n");
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDWATER, 1);
-	control_send_msg(msg);
+	#if 0
+		MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDWATER, 1);
+		control_send_msg(msg);
+		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
+		control_send_msg(msg1);
+	#else
+		control_feed_water(1);
+	#endif
     GPIO_ClearINTPendingBit(PNUM(WATER_AUTO_DET_PIN));
     GPIO_MaskINTConfig(PNUM(WATER_AUTO_DET_PIN), DISABLE);
     GPIO_INTConfig(PNUM(WATER_AUTO_DET_PIN), ENABLE);
@@ -345,8 +353,15 @@ void FEED_FOOD_DET_HANDLER(void)
     GPIO_MaskINTConfig(PNUM(FEED_AUTO_DET_PIN), ENABLE);
 
 	LOG_I("auto feed food !!!!\r\n");
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, 1);
-	control_send_msg(msg);
+	#if 0
+		MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, 1);
+		control_send_msg(msg);
+		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
+		control_send_msg(msg1);
+	#else
+		control_feed_num(1);
+	#endif
+	
     GPIO_ClearINTPendingBit(PNUM(FEED_AUTO_DET_PIN));
     GPIO_MaskINTConfig(PNUM(FEED_AUTO_DET_PIN), DISABLE);
     GPIO_INTConfig(PNUM(FEED_AUTO_DET_PIN), ENABLE);

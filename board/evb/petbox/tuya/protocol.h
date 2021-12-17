@@ -289,7 +289,13 @@ BLE_test_result内部有#err提示,完成函数后请删除该#err
 //
 #define DPID_FEED_REMAINING 237
 
-
+//add by wangkun
+//电量
+#define DPID_WIRELESS_ELECTRICITY   145
+//供电方式
+#define DPID_WIRELESS_POWERMODE     146
+//低电量报警
+#define DPID_WIRELESS_LOWPOWER      146
 
 /**
  * @brief  串口发送数据

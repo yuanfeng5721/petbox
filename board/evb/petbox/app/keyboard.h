@@ -55,7 +55,7 @@ typedef enum
 	KEY_ENABLE     = 1,
 }T_KEY_SHIELD;
 
-#define KEY_EVENT_LONG_COUNT		160		//计算长按时长。目前keyboard函数每50ms调用一次。
+#define KEY_EVENT_LONG_COUNT		100		//计算长按时长。目前keyboard函数每50ms调用一次。
 
 
 typedef struct

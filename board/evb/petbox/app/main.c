@@ -39,7 +39,9 @@
 #include "control_task.h"
 #include "mcu_api.h"
 #include "hx711.h"
-
+#include "battery.h"
+#include "board.h"
+#include "utils.h"
 /** @defgroup  PERIPH_DEMO_MAIN Peripheral Main
     * @brief Main file to initialize hardware and BT stack and start task scheduling
     * @{
@@ -81,10 +83,11 @@ void driver_init(void)
 	extern void Control_Init(void);
 	extern int KeyBoard_Init(void);
 	
-	LOG_I("petbox start running......\r\n");
+	LOG_I("petbox start running. Version: V%s_%s\r\n", SOFTWARE_VERSION, Get_Compile_Date());
 	wifi_protocol_init();
 	hx711_gpio_init();
 	KeyBoard_Init();
+	battery_init();
 	at_uart_init(uart_receive_buff_input);
 }
 

@@ -10,14 +10,15 @@
 * @version  v0.1
 *********************************************************************************************************
 */
-#ifndef _AT_UART_H_
-#define _AT_UART_H_
+#ifndef _HX711_H_
+#define _HX711_H_
 
 #include <stdint.h>
 #ifdef  __cplusplus
 extern "C" {
 #endif      /* __cplusplus */
 #define MAX_WEIGHT  5000
+
 void hx711_gpio_init(void);
 void Get_Maopi(void);
   

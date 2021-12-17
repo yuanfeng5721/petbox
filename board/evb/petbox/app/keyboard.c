@@ -160,8 +160,8 @@ void ReadKeyStatus(void)
                 if(keyboard[i].KeyLevel != KEY_HIGH)//key release
                 {
                     keyboard[i].KeyStatus = KEY_UP;
-                    keyboard[i].KeyEvent = KEY_EVENT_UP;//release event
-					//keyboard[i].KeyEvent = KEY_EVENT_NULL;
+                    //keyboard[i].KeyEvent = KEY_EVENT_UP;//release event
+					keyboard[i].KeyEvent = KEY_EVENT_NULL;
                 }
                 else if((keyboard[i].KeyLevel == KEY_HIGH) && (keyboard[i].KeyCount >= KEY_EVENT_LONG_COUNT))
                 {

@@ -33,6 +33,7 @@
 #include "control.h"
 #include "mcu_api.h"
 #include "protocol.h"
+#include "utils.h"
 /** @defgroup  PERIPH_APP_TASK Peripheral App Task
     * @brief This file handles the implementation of application task related functions.
     *
@@ -69,7 +70,7 @@ void control_exception_send(uint8_t exception)
  * @brief  Initialize App task
  * @return void
  */
-void control_task_init()
+void control_task_init(void)
 {
     os_task_create(&control_task_handle, "control", control_main_task, 0, CONTROL_TASK_STACK_SIZE,
                    CONTROL_TASK_PRIORITY);
@@ -168,11 +169,22 @@ void control_send_msg(T_IO_MSG msg)
 uint32_t control_feed_num(uint32_t num)
 {
 	uint8_t i;
-	LOG_I("need feed %d part\r\n", num);
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, num);
-	os_msg_send(msg_queue_handle, &msg, 0);
-	MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, num);
-	os_msg_send(msg_queue_handle, &msg1, 0);
+	static Timer    food_timer = {0};
+
+	if (expired(&food_timer)) {
+		InitTimer(&food_timer);
+		countdown(&food_timer, 30*60);
+		LOG_I("need feed %d part\r\n", num);
+		MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, num);
+		os_msg_send(msg_queue_handle, &msg, 0);
+		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, num);
+		os_msg_send(msg_queue_handle, &msg1, 0);
+	}
+	else
+	{
+		LOG_I("Had been feeded food in 30 mins, please waiting !\r\n");
+	}
+	
 	return num;
 }
 
@@ -192,13 +204,22 @@ uint8_t control_history(uint8_t history)
 
 uint8_t control_feed_water(uint8_t water)
 {
-	LOG_I("set feed water %s\r\n", water?"on":"off");
-	
-	MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDWATER, water);
-	os_msg_send(msg_queue_handle, &msg, 0);
-	
-	MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
-	os_msg_send(msg_queue_handle, &msg1, 0);
+	static Timer    water_timer = {0};
+
+	if (expired(&water_timer)) {
+		InitTimer(&water_timer);
+		countdown(&water_timer, 30*60);
+		LOG_I("set feed water %s\r\n", water?"on":"off");
+		
+		MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDWATER, water);
+		os_msg_send(msg_queue_handle, &msg, 0);
+		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
+		os_msg_send(msg_queue_handle, &msg1, 0);
+	}
+	else
+	{
+		LOG_I("Had been feeded water in 30 mins, please waiting !\r\n");
+	}
 	return water;
 }
 /** @} */ /* End of group PERIPH_APP_TASK */

@@ -30,6 +30,7 @@
 #include "mcu_api.h"
 #include "wifi.h"
 #include "keyboard.h"
+#include "hx711.h"
 
 /** @defgroup  PERIPH_APP_TASK Peripheral App Task
     * @brief This file handles the implementation of application task related functions.
@@ -104,7 +105,7 @@ void app_handle_io_msg(T_IO_MSG io_msg)
 	}
 	else if(msg_type == CUSTOM_MSG_KEYBOARD)
 	{
-		uint8_t keycode = msg_subtype;;
+		uint8_t keycode = msg_subtype;
 		uint8_t keyaction = io_msg.u.param;
 		const char code[][8] = {"config","feed"};
 		const char action[][8] = {"null", "up", "down", "long"};
@@ -134,6 +135,45 @@ void app_handle_io_msg(T_IO_MSG io_msg)
 					MAKE_CUSTOM_MSG(msg, CUSTOM_MSG_WIFI, CUSTOM_MSG_WIFI_RESET);
 					app_send_msg(msg);
 				}
+				else if(keycode == KEY_FEED)
+				{
+					Get_Maopi();
+				}
+			}
+			break;
+			
+			default:
+				break;
+		}
+	}
+	else if(msg_type == CUSTOM_MSG_BATTERY)
+	{
+		switch (msg_subtype)
+		{
+			case CUSTOM_MSG_BATTERY_STATUS:
+			{
+				uint8_t state = io_msg.u.param;
+				//mcu_dp_enum_update(DPID_WIRELESS_POWERMODE, state);
+			}
+			break;
+			
+			case CUSTOM_MSG_BATTERY_POWERMODE:
+			{
+				uint8_t mode = io_msg.u.param;
+				mcu_dp_enum_update(DPID_WIRELESS_POWERMODE, mode);
+			}
+			break;
+			
+			case CUSTOM_MSG_BATTERY_LOWPOWER:
+			{
+				
+			}
+			break;
+			
+			case CUSTOM_MSG_BATTERY_CAP:
+			{
+				uint8_t cap = io_msg.u.param;
+				mcu_dp_value_update(DPID_WIRELESS_ELECTRICITY, cap);	
 			}
 			break;
 			

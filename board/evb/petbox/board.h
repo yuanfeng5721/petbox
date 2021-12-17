@@ -25,6 +25,9 @@ extern "C" {
 #include "rtl876x_rcc.h"
 #include <platform_utils.h>
 
+/*software version*/
+#define SOFTWARE_VERSION "1.0.0"
+
 /* GPIO function define begin */
 #define DATA_UART_TX_PIN     P3_0
 #define DATA_UART_RX_PIN     P3_1

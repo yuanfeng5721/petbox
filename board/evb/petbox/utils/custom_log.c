@@ -23,3 +23,4 @@ void custom_printf(const char *fmt, ...)
     DBG_DIRECT("%s", buf);
 #endif
 }
+
