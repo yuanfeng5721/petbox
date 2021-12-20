@@ -288,6 +288,10 @@ BLE_test_result内部有#err提示,完成函数后请删除该#err
 //备注:设备主动上报当前宠物粮余量克数，余粮发生变化时上报。
 //
 #define DPID_FEED_REMAINING 237
+//PIR(可下发可上报)
+//备注:0 关闭
+//1 开启
+#define DPID_IPC_USAGE_MODE 238
 
 //add by wangkun
 //电量

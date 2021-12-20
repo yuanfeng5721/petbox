@@ -11,7 +11,9 @@
 #include "custom_msg.h"
 #include "custom_log.h"
 #include "control.h"
+#include "control_task.h"
 #include "board.h"
+#include "utils.h"
 
 void *feedwater_timer_handle;
 void *feedfood_timer_handle;
@@ -327,6 +329,7 @@ void WATER_LEVEL_L_HANDLER(void)
 }
 void FEED_WATER_DET_HANDLER(void)
 {
+	static Timer    water_timer = {0};
 	GPIO_INTConfig(PNUM(WATER_AUTO_DET_PIN), DISABLE);
     GPIO_MaskINTConfig(PNUM(WATER_AUTO_DET_PIN), ENABLE);
 
@@ -337,7 +340,20 @@ void FEED_WATER_DET_HANDLER(void)
 		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
 		control_send_msg(msg1);
 	#else
-		control_feed_water(1);
+	if(control_get_auto_feed())
+	{
+		if (expired(&water_timer)) {
+			InitTimer(&water_timer);
+			countdown(&water_timer, 30*60);
+			control_feed_water(1);
+		}
+		else
+		{
+			LOG_I("Had been feed water in 30 mins, please waiting !\r\n");
+		}
+	}
+	else
+		LOG_I("auto feed closed !!!!\r\n");
 	#endif
     GPIO_ClearINTPendingBit(PNUM(WATER_AUTO_DET_PIN));
     GPIO_MaskINTConfig(PNUM(WATER_AUTO_DET_PIN), DISABLE);
@@ -349,6 +365,7 @@ void FEED_BUCKET_DET_HANDLER(void)
 }
 void FEED_FOOD_DET_HANDLER(void)
 {
+	static Timer    food_timer = {0};
 	GPIO_INTConfig(PNUM(FEED_AUTO_DET_PIN), DISABLE);
     GPIO_MaskINTConfig(PNUM(FEED_AUTO_DET_PIN), ENABLE);
 
@@ -359,7 +376,20 @@ void FEED_FOOD_DET_HANDLER(void)
 		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
 		control_send_msg(msg1);
 	#else
-		control_feed_num(1);
+	if(control_get_auto_feed())
+	{
+		if (expired(&food_timer)) {
+			InitTimer(&food_timer);
+			countdown(&food_timer, 30*60);
+			control_feed_num(1);
+		}
+		else
+		{
+			LOG_I("Had been feed food in 30 mins, please waiting !\r\n");
+		}
+	}
+	else
+		LOG_I("auto feed closed !!!!\r\n");
 	#endif
 	
     GPIO_ClearINTPendingBit(PNUM(FEED_AUTO_DET_PIN));

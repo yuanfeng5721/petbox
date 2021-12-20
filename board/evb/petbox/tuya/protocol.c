@@ -85,6 +85,7 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_REALTIME_DATA, DP_TYPE_ENUM},
   {DPID_WATER_NUM, DP_TYPE_BOOL},
   {DPID_FEED_REMAINING, DP_TYPE_VALUE},
+  {DPID_IPC_USAGE_MODE, DP_TYPE_ENUM},
 };
 
 
@@ -272,6 +273,41 @@ static unsigned char dp_download_water_num_handle(const unsigned char value[], u
     else
         return ERROR;
 }
+/*****************************************************************************
+函数名称 : dp_download_ipc_usage_mode_handle
+功能描述 : 针对DPID_IPC_USAGE_MODE的处理函数
+输入参数 : value:数据源数据
+        : length:数据长度
+返回参数 : 成功返回:SUCCESS/失败返回:ERROR
+使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
+*****************************************************************************/
+static unsigned char dp_download_ipc_usage_mode_handle(const unsigned char value[], unsigned short length)
+{
+    //示例:当前DP类型为ENUM
+    unsigned char ret;
+    unsigned char ipc_usage_mode;
+    
+    ipc_usage_mode = mcu_get_dp_download_enum(value,length);
+//    switch(ipc_usage_mode) {
+//        case 0:
+//        break;
+//        
+//        case 1:
+//        break;
+//        
+//        default:
+//    
+//        break;
+//    }
+	LOG_I("ipc_usage = %d\r\n", ipc_usage_mode);
+    control_set_auto_feed(ipc_usage_mode);
+    //处理完DP数据后应有反馈
+    ret = mcu_dp_enum_update(DPID_IPC_USAGE_MODE, ipc_usage_mode);
+    if(ret == SUCCESS)
+        return SUCCESS;
+    else
+        return ERROR;
+}
 
 
 
@@ -315,6 +351,10 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
         case DPID_WATER_NUM:
             //手动喂水处理函数
             ret = dp_download_water_num_handle(value,length);
+        break;
+        case DPID_IPC_USAGE_MODE:
+            //PIR处理函数
+            ret = dp_download_ipc_usage_mode_handle(value,length);
         break;
 
         

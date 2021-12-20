@@ -190,7 +190,7 @@ uint32_t Get_Weight(void)
 	{
 		Weight_Shiwu = HX711_Buffer;
 		Weight_Shiwu = Weight_Shiwu - Weight_Maopi;				//获取实物的AD采样数值。
-		LOG_I("Weight raw: %d \r\n", HX711_Buffer);
+		//LOG_I("Weight raw: %d \r\n", HX711_Buffer);
 		LOG_I("Weight-Maopi: %d \r\n", Weight_Shiwu);
 		Weight_Shiwu = (int32_t)((float)Weight_Shiwu/GapValue); 	//计算实物的实际重量
 																		//因为不同的传感器特性曲线不一样，因此，每一个传感器需要矫正这里的GapValue这个除数。

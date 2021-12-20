@@ -55,7 +55,7 @@
 void *control_task_handle;   //!< APP Task handle
 //void *evt_queue_handle;  //!< Event queue handle
 static void *msg_queue_handle;   //!< IO queue handle
-
+static bool g_auto_feed_flag = true;
 /*============================================================================*
  *                              Functions
  *============================================================================*/
@@ -156,7 +156,7 @@ void control_main_task(void *p_param)
 				control_handle_io_msg(io_msg);
 			}
 		}
-		os_delay(200);
+		os_delay(100);
 		//LOG_I("control info......\r\n");
     }
 }
@@ -169,21 +169,21 @@ void control_send_msg(T_IO_MSG msg)
 uint32_t control_feed_num(uint32_t num)
 {
 	uint8_t i;
-	static Timer    food_timer = {0};
+//	static Timer    food_timer = {0};
 
-	if (expired(&food_timer)) {
-		InitTimer(&food_timer);
-		countdown(&food_timer, 30*60);
+//	if (expired(&food_timer)) {
+//		InitTimer(&food_timer);
+//		countdown(&food_timer, 30*60);
 		LOG_I("need feed %d part\r\n", num);
 		MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDFOOD_START, num);
 		os_msg_send(msg_queue_handle, &msg, 0);
-		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, num);
+		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
 		os_msg_send(msg_queue_handle, &msg1, 0);
-	}
-	else
-	{
-		LOG_I("Had been feeded food in 30 mins, please waiting !\r\n");
-	}
+//	}
+//	else
+//	{
+//		LOG_I("Had been feeded food in 30 mins, please waiting !\r\n");
+//	}
 	
 	return num;
 }
@@ -204,24 +204,37 @@ uint8_t control_history(uint8_t history)
 
 uint8_t control_feed_water(uint8_t water)
 {
-	static Timer    water_timer = {0};
+//	static Timer    water_timer = {0};
 
-	if (expired(&water_timer)) {
-		InitTimer(&water_timer);
-		countdown(&water_timer, 30*60);
+//	if (expired(&water_timer)) {
+//		InitTimer(&water_timer);
+//		countdown(&water_timer, 30*60);
 		LOG_I("set feed water %s\r\n", water?"on":"off");
 		
 		MAKE_CUSTOM_MSG_PARAM(msg, CUSTOM_MSG_CONTROL, CONTROL_MSG_FEEDWATER, water);
 		os_msg_send(msg_queue_handle, &msg, 0);
 		MAKE_CUSTOM_MSG_PARAM(msg1, CUSTOM_MSG_CONTROL, CONTROL_MSG_PLAY_VOICE, 1);
 		os_msg_send(msg_queue_handle, &msg1, 0);
-	}
-	else
-	{
-		LOG_I("Had been feeded water in 30 mins, please waiting !\r\n");
-	}
+//	}
+//	else
+//	{
+//		LOG_I("Had been feeded water in 30 mins, please waiting !\r\n");
+//	}
 	return water;
 }
+
+bool control_set_auto_feed(bool state)
+{
+	g_auto_feed_flag = state;
+	
+	return g_auto_feed_flag;
+}
+
+bool control_get_auto_feed(void)
+{
+	return g_auto_feed_flag;
+}
+
 /** @} */ /* End of group PERIPH_APP_TASK */
 
 
